@@ -1,0 +1,32 @@
+---
+description: NestJS backend conventions, DatabaseService usage, guards, decorators, and error handling
+globs: backend/**/*.ts
+alwaysApply: false
+---
+
+# Backend (NestJS) 约定
+
+## 模块与结构
+
+- 每块功能一个模块（Module），包含 Controller 与 Service；数据库访问通过注入 **DatabaseService**，使用 `this.db.getDb().prepare(...).run/get/all`，不在项目内维护独立 .sql 文件；迁移逻辑保留在 `config/database.service.ts` 的 `runMigrations()` 中。
+- 控制器路由前缀统一带 **`api/`**（如 `@Controller('api/work-records')`）。需要 JWT 的控制器加 **`@UseGuards(JwtAuthGuard)`**；公开接口使用 **`@Public()`** 装饰器。管理员写操作使用 **`@UseGuards(AdminGuard)`**。
+- 当前用户从 **`@CurrentUser() user: JwtPayload`** 获取（`user.sub`、`user.username`、`user.isAdmin`）。
+
+## 错误处理
+
+- 业务错误使用 Nest 内置异常：`BadRequestException`、`ForbiddenException`、`NotFoundException`、`ConflictException` 等，并传入明确的中文或英文 message。
+- 不要修改 **AllExceptionsFilter** 的响应结构；客户端约定收到 JSON 形如 `{ message: string }`。
+
+## 示例
+
+```typescript
+// 控制器中获取当前用户并校验权限
+@Put(':id')
+async update(@Param('id') id: string, @CurrentUser() user: JwtPayload, @Body() body: UpdateDto) {
+  return this.service.update(+id, user.sub, body);
+}
+
+// 服务中抛错
+if (!record) throw new NotFoundException('工作记录不存在');
+if (record.recorder_id !== userId) throw new ForbiddenException('仅记录人可修改');
+```

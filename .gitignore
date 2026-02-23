@@ -1,0 +1,32 @@
+# 根目录生成产物（不提交）
+/dist
+/public
+/node_modules
+/release
+
+# 各子项目自管
+backend/node_modules
+backend/dist
+backend/public
+frontend/node_modules
+frontend/dist
+
+# 本地配置与运行时数据（docs 中说明可由用户生成）
+/config.json
+data.sqlite
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+
+# 系统与 IDE
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.local
+.env.*.local
+
+# npm / yarn 调试日志
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

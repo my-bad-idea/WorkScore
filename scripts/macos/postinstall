@@ -1,0 +1,35 @@
+#!/bin/sh
+# postinstall: 安装后可选提示输入端口并写入 config.json
+# 参数: $1=目标卷 (如 /), $2=目标目录 (pkgbuild 时为 /)
+
+VOLUME="${1:-/}"
+INSTALL_DIR="$VOLUME/Applications/WorkScore"
+CONFIG="$INSTALL_DIR/config.json"
+DEFAULT_PORT=3000
+
+# 若已有 config 且含 port则跳过
+if [ -f "$CONFIG" ]; then
+  if grep -q '"port"' "$CONFIG" 2>/dev/null; then
+    exit 0
+  fi
+fi
+
+# 若可交互则用 osascript 弹窗询问端口
+if [ -t 0 ] && [ -t 1 ] 2>/dev/null; then
+  PORT=$(osascript -e 'display dialog "请输入服务端口 (1-65535):" default answer "3000" with title "WorkScore 配置"' -e 'text returned of result' 2>/dev/null) || true
+  if [ -z "$PORT" ]; then
+    PORT="$DEFAULT_PORT"
+  fi
+  # 简单校验
+  case "$PORT" in
+    [0-9]*) ;;
+    *) PORT="$DEFAULT_PORT";;
+  esac
+else
+  PORT="$DEFAULT_PORT"
+fi
+
+mkdir -p "$INSTALL_DIR"
+printf '{"port": %s}\n' "$PORT" > "$CONFIG"
+chmod 644 "$CONFIG"
+exit 0

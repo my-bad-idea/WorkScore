@@ -1,0 +1,20 @@
+/// <reference types="node" />
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
+import { fileURLToPath } from 'url';
+var __dirname = path.dirname(fileURLToPath(import.meta.url));
+export default defineConfig({
+    plugins: [react()],
+    resolve: {
+        alias: { '@': path.resolve(__dirname, 'src') },
+    },
+    server: {
+        host: true, /* 允许通过本机 IP 访问，如 http://192.168.x.x:5173 */
+        port: 5173,
+        strictPort: false, /* 5173 被占用时自动尝试下一端口 */
+        proxy: {
+            '/api': { target: 'http://localhost:3000', changeOrigin: true },
+        },
+    },
+});

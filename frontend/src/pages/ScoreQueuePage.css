@@ -1,0 +1,52 @@
+/* 第一列「类型」超链接样式 */
+.score-queue-type-link {
+  cursor: pointer;
+  text-decoration: none;
+}
+.score-queue-type-link:hover {
+  text-decoration: underline;
+}
+
+/* 错误信息列：文字省略 + 右侧复制图标垂直居中 */
+.score-queue-error-cell {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  gap: 4px;
+}
+.score-queue-error-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  -webkit-user-select: text;
+  user-select: text;
+}
+.score-queue-error-copy-btn {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0 4px;
+  height: auto;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+/* Tooltip 内完整错误信息，可换行、可选中复制 */
+.score-queue-error-tooltip-content {
+  white-space: pre-wrap;
+  display: inline-block;
+  max-width: 400px;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* 状态 Tag：浅色/深色主题下均易区分 */
+.score-queue-status-tag {
+  margin-inline-end: 0;
+}
+[data-theme="dark"] .score-queue-status-tag.ant-tag-blue { color: #93c5fd; border-color: #3b82f6; background: rgba(59, 130, 246, 0.15); }
+[data-theme="dark"] .score-queue-status-tag.ant-tag-orange { color: #fdba74; border-color: #f97316; background: rgba(249, 115, 22, 0.15); }
+[data-theme="dark"] .score-queue-status-tag.ant-tag-green { color: #86efac; border-color: #22c55e; background: rgba(34, 197, 94, 0.15); }
+[data-theme="dark"] .score-queue-status-tag.ant-tag-red { color: #fca5a5; border-color: #ef4444; background: rgba(239, 68, 68, 0.15); }

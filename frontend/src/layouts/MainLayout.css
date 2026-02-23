@@ -1,0 +1,296 @@
+/* ===== App Layout ===== */
+.app-layout {
+  min-height: 100vh;
+  overflow: visible !important;
+  background: #f0f2f8 !important;
+}
+
+/* ===== Header ===== */
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0 28px !important;
+  height: 60px !important;
+  min-height: 60px !important;
+  line-height: 1 !important;
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%) !important;
+  box-shadow: 0 2px 12px rgba(30, 27, 75, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.app-header.ant-layout-header {
+  line-height: 1 !important;
+}
+
+/* Logo */
+.app-header-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  margin-right: 32px;
+  flex-shrink: 0;
+  transition: opacity 0.2s;
+}
+
+.app-header-logo:hover {
+  opacity: 0.85;
+}
+
+.app-header-logo-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+}
+
+.app-header-logo-text {
+  color: #fff !important;
+  font-family: 'Outfit', sans-serif;
+  font-size: 17px !important;
+  letter-spacing: -0.02em;
+}
+
+/* 顶部导航菜单 */
+.app-header-menu {
+  flex: 1;
+  min-width: 0;
+  background: transparent !important;
+  border-bottom: none !important;
+  line-height: 60px !important;
+}
+
+.app-header-menu .ant-menu-item {
+  color: rgba(255, 255, 255, 0.72) !important;
+  font-weight: 500;
+  font-size: 14px;
+  border-radius: 8px !important;
+  padding: 0 16px !important;
+  margin: 0 2px;
+  transition: color 0.2s, background 0.2s;
+}
+
+.app-header-menu .ant-menu-item:hover {
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.app-header-menu .ant-menu-item-selected {
+  color: #fff !important;
+  background: rgba(99, 102, 241, 0.5) !important;
+}
+
+/* 选中下划线去掉（用背景色代替） */
+.app-header-menu .ant-menu-item::after {
+  display: none !important;
+}
+
+/* 右侧操作区：与 header 同高 60px，内容严格垂直居中且不超出 */
+.app-header-actions {
+  flex-shrink: 0;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.app-header-actions > * {
+  height: 60px;
+  max-height: 60px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+.app-header-actions .ant-dropdown-trigger {
+  height: 60px !important;
+  max-height: 60px !important;
+  min-height: 0;
+  display: flex !important;
+  align-items: center !important;
+  padding: 0;
+  overflow: hidden;
+  border: none !important;
+}
+.app-header-actions .ant-space {
+  display: inline-flex;
+  align-items: center;
+}
+.app-header-actions .ant-btn {
+  height: auto;
+}
+
+/* 主题切换按钮 */
+.theme-toggle {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: none !important;
+  outline: none;
+  box-shadow: none !important;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.25s, transform 0.2s;
+  padding: 0;
+  flex-shrink: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.theme-toggle::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.05);
+}
+.theme-toggle:active {
+  transform: scale(0.95);
+}
+.theme-toggle:focus {
+  outline: none;
+  box-shadow: none;
+}
+.theme-toggle:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 2px;
+}
+/* 主题下拉包裹：与 header 对齐，不撑高；彻底去掉触发器与按钮及子元素的一切边框/轮廓 */
+.app-header-actions .theme-dropdown-wrap {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+.app-header-actions .theme-dropdown-wrap .ant-dropdown-trigger {
+  background: transparent !important;
+}
+.app-header-actions .theme-dropdown-wrap .ant-dropdown-trigger,
+.app-header-actions .theme-dropdown-wrap .ant-dropdown-trigger *,
+.app-header-actions .theme-dropdown-wrap .ant-dropdown-trigger *::before,
+.app-header-actions .theme-dropdown-wrap .ant-dropdown-trigger *::after {
+  border: none !important;
+  border-width: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+.app-header-actions .theme-dropdown-wrap .ant-dropdown-trigger:focus,
+.app-header-actions .theme-dropdown-wrap .ant-dropdown-trigger:focus-visible,
+.app-header-actions .theme-dropdown-wrap .ant-dropdown-trigger.ant-dropdown-open {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+.app-header-actions .theme-dropdown-wrap .theme-toggle,
+.app-header-actions .theme-dropdown-wrap button.theme-toggle {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+.app-header-actions .theme-dropdown-wrap .theme-toggle::before,
+.app-header-actions .theme-dropdown-wrap .theme-toggle::after {
+  display: none !important;
+  border: none !important;
+}
+
+.theme-toggle-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.theme-toggle-sun {
+  color: #fbbf24;
+}
+
+.theme-toggle-moon {
+  color: #a5b4fc;
+  transform: rotate(-20deg);
+}
+
+.theme-toggle:hover .theme-toggle-sun {
+  transform: rotate(15deg);
+}
+
+.theme-toggle:hover .theme-toggle-moon {
+  transform: rotate(0deg);
+}
+
+/* 个人菜单：左右留足内边距，悬停时内容与边缘有间隔 */
+.app-header-user {
+  cursor: pointer;
+  padding: 0 24px !important;
+  padding-inline: 24px !important;
+  height: 40px;
+  max-height: 40px;
+  border-radius: 10px;
+  transition: background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  line-height: 1;
+  box-sizing: border-box;
+  margin: 0 8px;
+  min-width: 0;
+}
+.app-header-user.ant-space {
+  padding-left: 24px !important;
+  padding-right: 24px !important;
+}
+.app-header-user .ant-space-item {
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+.app-header-username {
+  line-height: 1;
+}
+
+.app-header-user:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.app-header-avatar {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.app-header-username {
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1 !important;
+}
+
+/* ===== Content ===== */
+.app-content {
+  padding: 28px 32px !important;
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ===== Footer ===== */
+.app-footer {
+  text-align: center;
+  padding: 16px 32px !important;
+  background: transparent !important;
+  color: #9ca3af !important;
+  font-size: 13px;
+}

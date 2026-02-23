@@ -1,0 +1,482 @@
+/* ============================================================
+   登录 / 安装页 — 深色全屏 + 动态光球 + 玻璃卡片
+   ============================================================ */
+
+/* ---------- 全局容器 ---------- */
+.auth-page {
+  --bg-deep: #080811;
+  --bg-mid: #0f0f22;
+  --card-bg: rgba(255, 255, 255, 0.045);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --card-shadow: 0 30px 60px -16px rgba(0, 0, 0, 0.65);
+  --title-color: #ffffff;
+  --subtitle-color: rgba(255, 255, 255, 0.58);
+  --label-color: rgba(255, 255, 255, 0.88);
+  --placeholder: rgba(255, 255, 255, 0.32);
+  --input-bg: rgba(255, 255, 255, 0.055);
+  --input-border: rgba(255, 255, 255, 0.12);
+  --accent: #7c3aed;
+  --accent-light: #a78bfa;
+  --accent-glow: rgba(124, 58, 237, 0.25);
+  --blue: #3b82f6;
+  --indigo: #6366f1;
+  --required-color: #f87171;
+  --input-bg-fallback: rgba(255, 255, 255, 0.055);
+
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-deep);
+}
+
+/* ---------- 多层背景光晕（静态层） ---------- */
+.auth-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 90% 60% at 25% 35%, rgba(99, 102, 241, 0.14) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 55% at 75% 65%, rgba(124, 58, 237, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse 55% 35% at 50% 95%, rgba(59, 130, 246, 0.07) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ---------- 动态浮动光球 ---------- */
+.auth-orbs {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.auth-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.5;
+  will-change: transform;
+}
+
+.auth-orb--1 {
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.35) 0%, transparent 70%);
+  top: -10%;
+  left: -5%;
+  animation: orbFloat1 14s ease-in-out infinite;
+}
+
+.auth-orb--2 {
+  width: 340px;
+  height: 340px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+  bottom: -8%;
+  right: -3%;
+  animation: orbFloat2 18s ease-in-out infinite;
+}
+
+.auth-orb--3 {
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.22) 0%, transparent 70%);
+  top: 50%;
+  left: 55%;
+  animation: orbFloat3 22s ease-in-out infinite;
+}
+
+@keyframes orbFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(60px, 40px) scale(1.08); }
+  66%      { transform: translate(-30px, 70px) scale(0.95); }
+}
+
+@keyframes orbFloat2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(-50px, -30px) scale(1.05); }
+  66%      { transform: translate(40px, -60px) scale(0.92); }
+}
+
+@keyframes orbFloat3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(-40px, 30px) scale(1.1); }
+}
+
+/* ---------- 卡片 ---------- */
+.auth-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+  padding: 0;
+  border-radius: 24px;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  backdrop-filter: blur(24px) saturate(1.4);
+  box-shadow: var(--card-shadow);
+  animation: cardEnter 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  overflow: hidden;
+}
+
+/* 顶部流光线 */
+.auth-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-light), transparent);
+  opacity: 0.6;
+}
+
+@keyframes cardEnter {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ---------- 卡片内边距容器 ---------- */
+.auth-card-body {
+  padding: 44px 40px 36px;
+}
+
+/* ---------- 头部区域 ---------- */
+.auth-card-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+/* 图标圆圈 */
+.auth-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 20px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--indigo) 0%, var(--accent) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.3);
+}
+
+.auth-icon svg {
+  width: 28px;
+  height: 28px;
+  fill: none;
+  stroke: white;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.auth-badge {
+  display: inline-block;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--accent-light);
+  background: rgba(124, 58, 237, 0.14);
+  padding: 5px 14px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(124, 58, 237, 0.22);
+}
+
+.auth-logo h1 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.35;
+  color: var(--title-color);
+  margin: 0 0 6px 0;
+}
+
+.auth-logo p {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--subtitle-color);
+  margin: 0;
+}
+
+/* ---------- 分隔线 ---------- */
+.auth-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--card-border) 50%, transparent 100%);
+  margin: 0;
+}
+
+/* ---------- 表单 ---------- */
+/* 登录表单外层：可聚焦以便在非输入框区域按回车也能提交，不显示焦点轮廓 */
+.auth-form-wrap {
+  outline: none;
+}
+
+.auth-page .ant-form-item {
+  margin-bottom: 22px;
+}
+
+.auth-page .ant-form-item:last-of-type {
+  margin-bottom: 0;
+}
+
+.auth-page .ant-form-item-label {
+  padding-bottom: 4px !important;
+}
+
+.auth-page .ant-form-item-label > label {
+  color: var(--label-color) !important;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  height: auto !important;
+  line-height: 1.4 !important;
+}
+
+/* 必填星号 */
+.auth-page .ant-form-item-required::before {
+  color: var(--required-color) !important;
+}
+
+.auth-page .ant-input {
+  background: var(--input-bg, var(--input-bg-fallback)) !important;
+  border: 1px solid var(--input-border) !important;
+  color: #ffffff !important;
+  border-radius: 12px !important;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9375rem;
+  height: 44px;
+  line-height: 44px;
+  transition: border-color 0.25s, box-shadow 0.25s;
+  box-sizing: border-box !important;
+}
+
+.auth-page .ant-input-lg {
+  height: 44px;
+}
+
+.auth-page .ant-input::placeholder,
+.auth-page .ant-input-password input::placeholder {
+  color: var(--placeholder);
+  font-size: 0.875rem;
+}
+
+.auth-page .ant-input:hover,
+.auth-page .ant-input-password:hover {
+  border-color: rgba(255, 255, 255, 0.22) !important;
+}
+
+.auth-page .ant-input:focus,
+.auth-page .ant-input-affix-wrapper-focused,
+.auth-page .ant-input-password.ant-input-affix-wrapper-focused {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px var(--accent-glow) !important;
+}
+
+/* 密码框外层：整体一块，无内阴影、无内部分割，背景与圆角统一 */
+.auth-page .ant-input-password.ant-input-affix-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  padding-left: 11px !important;
+  padding-right: 0 !important;
+  background: var(--input-bg, var(--input-bg-fallback)) !important;
+  border: 1px solid var(--input-border) !important;
+  color: #ffffff !important;
+  border-radius: 12px !important;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9375rem;
+  height: 44px;
+  min-height: 44px;
+  transition: border-color 0.25s, box-shadow 0.25s;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  box-shadow: none !important;
+}
+.auth-page .ant-input-password.ant-input-affix-wrapper:hover {
+  box-shadow: none !important;
+}
+
+/*
+ * 内层全部 transparent —— 只靠外层 wrapper 提供唯一一层半透明背景，
+ * 避免 rgba 叠加导致内部比边框区更亮。
+ */
+
+/* 内层 input */
+.auth-page .ant-input-password input {
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: 0.9375rem !important;
+  height: 42px !important;
+  line-height: 42px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+  background: transparent !important;
+  color: #ffffff !important;
+  border-radius: 0 !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  box-shadow: none !important;
+}
+
+/* 浏览器自动填充：用不透明 inset 阴影覆盖系统白底（#0f0f22 近似页面深色底） */
+.auth-page .ant-input-password input:-webkit-autofill,
+.auth-page .ant-input-password input:-webkit-autofill:hover,
+.auth-page .ant-input-password input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #ffffff !important;
+  -webkit-box-shadow: 0 0 0 60px #141425 inset !important;
+  box-shadow: 0 0 0 60px #141425 inset !important;
+  transition: background-color 5000s ease-in-out 0s !important;
+}
+
+/* 包裹 input 的 span */
+.auth-page .ant-input-password.ant-input-affix-wrapper > span:not(.ant-input-suffix):not(.ant-input-prefix) {
+  background: transparent !important;
+  overflow: hidden;
+  display: flex !important;
+  align-items: center !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+/* 右侧眼睛图标区 */
+.auth-page .ant-input-password .ant-input-suffix {
+  background: transparent !important;
+  padding-right: 11px !important;
+  padding-left: 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  flex-shrink: 0;
+  border: none !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  align-self: stretch !important;
+}
+.auth-page .ant-input-password .ant-input-suffix::before,
+.auth-page .ant-input-password .ant-input-suffix::after {
+  display: none !important;
+}
+.auth-page .ant-input-password .ant-input-suffix * {
+  margin: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.auth-page .ant-input {
+  padding: 0 11px !important;
+  line-height: 44px !important;
+  box-sizing: border-box !important;
+}
+
+.auth-page .ant-input-password .anticon {
+  color: var(--placeholder);
+  transition: color 0.2s;
+}
+
+.auth-page .ant-input-password .anticon:hover {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* ---------- 按钮 ---------- */
+.auth-page .ant-btn-primary {
+  height: 48px;
+  border-radius: 12px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: 0.03em;
+  background: linear-gradient(135deg, var(--indigo) 0%, var(--accent) 50%, #9333ea 100%) !important;
+  background-size: 200% 200% !important;
+  animation: btnShimmer 4s ease infinite;
+  border: none !important;
+  box-shadow: 0 6px 20px var(--accent-glow);
+  transition: transform 0.2s, box-shadow 0.2s;
+  margin-top: 4px;
+}
+
+@keyframes btnShimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+
+.auth-page .ant-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(124, 58, 237, 0.4) !important;
+}
+
+.auth-page .ant-btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 14px var(--accent-glow) !important;
+}
+
+/* ---------- 错误提示 ---------- */
+.auth-page .ant-alert-error {
+  border-radius: 12px;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  background: rgba(248, 113, 113, 0.08);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.auth-page .ant-alert-error .ant-alert-message {
+  color: #fca5a5;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.875rem;
+}
+
+/* ---------- 底部 footer ---------- */
+.auth-footer {
+  padding: 16px 40px 20px;
+  text-align: center;
+}
+
+.auth-footer span {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.28);
+  letter-spacing: 0.04em;
+}
+
+/* ---------- 安装页密码强度提示 ---------- */
+.auth-password-strength {
+  margin-top: -16px !important;
+  margin-bottom: 8px !important;
+}
+.auth-password-strength-label {
+  margin-left: 8px;
+  font-size: 12px;
+  color: var(--subtitle-color, rgba(255, 255, 255, 0.58));
+}
+
+/* ---------- 细节微调 ---------- */
+.auth-page .ant-form-item-explain-error {
+  font-size: 0.8125rem;
+  color: #fca5a5;
+  margin-top: 4px;
+}
+
+/* 表单验证错误时的输入框 */
+.auth-page .ant-form-item-has-error .ant-input,
+.auth-page .ant-form-item-has-error .ant-input-password {
+  border-color: rgba(248, 113, 113, 0.5) !important;
+}
+
+.auth-page .ant-form-item-has-error .ant-input:focus,
+.auth-page .ant-form-item-has-error .ant-input-password.ant-input-affix-wrapper-focused {
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.15) !important;
+}

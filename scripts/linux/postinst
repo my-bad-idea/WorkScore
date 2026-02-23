@@ -1,0 +1,25 @@
+#!/bin/sh
+# .deb/.rpm postinst：交互模式下提示输入端口并写入 config.json
+set -e
+CONFIG_DIR="${1:-/opt/workscore}"
+CONFIG="$CONFIG_DIR/config.json"
+DEFAULT_PORT=3000
+
+if [ "$(id -u)" -eq 0 ] && [ -t 0 ] && [ -t 1 ]; then
+  echo "WorkScore 服务配置"
+  printf "请输入服务端口 [%s]: " "$DEFAULT_PORT"
+  read -r PORT
+  PORT="${PORT:-$DEFAULT_PORT}"
+  case "$PORT" in
+    [0-9]*) ;;
+    *) PORT="$DEFAULT_PORT";;
+  esac
+else
+  PORT="$DEFAULT_PORT"
+fi
+
+mkdir -p "$CONFIG_DIR"
+printf '{"port": %s}\n' "$PORT" > "$CONFIG"
+chown -R root:root "$CONFIG_DIR" 2>/dev/null || true
+chmod 644 "$CONFIG"
+exit 0

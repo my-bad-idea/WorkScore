@@ -1,0 +1,29 @@
+/* 系统设置模块表格操作列：无权限时禁用样式 */
+.system-table-action-link {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.system-table-action-link.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* 岗位管理考核标准 Markdown 编辑器容器 */
+.positions-md-editor-wrap {
+  min-height: 200px;
+}
+
+/* AI 考核测试：评分结果区域 */
+.ai-test-result-wrap {
+  margin-top: 24px;
+}
+
+/* 岗位管理：AI 生成考核标准弹窗内边距 */
+.positions-ai-modal-dept-line {
+  margin-bottom: 12px;
+}
+
+.positions-ai-modal-form {
+  margin-bottom: 12px;
+}

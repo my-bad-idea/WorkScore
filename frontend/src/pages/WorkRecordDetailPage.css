@@ -1,0 +1,65 @@
+.work-record-detail-back {
+  margin-bottom: 16px;
+}
+
+/* 字段名列不折行 */
+.work-record-detail-descriptions.ant-descriptions .ant-descriptions-item-label {
+  white-space: nowrap;
+}
+
+.work-record-detail-edit-btn {
+  margin-right: 8px;
+}
+
+.work-record-detail-summary {
+  margin-top: 16px;
+}
+
+.work-record-detail-scores-card {
+  margin-top: 16px;
+}
+
+.work-record-detail-action-disabled {
+  color: #00000040;
+  cursor: not-allowed;
+}
+
+/* 评分说明列：内容过多时单行省略显示 ... */
+.work-record-detail-remark-ellipsis {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* 操作列：查看 | 删除 */
+.work-record-detail-actions {
+  white-space: nowrap;
+}
+.work-record-detail-action-sep {
+  margin: 0 6px;
+  color: #00000040;
+}
+
+/* 评分说明详情弹窗：尺寸加大，评分说明使用 Markdown 预览 */
+.work-record-detail-remark-detail p {
+  margin-bottom: 8px;
+}
+.work-record-detail-remark-detail-content {
+  margin-top: 12px;
+}
+.work-record-detail-remark-detail-text {
+  margin-top: 6px;
+  padding: 0;
+  word-break: break-word;
+  max-height: 420px;
+  overflow-y: auto;
+}
+/* MdEditor 预览区域随主题与弹窗宽度自适应 */
+.work-record-detail-remark-detail-text .w-md-editor {
+  box-shadow: none;
+}
+.work-record-detail-remark-detail-text .w-md-editor-area {
+  padding: 12px;
+}

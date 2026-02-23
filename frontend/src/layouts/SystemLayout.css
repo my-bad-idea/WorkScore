@@ -1,0 +1,76 @@
+/* ===== 系统配置两栏布局 ===== */
+.system-layout {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.system-sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 88px;
+}
+
+.system-menu {
+  background: #ffffff !important;
+  border-radius: 14px !important;
+  padding: 8px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.02);
+  border-inline-end: none !important;
+}
+
+.system-menu .ant-menu-item {
+  border-radius: 10px !important;
+  margin: 2px 0 !important;
+  height: 42px !important;
+  line-height: 42px !important;
+  font-weight: 500;
+  color: #4b5563;
+  transition: all 0.2s;
+}
+
+.system-menu .ant-menu-item:hover {
+  background: #f0f0ff !important;
+  color: #6366f1 !important;
+}
+
+.system-menu .ant-menu-item-selected {
+  background: linear-gradient(135deg, #eef2ff, #e8e5ff) !important;
+  color: #6366f1 !important;
+  font-weight: 600;
+}
+
+.system-menu .ant-menu-item-selected .anticon {
+  color: #6366f1;
+}
+
+.system-main {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 暗色主题侧栏 */
+[data-theme="dark"] .system-menu {
+  background: #1c1c2e !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .system-menu .ant-menu-item {
+  color: #9ca3b8;
+}
+
+[data-theme="dark"] .system-menu .ant-menu-item:hover {
+  background: rgba(129, 140, 248, 0.1) !important;
+  color: #a5b4fc !important;
+}
+
+[data-theme="dark"] .system-menu .ant-menu-item-selected {
+  background: rgba(129, 140, 248, 0.15) !important;
+  color: #a5b4fc !important;
+}
+
+[data-theme="dark"] .system-menu .ant-menu-item-selected .anticon {
+  color: #a5b4fc;
+}

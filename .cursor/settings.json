@@ -1,0 +1,31 @@
+{
+  "plugins": {
+    "cursor-team-kit": {
+      "enabled": true
+    },
+    "continual-learning": {
+      "enabled": true
+    },
+    "context7-plugin": {
+      "enabled": true
+    },
+    "create-plugin": {
+      "enabled": true
+    },
+    "compound-engineering": {
+      "enabled": true
+    },
+    "superpowers": {
+      "enabled": true
+    },
+    "parallel": {
+      "enabled": true
+    },
+    "phantom-connect": {
+      "enabled": true
+    },
+    "amplitude-analysis": {
+      "enabled": true
+    }
+  }
+}
