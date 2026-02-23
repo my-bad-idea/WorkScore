@@ -17,6 +17,7 @@ data.sqlite
 *.sqlite
 *.sqlite-journal
 *.sqlite-wal
+*.sqlite-shm
 
 # 系统与 IDE
 .DS_Store

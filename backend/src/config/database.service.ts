@@ -124,6 +124,23 @@ export class DatabaseService implements OnModuleInit {
     for (const sql of indexStatements) {
       db.exec(sql);
     }
+    // 系统设置默认值（与系统设置页一致，不含 API Key）
+    const now = new Date().toISOString();
+    const defaultSettings: Record<string, string> = {
+      token_expire_hours: '168',
+      default_user_password: 'Aa.123456',
+      llm_api_url: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
+      llm_model: 'qwen-plus',
+      llm_assessment_interval_seconds: '5',
+      llm_assessment_retry_interval_seconds: '60',
+      llm_assessment_weight_percent: '80',
+    };
+    const insertSetting = db.prepare(
+      'INSERT OR IGNORE INTO system_settings (key, value, updated_at) VALUES (?, ?, ?)',
+    );
+    for (const [key, value] of Object.entries(defaultSettings)) {
+      insertSetting.run(key, value, now);
+    }
     // 迁移：原为每条记录仅一条人工评分，现改为每条记录可多人评分、每人仅一条
     db.exec('DROP INDEX IF EXISTS idx_score_records_work_type');
     // 迁移：为已有 users 表添加 role 列并回填
