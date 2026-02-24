@@ -108,12 +108,16 @@ export class WorkRecordsService {
     const type = dto.type ?? existing.type;
     const recordDateRaw = dto.recordDate ?? existing.recordDate;
     const recordDate = type === 'weekly' ? getMondayOfWeek(recordDateRaw) : recordDateRaw;
-    if (type !== existing.type || recordDate !== (existing.type === 'weekly' ? getMondayOfWeek(existing.recordDate) : existing.recordDate)) {
+    const oldNormDate = existing.type === 'weekly' ? getMondayOfWeek(existing.recordDate) : existing.recordDate;
+    if (type !== existing.type || recordDate !== oldNormDate) {
       this.checkUniqueness(userId, type, recordDate);
+      // 类型或日期变更时，先标记旧月份脏（DB 尚未更新，markScoreDirty 读到的是旧 record_date）
+      this.scoresService.markScoreDirty(id);
     }
     const content = dto.content ?? existing.content;
     const now = new Date().toISOString();
     this.db.getDb().prepare('UPDATE work_records SET type = ?, record_date = ?, content = ?, updated_at = ? WHERE id = ?').run(type, recordDate, content, now, id);
+    // 更新后 requeue 会再次调用 markScoreDirty，此时读到新 record_date，标记新月份
     this.scoresService.requeueByWorkRecordId(id);
     return { id };
   }

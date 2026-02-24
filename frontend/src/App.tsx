@@ -12,6 +12,7 @@ import HomePage from './pages/HomePage';
 import WorkRecordsPage from './pages/WorkRecordsPage';
 import WorkRecordDetailPage from './pages/WorkRecordDetailPage';
 import AssessmentsPage from './pages/AssessmentsPage';
+import WorkPlansPage from './pages/WorkPlansPage';
 import ScoreQueuePage from './pages/ScoreQueuePage';
 import ProfilePage from './pages/ProfilePage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
@@ -67,6 +68,7 @@ function AppRoutes() {
               <Route index element={<HomePage />} />
               <Route path="work-records" element={<WorkRecordsPage />} />
             <Route path="work-records/:id" element={<WorkRecordDetailPage />} />
+            <Route path="work-plans" element={<WorkPlansPage />} />
             <Route path="assessments" element={<AssessmentsPage />} />
               <Route path="score-queue" element={<RequirePermission check={canUseAiAssessment} redirectTo="/"><ScoreQueuePage /></RequirePermission>} />
               <Route path="profile" element={<ProfilePage />} />

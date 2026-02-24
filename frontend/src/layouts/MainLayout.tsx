@@ -3,6 +3,7 @@ import { Layout, Menu, Typography, Space, Avatar, Dropdown, App } from 'antd';
 import {
   HomeOutlined,
   FileTextOutlined,
+  ScheduleOutlined,
   TrophyOutlined,
   UnorderedListOutlined,
   SettingOutlined,
@@ -21,6 +22,7 @@ const { Header, Content, Footer } = Layout;
 const allMenuItems = [
   { key: '/', icon: <HomeOutlined />, label: '首页' },
   { key: '/work-records', icon: <FileTextOutlined />, label: '工作记录' },
+  { key: '/work-plans', icon: <ScheduleOutlined />, label: '工作计划' },
   { key: '/assessments', icon: <TrophyOutlined />, label: '考核排名' },
   { key: '/score-queue', icon: <UnorderedListOutlined />, label: '智能考核队列' },
   { key: '/system', icon: <SettingOutlined />, label: '系统配置' },

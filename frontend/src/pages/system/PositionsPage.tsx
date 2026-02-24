@@ -231,10 +231,11 @@ export default function PositionsPage() {
           loading={loading}
           dataSource={list}
           rowKey="id"
+          size="middle"
           columns={[
-            { title: '部门', dataIndex: 'departmentName', key: 'departmentName' },
-            { title: '岗位名称', dataIndex: 'name', key: 'name' },
-            { title: '启用', dataIndex: 'enabled', key: 'enabled', render: (v: boolean) => (v ? '是' : '否') },
+            { title: '部门', dataIndex: 'departmentName', key: 'departmentName', width: 160, ellipsis: true },
+            { title: '岗位名称', dataIndex: 'name', key: 'name', width: 200, ellipsis: true },
+            { title: '启用', dataIndex: 'enabled', key: 'enabled', width: 60, align: 'center' as const, render: (v: boolean) => (v ? '是' : '否') },
             {
               title: '操作',
               key: 'action',

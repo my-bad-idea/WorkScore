@@ -4,7 +4,8 @@ import dayjs from 'dayjs';
 import { assessmentsApi, departmentsApi, positionsApi } from '../api/client';
 import { useAuth } from '../stores/auth';
 
-type DeptRanking = { departmentId: number; departmentName: string; rankings: { userId: number; userName: string; score: number; rank: number; positionName?: string | null }[] };
+type RankingRow = { userId: number; userName: string; score: number; workPlanScore?: number; weeklyReportScore?: number; rank: number; positionName?: string | null };
+type DeptRanking = { departmentId: number; departmentName: string; rankings: RankingRow[] };
 
 export default function AssessmentsPage() {
   const { user } = useAuth();
@@ -111,10 +112,12 @@ export default function AssessmentsPage() {
                         size="small"
                         pagination={false}
                         columns={[
-                          { title: '名次', dataIndex: 'rank', key: 'rank', width: 80 },
-                          { title: '姓名', dataIndex: 'userName', key: 'userName' },
-                          { title: '岗位', dataIndex: 'positionName', key: 'positionName', render: (v: string | null | undefined) => v ?? '-' },
-                          { title: '分数', dataIndex: 'score', key: 'score', render: (v: number) => v.toFixed(1) },
+                          { title: '名次', dataIndex: 'rank', key: 'rank', width: 70, align: 'center' as const },
+                          { title: '姓名', dataIndex: 'userName', key: 'userName', width: 120 },
+                          { title: '岗位', dataIndex: 'positionName', key: 'positionName', width: 100, ellipsis: true, render: (v: string | null | undefined) => v ?? '-' },
+                          { title: '工作计划得分', dataIndex: 'workPlanScore', key: 'workPlanScore', width: 100, align: 'right' as const, render: (v: number) => (v ?? 0).toFixed(1) },
+                          { title: '周报得分', dataIndex: 'weeklyReportScore', key: 'weeklyReportScore', width: 90, align: 'right' as const, render: (v: number) => (v ?? 0).toFixed(1) },
+                          { title: '总分', dataIndex: 'score', key: 'score', width: 80, align: 'right' as const, render: (v: number) => (v ?? 0).toFixed(1) },
                         ]}
                       />
                     </Card>
@@ -153,10 +156,12 @@ export default function AssessmentsPage() {
                         size="small"
                         pagination={false}
                         columns={[
-                          { title: '名次', dataIndex: 'rank', key: 'rank', width: 80 },
-                          { title: '姓名', dataIndex: 'userName', key: 'userName' },
-                          { title: '岗位', dataIndex: 'positionName', key: 'positionName', render: (v: string | null | undefined) => v ?? '-' },
-                          { title: '分数', dataIndex: 'score', key: 'score', render: (v: number) => v.toFixed(1) },
+                          { title: '名次', dataIndex: 'rank', key: 'rank', width: 70, align: 'center' as const },
+                          { title: '姓名', dataIndex: 'userName', key: 'userName', width: 120 },
+                          { title: '岗位', dataIndex: 'positionName', key: 'positionName', width: 100, ellipsis: true, render: (v: string | null | undefined) => v ?? '-' },
+                          { title: '工作计划得分', dataIndex: 'workPlanScore', key: 'workPlanScore', width: 100, align: 'right' as const, render: (v: number) => (v ?? 0).toFixed(1) },
+                          { title: '周报得分', dataIndex: 'weeklyReportScore', key: 'weeklyReportScore', width: 90, align: 'right' as const, render: (v: number) => (v ?? 0).toFixed(1) },
+                          { title: '总分', dataIndex: 'score', key: 'score', width: 80, align: 'right' as const, render: (v: number) => (v ?? 0).toFixed(1) },
                         ]}
                       />
                     </Card>

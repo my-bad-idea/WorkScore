@@ -275,30 +275,25 @@ export default function WorkRecordsPage() {
           loading={loading}
           dataSource={list}
           rowKey="id"
+          size="middle"
+          scroll={{ x: 950 }}
           columns={[
-            { title: '类型', dataIndex: 'type', key: 'type', render: (v: string) => (v === 'daily' ? '日报' : '周报') },
-            { title: '所属日期', dataIndex: 'recordDate', key: 'recordDate' },
-            { title: '记录人', dataIndex: 'recorderName', key: 'recorderName' },
-            { title: '部门', dataIndex: 'recorderDepartmentName', key: 'recorderDepartmentName' },
-            { title: '岗位', dataIndex: 'recorderPositionName', key: 'recorderPositionName' },
+            { title: '类型', dataIndex: 'type', key: 'type', width: 70, render: (v: string) => (v === 'daily' ? '日报' : '周报') },
+            { title: '所属日期', dataIndex: 'recordDate', key: 'recordDate', width: 110 },
+            { title: '记录人', dataIndex: 'recorderName', key: 'recorderName', width: 90 },
+            { title: '部门', dataIndex: 'recorderDepartmentName', key: 'recorderDepartmentName', width: 100, ellipsis: true },
+            { title: '岗位', dataIndex: 'recorderPositionName', key: 'recorderPositionName', width: 100, ellipsis: true },
             {
-              title: '总成绩',
-              dataIndex: 'totalScore',
-              key: 'totalScore',
+              title: '总成绩', dataIndex: 'totalScore', key: 'totalScore', width: 80, align: 'center' as const,
               render: (v: number | undefined) => (v != null ? Number(v).toFixed(1) : '—'),
             },
             {
-              title: '记录时间',
-              dataIndex: 'createdAt',
-              key: 'createdAt',
-              render: (v: string) => (v ? dayjs(v).format('YYYY-MM-DD HH:mm:ss.SSS') : ''),
+              title: '记录时间', dataIndex: 'createdAt', key: 'createdAt', width: 160,
+              render: (v: string) => (v ? dayjs(v).format('YYYY-MM-DD HH:mm:ss') : ''),
             },
             {
-              title: '操作',
-              key: 'action',
-              align: 'center',
-              width: 140,
-              render: (_, record) => {
+              title: '操作', key: 'action', align: 'center' as const, width: 140, fixed: 'right' as const,
+              render: (_: unknown, record: RecordItem) => {
                 const isOwn = record.recorderId === user?.id;
                 return (
                   <Space size="small">

@@ -90,7 +90,9 @@ WorkScore/
 - **部门** 1:N **人员**，**岗位** N:1 **人员**（人员所属部门 + 所属岗位）
 - **人员** 1:N **工作记录**
 - **工作记录** 至多 1 条 **AI 评分**、多条 **人工评分**（每人每条记录至多一条；评分人可删自己的评分；人工评分说明必填）
-- **部门** + **人员** + **时间维度** → **月度/年度考核汇总与排名**
+- **部门** + **人员** + **时间维度** → **月度/年度考核汇总与排名**（汇总表含周报得分、工作计划得分、总分，由后台按配置占比刷新）
+- **部门** 1:N **工作计划**，**人员** 1:N **工作计划**（计划归属用户 + 部门；另有创建人、执行人）；计划变更会标记对应用户月份的「工作计划」脏数据以触发重算
+- **user_monthly_score_updates**：按 (user_id, year_month, source_type) 标记需刷新的维度，source_type 为 `work_record`（周报）或 `work_plan`（工作计划）
 - **安装状态**：无用户时视为未安装，需走安装向导创建管理员。
 
 ### 3.2 表结构（SQLite）
@@ -166,8 +168,9 @@ CREATE TABLE score_records (
   FOREIGN KEY (work_record_id) REFERENCES work_records(id),
   FOREIGN KEY (scorer_id) REFERENCES users(id)
 );
--- 唯一约束：同一工作记录同类型评分仅一条（AI 一条、人工一条）
-CREATE UNIQUE INDEX idx_score_records_work_type ON score_records(work_record_id, score_type);
+-- 唯一约束：同一工作记录仅一条 AI 评分；人工评分可多条、每人每条记录仅一条
+CREATE UNIQUE INDEX idx_score_records_ai_unique ON score_records(work_record_id) WHERE score_type = 'ai';
+CREATE UNIQUE INDEX idx_score_records_manual_user_unique ON score_records(work_record_id, scorer_id) WHERE score_type = 'manual';
 
 -- 考核队列（待 AI 评分）
 CREATE TABLE score_queue (
@@ -188,16 +191,78 @@ CREATE INDEX idx_work_records_recorder_date ON work_records(recorder_id, record_
 CREATE INDEX idx_work_records_type ON work_records(type);
 CREATE INDEX idx_score_records_work ON score_records(work_record_id);
 CREATE INDEX idx_score_queue_status ON score_queue(status);
+
+-- 工作计划（部门内可查看，可为同部门他人创建；仅所属用户或执行人可修改/删除）
+CREATE TABLE work_plans (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,         -- 计划所属用户
+  creator_id INTEGER NOT NULL,      -- 创建人（实际创建的用户）
+  department_id INTEGER NOT NULL,   -- 所属部门
+  executor_id INTEGER,              -- 执行人（可空）
+  system TEXT,                      -- 系统
+  module TEXT,                      -- 模块
+  plan_content TEXT NOT NULL,       -- 计划内容
+  planned_start_at TEXT,            -- 计划开始时间
+  planned_end_at TEXT,              -- 计划结束时间
+  planned_duration_minutes INTEGER, -- 计划时长（分钟）
+  actual_start_at TEXT,             -- 实际开始时间
+  actual_end_at TEXT,               -- 实际结束时间
+  actual_duration_minutes INTEGER,  -- 实际时长（分钟）
+  priority TEXT NOT NULL DEFAULT 'medium', -- high / medium / low
+  status TEXT NOT NULL DEFAULT 'pending',  -- pending / in_progress / completed / cancelled / on_hold / delayed
+  remark TEXT,
+  sort_order INTEGER DEFAULT 0,
+  created_at TEXT,
+  updated_at TEXT,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (creator_id) REFERENCES users(id),
+  FOREIGN KEY (department_id) REFERENCES departments(id),
+  FOREIGN KEY (executor_id) REFERENCES users(id)
+);
+CREATE INDEX idx_work_plans_user_status ON work_plans(user_id, status);
+CREATE INDEX idx_work_plans_department ON work_plans(department_id);
+CREATE INDEX idx_work_plans_executor ON work_plans(executor_id);
+CREATE INDEX idx_work_plans_creator ON work_plans(creator_id);
+
+-- 月度排名汇总表（按用户、月份；总分 = 工作计划得分×占比 + 周报得分×占比）
+CREATE TABLE user_monthly_rankings (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  year_month TEXT NOT NULL,
+  department_id INTEGER NOT NULL,
+  position_id INTEGER,
+  avg_score REAL NOT NULL DEFAULT 0,       -- 周报平均（与 weekly_report_score 一致）
+  record_count INTEGER NOT NULL DEFAULT 0,
+  score_sum REAL NOT NULL DEFAULT 0,      -- 周报得分之和
+  work_plan_score REAL DEFAULT 0,         -- 工作计划完成度得分（0–100，AI 打分）
+  weekly_report_score REAL DEFAULT 0,     -- 周报月均分
+  total_score REAL DEFAULT 0,             -- 排名用总分 = work_plan_score*占比 + weekly_report_score*占比
+  updated_at TEXT,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+CREATE UNIQUE INDEX idx_umr_user_month ON user_monthly_rankings(user_id, year_month);
+
+-- 月度刷新脏标记（按来源区分：工作记录变更标 work_record，工作计划变更标 work_plan）
+CREATE TABLE user_monthly_score_updates (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  year_month TEXT NOT NULL,
+  source_type TEXT NOT NULL DEFAULT 'work_record',  -- 'work_record' | 'work_plan'
+  last_updated_at TEXT NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+CREATE UNIQUE INDEX idx_umsu_user_month_type ON user_monthly_score_updates(user_id, year_month, source_type);
 ```
 
-实现中可能包含缓存/汇总表（如 `user_monthly_rankings`、`user_monthly_score_updates`）用于月度排名与增量更新，此处从略。
+实现中索引名与迁移逻辑见 `backend/src/config/database.service.ts`（如 `idx_umsu_user_month` 已弃用，改用 `idx_umsu_user_month_type`）。
 
 说明：
 - **岗位考核标准**：`positions.assessment_criteria` 存 JSON，如 `[{ "name": "完成度", "weight": 0.3, "description": "..." }, ...]`。AI 评分与人工评分均按当前记录人的岗位取考核项。
 - **工作记录唯一性**：日报按 `(recorder_id, record_date)` 唯一；周报的 `record_date` 统一存该周**周一**的日期。新增/编辑时后端校验并返回明确错误。
 - **评分唯一性**：同一工作记录最多一条 AI 评分；人工评分可多人提交、每人每条记录仅一条（同一 work_record_id + scorer_id + score_type='manual' 唯一）。不能给自己的记录评分。提交本人已评过的记录时返回 409。评分人可**删除自己的评分记录**（仅 `scorer_id = 当前用户` 可删）。
 - **评分说明**：`score_records.remark` 人工评分为必填；AI 评分可带说明。
-- 总考核成绩：对该记录下至多两条评分（AI + 人工）做聚合（如平均），再参与月度/年度统计。
+- **单条工作记录总成绩**：该记录下 AI 与人工评分按系统设置「周报内 AI 占比」加权（AI 总分×占比 + 人工平均×(1−占比)），再参与月度/年度统计。
+- **月度排名总分**：`total_score = work_plan_score × 工作计划占比 + weekly_report_score × 周报占比`；周报得分为该月工作记录总成绩平均，工作计划得分为该月计划完成度 AI 打分。占比在系统设置中配置（如 `work_plan_ratio_percent`、`llm_assessment_weight_percent`）。
 
 ---
 
@@ -226,7 +291,16 @@ CREATE INDEX idx_score_queue_status ON score_queue(status);
 - `PUT /api/work-records/:id` — 仅记录人可改（改日期时仍校验唯一性）
 - `DELETE /api/work-records/:id` — 仅记录人可删
 
-### 4.5 工作考核
+### 4.5 工作计划
+- `GET /api/work-plans` — 列表：返回当前用户所属部门内所有计划；支持 query：`status`、`priority`、`executorId`、`userId`（所属用户）、`plannedStartFrom`、`plannedStartTo`。
+- `GET /api/work-plans/:id` — 详情；仅当计划所属部门与当前用户部门一致可访问。
+- `POST /api/work-plans` — 新增；body 可选 `userId`（计划所属用户，须同部门，默认当前用户）；`creator_id` 固定为当前用户。
+- `PUT /api/work-plans/:id` — 更新；仅计划所属用户（`user_id`）或执行人（`executor_id`）可改。
+- `DELETE /api/work-plans/:id` — 删除；同上权限。
+- 状态枚举：`pending` 待开始、`in_progress` 执行中、`completed` 已完成、`cancelled` 已取消、`on_hold` 已搁置、`delayed` 已延期。
+- 优先级枚举：`high` 高、`medium` 中、`low` 低。
+
+### 4.6 工作考核
 - `GET /api/work-records/:id/scores` — 某条工作记录的所有评分（一条 AI + 多条人工，含评分说明）
 - `GET /api/work-records/:id/criteria` — 该记录对应记录人岗位的考核标准（供人工评分表单使用）
 - `POST /api/work-records/:id/scores` — 提交人工评分（JSON：评分项、分数、**总分 totalScore**、**评分说明 remark**，二者均为必填）；不能给自己评分；每人每条记录只能评一次，重复提交返回 409
@@ -236,19 +310,20 @@ CREATE INDEX idx_score_queue_status ON score_queue(status);
 - `POST /api/scores/ai-generate-criteria` — 根据部门名、岗位名与可选需求描述生成考核标准草稿（供岗位配置使用）；仅系统/部门管理员可访问
 - 总成绩：`GET /api/work-records/:id/summary` — 对至多两条评分聚合
 
-### 4.6 排名与报表
-- `GET /api/assessments/monthly` — 按月个人考核（参数：year, month；可选 departmentId，不传则全部部门；按部门排名）
-- `GET /api/assessments/yearly` — 按年个人考核（参数：year；可选 departmentId）
-- 返回结构示例：`{ departmentId, departmentName, rankings: [{ userId, userName, score, rank }] }`
+### 4.7 排名与报表
+- `GET /api/assessments/monthly` — 按月个人考核（参数：year, month；可选 departmentId、positionId；按部门排名）
+- `GET /api/assessments/yearly` — 按年个人考核（参数：year；可选 departmentId、positionId）
+- 返回结构：`{ departmentId, departmentName, rankings: [{ userId, userName, score, workPlanScore, weeklyReportScore, rank, positionName? }] }`；`score` 为总分（排名依据），`workPlanScore`、`weeklyReportScore` 用于展示。
 - **首页用**：传当前用户所属 `departmentId` + 当前月/年，即“所属部门评分排名”
 
-### 4.7 权限约定
+### 4.8 权限约定
 - 安装接口：仅当 `GET /api/setup/status` 为未安装时可调用 `POST /api/setup/init`；已安装后不再暴露或返回 403。
 - 其余 API（除登录、安装）需 JWT。
 - **角色**：`system_admin`（系统管理员）、`department_admin`（部门管理员）、`user`（普通用户）。部门管理员仅可维护本部门（department_id = 当前用户 departmentId）下的岗位与人员；系统设置、考核队列、AI 考核测试仅系统管理员与部门管理员可访问（系统设置仅系统管理员）。
 - 部门写操作：仅 `role = 'system_admin'`。岗位/人员写操作：系统管理员无限制，部门管理员仅限本部门资源。
 - 工作记录修改/删除：仅 `recorder_id = 当前用户`。
 - 评分记录删除：仅 `scorer_id = 当前用户`。
+- **工作计划**：部门内所有登录用户可查看本部门计划；可为同部门他人创建计划（`creator_id` 固定当前用户）；修改/删除仅当 `user_id = 当前用户` 或 `executor_id = 当前用户`。
 
 ---
 
@@ -262,10 +337,11 @@ CREATE INDEX idx_score_queue_status ON score_queue(status);
 ### 5.2 路由与页面
 - `/setup` — **安装向导**：仅在未安装时可访问；表单输入管理员账号、密码、姓名，提交后调用 `POST /api/setup/init`，成功后跳转登录。若已安装则重定向到 `/login` 或 `/`。
 - `/login` — 登录
-- **`/`（首页）** — **所属部门评分排名**：展示当前用户所在部门的当月（或可选月/年）排名；默认即部门排名页，无需再跳转。
+- **`/`（首页）** — **所属部门评分排名**：展示当前用户所在部门的当月（或可选月/年）排名，含工作计划得分、周报得分、总分；默认即部门排名页，无需再跳转。
 - `/work-records` — 工作记录列表（筛选、新建、编辑、删除）；新建时前端可提示“每人每天仅一条日报、每人每周仅一条周报”。
 - `/work-records/:id` — 记录详情 + 评分列表（一条 AI + 多条人工，展示评分说明；**评分人可删自己的评分**）+ 人工评分入口（若当前用户已评过则隐藏）；人工评分表单含**总分**与**评分说明（均必填）**，根据 criteria 动态生成评分项。
-- `/assessments` — 考核与排名（Tab：月度排名 / 年度排名，可切换部门、月/年）
+- `/work-plans` — **工作计划**列表（部门内全部计划，支持筛选状态/优先级/执行人/所属用户/时间范围；新建/编辑/删除）。
+- `/assessments` — 考核与排名（Tab：月度排名 / 年度排名，可切换部门、月/年；表格含工作计划得分、周报得分、总分）
 - **`/score-queue`** — **考核队列查看**：列表展示待处理/处理中/已完成/失败，可筛状态、时间；支持跳转对应工作记录详情。
 - `/system` — 系统配置（仅管理员可见或可编辑）
   - `/system/departments` — 部门 CRUD
@@ -312,10 +388,11 @@ CREATE INDEX idx_score_queue_status ON score_queue(status);
 3. **删除评分**：评分人可调用 `DELETE /api/score-records/:id` 删除自己的评分；同一工作记录同类型（AI/人工）只能各有一条，删除后可再次提交该类型评分。
 
 ### 6.4 多评分汇总与月度/年度排名
-- 单条工作记录总成绩：该记录有一条 AI 评分（若有）与多条人工评分（若有）。**当同时存在 AI 与人工评分时**，按系统配置 `llm_assessment_weight_percent`（默认 80%）加权：`总成绩 = AI总分×AI占比 + 人工平均分×(1-AI占比)`；仅有一种时取该分数；多条人工评分取平均后参与加权。可写进缓存/汇总表或实时计算。
-- 月度：该月该用户所有“工作记录汇总成绩”的平均。
-- 年度：该年该用户所有“工作记录汇总成绩”的平均。
-- 部门内按分数降序即名次，通过 `GET /api/assessments/monthly` 与 `yearly` 返回；**首页**默认展示当前用户所属部门的当月排名。
+- **单条工作记录总成绩**：该记录有一条 AI 评分（若有）与多条人工评分（若有）。**当同时存在 AI 与人工评分时**，按系统配置 `llm_assessment_weight_percent`（周报内 AI 占比，默认 80%）加权：`总成绩 = AI总分×AI占比 + 人工平均分×(1-AI占比)`；仅有一种时取该分数；多条人工评分取平均后参与加权。
+- **月度刷新**：后台 `RankingRefreshProcessor` 按 `user_monthly_score_updates` 的脏数据（`source_type` 为 `work_record` 或 `work_plan`）对每个 (user_id, year_month) 重算：**周报得分** = 该月各工作记录总成绩的平均；**工作计划得分** = 该月工作计划完成度 AI 打分（0–100，失败或无计划为 0）；**总分** = `work_plan_score × (work_plan_ratio_percent/100) + weekly_report_score × (1 - work_plan_ratio_percent/100)`。写入 `user_monthly_rankings` 的 `work_plan_score`、`weekly_report_score`、`total_score` 等。
+- **月度排名**：按 `total_score` 降序；API 返回 `score`（总分）、`workPlanScore`、`weeklyReportScore` 供前端展示。
+- **年度排名**：按该年各月 `total_score` 的聚合（如平均）排序；同样返回工作计划得分、周报得分与总分。
+- **首页**：默认展示当前用户所属部门的当月排名（含工作计划得分、周报得分、总分）。
 
 ---
 
@@ -353,10 +430,11 @@ CREATE INDEX idx_score_queue_status ON score_queue(status);
 ## 八、配置与部署要点
 
 - **安装**：首次部署后通过安装向导创建管理员账号与密码，之后仅能通过登录使用系统。
-- **环境变量**：数据库路径、JWT 密钥、LLM API Key 及 endpoint。
+- **环境变量**：数据库路径、JWT 密钥、LLM API Key 及 endpoint。LLM 相关（含 temperature、top_p）也可在系统设置中配置，优先以系统设置为准。
+- **系统设置键**（`system_settings`）：如 `token_expire_hours`、`llm_api_url` / `llm_api_key` / `llm_model` / `llm_temperature` / `llm_top_p`、`llm_assessment_interval_seconds`、`llm_assessment_weight_percent`（周报内 AI 占比）、`work_plan_ratio_percent`（工作计划考核占比）、`default_user_password` 等。
 - **SQLite**：单文件，注意并发写（可考虑 WAL 模式）。
 - **AI 评分**：按**岗位**考核标准拼 prompt；异步队列 + 重试与失败记录。
 - **权限**：按用户角色（system_admin / department_admin / user）控制：部门 CRUD 仅系统管理员；岗位/人员写操作系统管理员全部、部门管理员仅本部门；系统设置与考核队列/AI 测试仅系统管理员（设置）或系统/部门管理员（队列与 AI 测试）。工作记录写接口校验 `recorder_id`；评分删除校验 `scorer_id`；安装接口仅未安装时可用。
-- **评分**：每条工作记录 AI 仅一条、人工可多人评分（每人每条记录仅一条）；**人工评分**需填写总分与评分说明（均必填）；不能给自己评分；评分人可删自己的评分。**首页**为所属部门评分排名，**考核队列**提供独立查看页面。
+- **评分**：每条工作记录 AI 仅一条、人工可多人评分（每人每条记录仅一条）；**人工评分**需填写总分与评分说明（均必填）；不能给自己评分；评分人可删自己的评分。**首页**为所属部门评分排名（含工作计划得分、周报得分、总分），**考核队列**提供独立查看页面。**工作计划**变更会触发当月工作计划得分重算（`markWorkPlanScoreDirty`）。
 
 以上为完整设计与实施计划，可按阶段迭代开发；考核标准以岗位为单位维护，日报/周报与评分唯一性由后端严格校验，主题与安装流程已纳入设计。

@@ -188,7 +188,28 @@ export class UsersService {
       throw new ForbiddenException('仅可维护本部门下的人员');
     }
     if (actor.role === 'user') throw new ForbiddenException('无权限');
-    this.db.getDb().prepare('DELETE FROM users WHERE id = ?').run(id);
+    const db = this.db.getDb();
+    try {
+      db.exec('BEGIN');
+      // 依赖 users 的表按外键顺序级联删除，避免 FOREIGN KEY constraint failed
+      const workRecordIds = db.prepare('SELECT id FROM work_records WHERE recorder_id = ?').all(id) as { id: number }[];
+      const ids = workRecordIds.map((r) => r.id);
+      if (ids.length > 0) {
+        const placeholders = ids.map(() => '?').join(',');
+        db.prepare(`DELETE FROM score_records WHERE work_record_id IN (${placeholders})`).run(...ids);
+        db.prepare(`DELETE FROM score_queue WHERE work_record_id IN (${placeholders})`).run(...ids);
+      }
+      db.prepare('DELETE FROM score_records WHERE scorer_id = ?').run(id);
+      db.prepare('DELETE FROM work_records WHERE recorder_id = ?').run(id);
+      db.prepare('DELETE FROM user_monthly_rankings WHERE user_id = ?').run(id);
+      db.prepare('DELETE FROM user_monthly_score_updates WHERE user_id = ?').run(id);
+      db.prepare('DELETE FROM work_plans WHERE user_id = ? OR creator_id = ? OR executor_id = ?').run(id, id, id);
+      db.prepare('DELETE FROM users WHERE id = ?').run(id);
+      db.exec('COMMIT');
+    } catch (e) {
+      db.exec('ROLLBACK');
+      throw e;
+    }
   }
 
   async updatePassword(id: number, passwordHash: string) {

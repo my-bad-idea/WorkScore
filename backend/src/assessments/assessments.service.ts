@@ -14,25 +14,35 @@ export class AssessmentsService {
     const db = this.db.getDb();
     const rows = db.prepare(
       `SELECT r.user_id, r.avg_score, r.department_id, r.position_id,
+              COALESCE(r.work_plan_score, 0) AS work_plan_score,
+              COALESCE(r.weekly_report_score, r.avg_score) AS weekly_report_score,
+              COALESCE(r.total_score, r.avg_score) AS total_score,
               u.real_name, d.name AS department_name, p.name AS position_name
        FROM user_monthly_rankings r
        JOIN users u ON r.user_id = u.id
        JOIN departments d ON r.department_id = d.id
        LEFT JOIN positions p ON r.position_id = p.id
        WHERE r.year_month = ?`,
-    ).all(yearMonth) as { user_id: number; avg_score: number; department_id: number; position_id: number | null; real_name: string; department_name: string; position_name: string | null }[];
+    ).all(yearMonth) as { user_id: number; avg_score: number; department_id: number; position_id: number | null; work_plan_score: number; weekly_report_score: number; total_score: number; real_name: string; department_name: string; position_name: string | null }[];
 
-    const byDept = new Map<number, { departmentName: string; list: { userId: number; userName: string; score: number; positionName: string | null }[] }>();
+    const byDept = new Map<number, { departmentName: string; list: { userId: number; userName: string; score: number; workPlanScore: number; weeklyReportScore: number; positionName: string | null }[] }>();
     for (const r of rows) {
       if (departmentId != null && String(r.department_id) !== departmentId) continue;
       if (positionId != null && (r.position_id == null || String(r.position_id) !== positionId)) continue;
       let dept = byDept.get(r.department_id);
       if (!dept) dept = { departmentName: r.department_name, list: [] };
-      dept.list.push({ userId: r.user_id, userName: r.real_name, score: r.avg_score, positionName: r.position_name });
+      dept.list.push({
+        userId: r.user_id,
+        userName: r.real_name,
+        score: r.total_score,
+        workPlanScore: r.work_plan_score,
+        weeklyReportScore: r.weekly_report_score,
+        positionName: r.position_name,
+      });
       byDept.set(r.department_id, dept);
     }
 
-    const result: { departmentId: number; departmentName: string; rankings: { userId: number; userName: string; score: number; rank: number; positionName?: string | null }[] }[] = [];
+    const result: { departmentId: number; departmentName: string; rankings: { userId: number; userName: string; score: number; workPlanScore: number; weeklyReportScore: number; rank: number; positionName?: string | null }[] }[] = [];
     for (const [deptId, dept] of byDept) {
       dept.list.sort((a, b) => b.score - a.score);
       result.push({
@@ -48,28 +58,41 @@ export class AssessmentsService {
     const db = this.db.getDb();
     const rows = db.prepare(
       `SELECT r.user_id,
-              SUM(r.score_sum) / SUM(r.record_count) AS avg_score,
-              r.department_id, r.position_id,
-              u.real_name, d.name AS department_name, p.name AS position_name
+              SUM(r.score_sum) / NULLIF(SUM(r.record_count), 0) AS avg_score,
+              MAX(r.department_id) AS department_id,
+              MAX(r.position_id) AS position_id,
+              AVG(COALESCE(r.work_plan_score, 0)) AS work_plan_score,
+              AVG(COALESCE(r.weekly_report_score, r.avg_score)) AS weekly_report_score,
+              AVG(COALESCE(r.total_score, r.avg_score)) AS total_score,
+              MAX(u.real_name) AS real_name,
+              MAX(d.name) AS department_name,
+              MAX(p.name) AS position_name
        FROM user_monthly_rankings r
        JOIN users u ON r.user_id = u.id
        JOIN departments d ON r.department_id = d.id
        LEFT JOIN positions p ON r.position_id = p.id
        WHERE r.year_month LIKE ?
        GROUP BY r.user_id`,
-    ).all(`${year}-%`) as { user_id: number; avg_score: number; department_id: number; position_id: number | null; real_name: string; department_name: string; position_name: string | null }[];
+    ).all(`${year}-%`) as { user_id: number; avg_score: number; department_id: number; position_id: number | null; work_plan_score: number; weekly_report_score: number; total_score: number; real_name: string; department_name: string; position_name: string | null }[];
 
-    const byDept = new Map<number, { departmentName: string; list: { userId: number; userName: string; score: number; positionName: string | null }[] }>();
+    const byDept = new Map<number, { departmentName: string; list: { userId: number; userName: string; score: number; workPlanScore: number; weeklyReportScore: number; positionName: string | null }[] }>();
     for (const r of rows) {
       if (departmentId != null && String(r.department_id) !== departmentId) continue;
       if (positionId != null && (r.position_id == null || String(r.position_id) !== positionId)) continue;
       let dept = byDept.get(r.department_id);
       if (!dept) dept = { departmentName: r.department_name, list: [] };
-      dept.list.push({ userId: r.user_id, userName: r.real_name, score: r.avg_score, positionName: r.position_name });
+      dept.list.push({
+        userId: r.user_id,
+        userName: r.real_name,
+        score: r.total_score,
+        workPlanScore: r.work_plan_score ?? 0,
+        weeklyReportScore: r.weekly_report_score ?? r.avg_score,
+        positionName: r.position_name,
+      });
       byDept.set(r.department_id, dept);
     }
 
-    const result: { departmentId: number; departmentName: string; rankings: { userId: number; userName: string; score: number; rank: number; positionName?: string | null }[] }[] = [];
+    const result: { departmentId: number; departmentName: string; rankings: { userId: number; userName: string; score: number; workPlanScore: number; weeklyReportScore: number; rank: number; positionName?: string | null }[] }[] = [];
     for (const [deptId, dept] of byDept) {
       dept.list.sort((a, b) => b.score - a.score);
       result.push({

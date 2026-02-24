@@ -1,6 +1,6 @@
 # 工作智能评分平台
 
-日报/周报录入，AI 与人工双通道考核，部门岗位标准评分。技术栈：NestJS + React + Vite + Ant Design + SQLite。
+日报/周报录入，工作计划管理，AI 与人工双通道考核，按部门/岗位标准评分，月度/年度排名（总分 = 工作计划得分×占比 + 周报得分×占比，可配置）。技术栈：NestJS + React + Vite + Ant Design + SQLite。
 
 ---
 
@@ -32,7 +32,7 @@ work-score
 |------|------|
 | 安装向导 / 登录 | `/setup` · `/login` |
 | 首页（部门当月排名） | `/` |
-| 工作记录 / 考核排名 / 考核队列 | `/work-records` · `/assessments` · `/score-queue` |
+| 工作记录 / 工作计划 / 考核排名 / 考核队列 | `/work-records` · `/work-plans` · `/assessments` · `/score-queue` |
 | 系统配置 / 个人 | `/system/*` · `/profile` |
 
 详细功能与角色权限见 [功能说明](docs/功能说明.md)。

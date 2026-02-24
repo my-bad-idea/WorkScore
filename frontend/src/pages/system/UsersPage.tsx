@@ -150,25 +150,21 @@ export default function UsersPage() {
           loading={loading}
           dataSource={list}
           rowKey="id"
+          size="middle"
+          scroll={{ x: 750 }}
           columns={[
-            { title: '账号', dataIndex: 'username', key: 'username' },
-            { title: '姓名', dataIndex: 'realName', key: 'realName' },
-            { title: '部门', dataIndex: 'departmentName', key: 'departmentName' },
-            { title: '岗位', dataIndex: 'positionName', key: 'positionName' },
+            { title: '账号', dataIndex: 'username', key: 'username', width: 120, ellipsis: true },
+            { title: '姓名', dataIndex: 'realName', key: 'realName', width: 100 },
+            { title: '部门', dataIndex: 'departmentName', key: 'departmentName', width: 110, ellipsis: true },
+            { title: '岗位', dataIndex: 'positionName', key: 'positionName', width: 110, ellipsis: true },
             {
-              title: '角色',
-              dataIndex: 'role',
-              key: 'role',
+              title: '角色', dataIndex: 'role', key: 'role', width: 100,
               render: (_: unknown, r: UserItem) => roleLabel((r.role === 'system_admin' || r.role === 'department_admin' ? r.role : 'user') as UserRole),
             },
-            { title: '启用', dataIndex: 'enabled', key: 'enabled', render: (v: boolean) => (v ? '是' : '否') },
+            { title: '启用', dataIndex: 'enabled', key: 'enabled', width: 60, align: 'center' as const, render: (v: boolean) => (v ? '是' : '否') },
             {
-              title: '操作',
-              key: 'action',
-              align: 'center',
-              width: 120,
-              fixed: 'right',
-              render: (_, record) => {
+              title: '操作', key: 'action', align: 'center' as const, width: 110, fixed: 'right' as const,
+              render: (_: unknown, record: UserItem) => {
                 const canEdit = canEditUser(currentUser ?? null, record);
                 return (
                   <Space>

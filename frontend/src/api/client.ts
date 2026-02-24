@@ -174,6 +174,67 @@ export const scoreQueueApi = {
   },
 };
 
+export interface WorkPlan {
+  id: number;
+  userId: number;
+  ownerName: string;
+  creatorId: number;
+  creatorName: string;
+  departmentId: number;
+  departmentName: string;
+  executorId?: number;
+  executorName?: string;
+  system?: string;
+  module?: string;
+  planContent: string;
+  plannedStartAt?: string;
+  plannedEndAt?: string;
+  plannedDurationMinutes?: number;
+  actualStartAt?: string;
+  actualEndAt?: string;
+  actualDurationMinutes?: number;
+  priority: string;
+  status: string;
+  remark?: string;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const workPlansApi = {
+  list: (params?: { status?: string; priority?: string; executorId?: string; userId?: string; system?: string; module?: string; plannedStartFrom?: string; plannedStartTo?: string }) => {
+    const q = new URLSearchParams();
+    if (params?.status) q.set('status', params.status);
+    if (params?.priority) q.set('priority', params.priority);
+    if (params?.executorId) q.set('executorId', params.executorId);
+    if (params?.userId) q.set('userId', params.userId);
+    if (params?.system) q.set('system', params.system);
+    if (params?.module) q.set('module', params.module);
+    if (params?.plannedStartFrom) q.set('plannedStartFrom', params.plannedStartFrom);
+    if (params?.plannedStartTo) q.set('plannedStartTo', params.plannedStartTo);
+    const suffix = q.toString() ? `?${q.toString()}` : '';
+    return api<WorkPlan[]>(`/work-plans${suffix}`);
+  },
+  get: (id: number) => api<WorkPlan>(`/work-plans/${id}`),
+  create: (body: {
+    userId?: number; executorId?: number;
+    system?: string; module?: string; planContent: string;
+    plannedStartAt?: string; plannedEndAt?: string; plannedDurationMinutes?: number;
+    actualStartAt?: string; actualEndAt?: string; actualDurationMinutes?: number;
+    priority?: string; status?: string; remark?: string; sortOrder?: number;
+  }) => api<{ id: number }>('/work-plans', { method: 'POST', body: JSON.stringify(body) }),
+  update: (id: number, body: {
+    executorId?: number | null;
+    system?: string; module?: string; planContent?: string;
+    plannedStartAt?: string; plannedEndAt?: string; plannedDurationMinutes?: number;
+    actualStartAt?: string; actualEndAt?: string; actualDurationMinutes?: number;
+    priority?: string; status?: string; remark?: string; sortOrder?: number;
+  }) => api<{ id: number }>(`/work-plans/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  remove: (id: number) => api(`/work-plans/${id}`, { method: 'DELETE' }),
+  reorder: (items: { id: number; sortOrder: number }[]) =>
+    api('/work-plans/batch/reorder', { method: 'PUT', body: JSON.stringify({ items }) }),
+};
+
 export const assessmentsApi = {
   monthly: (year: string, month: string, departmentId?: number, positionId?: number) => {
     const q = new URLSearchParams({ year, month });

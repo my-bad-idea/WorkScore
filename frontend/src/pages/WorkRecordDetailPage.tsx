@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { App, Card, Button, Descriptions, Modal, Form, Select, DatePicker, Input, InputNumber, message, Table } from 'antd';
+import { App, Card, Button, Descriptions, Modal, Form, Select, DatePicker, Input, InputNumber, message, Table, Tooltip } from 'antd';
 import dayjs from 'dayjs';
 import ReactMarkdown from 'react-markdown';
 import MdEditor from '@uiw/react-md-editor';
@@ -195,7 +195,7 @@ export default function WorkRecordDetailPage() {
           <Descriptions.Item label="类型">{record.type === 'daily' ? '日报' : '周报'}</Descriptions.Item>
           <Descriptions.Item label="所属日期">{record.recordDate}</Descriptions.Item>
           <Descriptions.Item label="记录人">{record.recorderName}</Descriptions.Item>
-          <Descriptions.Item label="记录时间">{record.createdAt ? dayjs(record.createdAt).format('YYYY-MM-DD HH:mm:ss.SSS') : ''}</Descriptions.Item>
+          <Descriptions.Item label="记录时间">{record.createdAt ? dayjs(record.createdAt).format('YYYY-MM-DD HH:mm:ss') : ''}</Descriptions.Item>
           <Descriptions.Item label="内容">
             <div className="markdown-preview work-record-detail-content">
               {record.content ? <ReactMarkdown>{record.content}</ReactMarkdown> : '无'}
@@ -223,34 +223,27 @@ export default function WorkRecordDetailPage() {
             dataSource={scores}
             rowKey="id"
             size="small"
+            scroll={{ x: 750 }}
             columns={[
-              { title: '类型', dataIndex: 'scoreType', key: 'scoreType', render: (v: string) => (v === 'ai' ? 'AI' : '人工') },
-              { title: '总分', dataIndex: 'totalScore', key: 'totalScore' },
+              { title: '类型', dataIndex: 'scoreType', key: 'scoreType', width: 70, render: (v: string) => (v === 'ai' ? 'AI' : '人工') },
+              { title: '总分', dataIndex: 'totalScore', key: 'totalScore', width: 70 },
               {
-                title: '评分说明',
-                dataIndex: 'remark',
-                key: 'remark',
-                width: 200,
-                ellipsis: true,
+                title: '评分说明', dataIndex: 'remark', key: 'remark', width: 200,
+                ellipsis: { showTitle: false },
                 render: (remark: string | null) => (
-                  <span className="work-record-detail-remark-ellipsis" title={remark ?? ''}>
-                    {remark ?? '无'}
-                  </span>
+                  <Tooltip placement="topLeft" title={remark ?? '无'}>
+                    <span className="work-record-detail-remark-ellipsis">{remark ?? '无'}</span>
+                  </Tooltip>
                 ),
               },
-              { title: '评分人', dataIndex: 'scorerName', key: 'scorerName', render: (v: string, r: ScoreItem) => (r.scoreType === 'ai' ? 'AI' : v) },
+              { title: '评分人', dataIndex: 'scorerName', key: 'scorerName', width: 80, render: (v: string, r: ScoreItem) => (r.scoreType === 'ai' ? 'AI' : v) },
               {
-                title: '时间',
-                dataIndex: 'scoredAt',
-                key: 'scoredAt',
-                render: (v: string) => (v ? dayjs(v).format('YYYY-MM-DD HH:mm:ss.SSS') : ''),
+                title: '时间', dataIndex: 'scoredAt', key: 'scoredAt', width: 160,
+                render: (v: string) => (v ? dayjs(v).format('YYYY-MM-DD HH:mm:ss') : ''),
               },
               {
-                title: '操作',
-                key: 'action',
-                align: 'center',
-                width: 120,
-                render: (_, r) => {
+                title: '操作', key: 'action', align: 'center' as const, width: 110,
+                render: (_: unknown, r: ScoreItem) => {
                   const canDelete = r.scoreType === 'manual' && r.scorerId === user?.id;
                   return (
                     <span className="work-record-detail-actions">

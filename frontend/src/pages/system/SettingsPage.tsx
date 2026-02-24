@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Card, Form, InputNumber, Input, Button, message, Divider } from 'antd';
+import { Card, Form, InputNumber, Input, Button, message, Divider, Row, Col } from 'antd';
 import { useAuth } from '../../stores/auth';
 import { canManageSystemSettings } from '../../utils/permissions';
 import { settingsApi } from '../../api/client';
@@ -23,9 +23,12 @@ export default function SettingsPage() {
           llm_api_url: data.llm_api_url ?? '',
           llm_api_key: data.llm_api_key ?? '',
           llm_model: data.llm_model ?? 'gpt-3.5-turbo',
+          llm_temperature: data.llm_temperature !== undefined && data.llm_temperature !== '' ? Number(data.llm_temperature) : 0,
+          llm_top_p: data.llm_top_p !== undefined && data.llm_top_p !== '' ? Number(data.llm_top_p) : 1,
           llm_assessment_interval_seconds: data.llm_assessment_interval_seconds ? Number(data.llm_assessment_interval_seconds) : 5,
           llm_assessment_retry_interval_seconds: data.llm_assessment_retry_interval_seconds ? Number(data.llm_assessment_retry_interval_seconds) : 60,
           llm_assessment_weight_percent: data.llm_assessment_weight_percent ? Number(data.llm_assessment_weight_percent) : 80,
+          work_plan_ratio_percent: data.work_plan_ratio_percent ? Number(data.work_plan_ratio_percent) : 40,
         });
       } catch (e) {
         message.error(e instanceof Error ? e.message : '加载失败');
@@ -41,9 +44,12 @@ export default function SettingsPage() {
     llm_api_url?: string;
     llm_api_key?: string;
     llm_model?: string;
+    llm_temperature?: number;
+    llm_top_p?: number;
     llm_assessment_interval_seconds?: number;
     llm_assessment_retry_interval_seconds?: number;
     llm_assessment_weight_percent?: number;
+    work_plan_ratio_percent?: number;
   }) => {
     if (!canEdit) {
       message.error('无权限');
@@ -60,12 +66,16 @@ export default function SettingsPage() {
       if (values.llm_api_key !== undefined && String(values.llm_api_key).trim() !== '')
         body.llm_api_key = values.llm_api_key;
       if (values.llm_model !== undefined) body.llm_model = (values.llm_model || 'gpt-3.5-turbo').trim();
+      if (values.llm_temperature !== undefined) body.llm_temperature = String(Math.min(2, Math.max(0, Number(values.llm_temperature) ?? 0)));
+      if (values.llm_top_p !== undefined) body.llm_top_p = String(Math.min(1, Math.max(0, Number(values.llm_top_p) ?? 1)));
       if (values.llm_assessment_interval_seconds !== undefined)
         body.llm_assessment_interval_seconds = String(Math.max(1, Math.floor(values.llm_assessment_interval_seconds ?? 5)));
       if (values.llm_assessment_retry_interval_seconds !== undefined)
         body.llm_assessment_retry_interval_seconds = String(Math.max(0, Math.floor(values.llm_assessment_retry_interval_seconds ?? 60)));
       if (values.llm_assessment_weight_percent !== undefined)
         body.llm_assessment_weight_percent = String(Math.min(100, Math.max(0, Math.floor(values.llm_assessment_weight_percent ?? 80))));
+      if (values.work_plan_ratio_percent !== undefined)
+        body.work_plan_ratio_percent = String(Math.min(100, Math.max(0, Math.floor(values.work_plan_ratio_percent ?? 40))));
       await settingsApi.update(body);
       message.success('已保存');
     } catch (e) {
@@ -136,10 +146,85 @@ export default function SettingsPage() {
           >
             <Input placeholder="qwen-turbo" disabled={!canEdit} allowClear />
           </Form.Item>
+          <Form.Item
+            name="llm_temperature"
+            label="Temperature"
+            extra="生成随机性，0 更确定、2 更随机；考核场景建议 0"
+            rules={[{ required: true }, { type: 'number', min: 0, max: 2 }]}
+          >
+            <InputNumber min={0} max={2} step={0.1} style={{ width: '100%' }} disabled={!canEdit} />
+          </Form.Item>
+          <Form.Item
+            name="llm_top_p"
+            label="Top P"
+            extra="核采样参数，0–1；1 表示不启用核采样"
+            rules={[{ required: true }, { type: 'number', min: 0, max: 1 }]}
+          >
+            <InputNumber min={0} max={1} step={0.1} style={{ width: '100%' }} disabled={!canEdit} />
+          </Form.Item>
 
           <Divider orientation="left" style={{ marginTop: 24, marginBottom: 16 }}>
             考核配置
           </Divider>
+          <div style={{ marginBottom: 16, padding: '12px 16px', background: 'var(--ant-color-fill-quaternary)', borderRadius: 8 }}>
+            <div style={{ fontSize: 13, color: 'var(--ant-color-text-secondary)', marginBottom: 12 }}>
+              总分 = 工作计划得分 × 工作计划占比 + 周报得分 × 周报占比；周报得分内部再按 AI / 人工占比合成。
+            </div>
+            <Row gutter={24}>
+              <Col xs={24} sm={12}>
+                <Form.Item
+                  name="work_plan_ratio_percent"
+                  label="工作计划考核占比（%）"
+                  extra="与周报考核占比之和为 100%"
+                  rules={[{ required: true }, { type: 'number', min: 0, max: 100 }]}
+                >
+                  <InputNumber min={0} max={100} style={{ width: '100%' }} disabled={!canEdit} />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={12}>
+                <Form.Item
+                  noStyle
+                  shouldUpdate={(prev, curr) => prev?.work_plan_ratio_percent !== curr?.work_plan_ratio_percent}
+                >
+                  {({ getFieldValue }) => {
+                    const wp = getFieldValue('work_plan_ratio_percent');
+                    const weekly = typeof wp === 'number' ? 100 - wp : 60;
+                    return (
+                      <Form.Item label="周报考核占比（%）" extra="只读，= 100% − 工作计划占比">
+                        <InputNumber value={weekly} readOnly style={{ width: '100%' }} />
+                      </Form.Item>
+                    );
+                  }}
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={12}>
+                <Form.Item
+                  name="llm_assessment_weight_percent"
+                  label="周报AI考核占比（%）"
+                  extra="周报分数中 AI 评分的权重；与人工占比之和为 100%"
+                  rules={[{ required: true }, { type: 'number', min: 0, max: 100 }]}
+                >
+                  <InputNumber min={0} max={100} style={{ width: '100%' }} disabled={!canEdit} />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={12}>
+                <Form.Item
+                  noStyle
+                  shouldUpdate={(prev, curr) => prev?.llm_assessment_weight_percent !== curr?.llm_assessment_weight_percent}
+                >
+                  {({ getFieldValue }) => {
+                    const ai = getFieldValue('llm_assessment_weight_percent');
+                    const manual = typeof ai === 'number' ? 100 - ai : 20;
+                    return (
+                      <Form.Item label="周报人工考核占比（%）" extra="只读，= 100% − 周报AI占比">
+                        <InputNumber value={manual} readOnly style={{ width: '100%' }} />
+                      </Form.Item>
+                    );
+                  }}
+                </Form.Item>
+              </Col>
+            </Row>
+          </div>
           <Form.Item
             name="llm_assessment_interval_seconds"
             label="考核执行间隔（秒）"
@@ -155,14 +240,6 @@ export default function SettingsPage() {
             rules={[{ required: true }]}
           >
             <InputNumber min={0} max={86400} style={{ width: '100%' }} disabled={!canEdit} />
-          </Form.Item>
-          <Form.Item
-            name="llm_assessment_weight_percent"
-            label="AI考核占比（%）"
-            extra="排名与总成绩中，当该条记录同时存在 AI 与人工评分时：AI 得分按此权重、人工得分占其余比例；仅一种评分时取该分数。默认 80"
-            rules={[{ required: true }]}
-          >
-            <InputNumber min={0} max={100} style={{ width: '100%' }} disabled={!canEdit} />
           </Form.Item>
 
           {canEdit && (

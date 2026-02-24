@@ -157,12 +157,25 @@ export class ScoresService {
     ).get(workRecordId) as { recorder_id: number; record_date: string } | undefined;
     if (!row) return;
     const yearMonth = row.record_date.slice(0, 7);
+    this.upsertScoreUpdate(db, row.recorder_id, yearMonth, 'work_record');
+  }
+
+  /**
+   * 标记指定用户指定月份的工作计划分数需重新统计（计划变更后由后台任务刷新）。
+   */
+  markWorkPlanScoreDirty(userId: number, yearMonth: string): void {
+    const db = this.db.getDb();
+    this.upsertScoreUpdate(db, userId, yearMonth, 'work_plan');
+  }
+
+  private upsertScoreUpdate(db: ReturnType<DatabaseService['getDb']>, userId: number, yearMonth: string, sourceType: 'work_record' | 'work_plan'): void {
     const now = new Date().toISOString();
-    db.prepare(
-      `INSERT INTO user_monthly_score_updates (user_id, year_month, last_updated_at)
-       VALUES (?, ?, ?)
-       ON CONFLICT(user_id, year_month) DO UPDATE SET last_updated_at = excluded.last_updated_at`,
-    ).run(row.recorder_id, yearMonth, now);
+    const stmt = db.prepare(
+      `INSERT INTO user_monthly_score_updates (user_id, year_month, source_type, last_updated_at)
+       VALUES (?, ?, ?, ?)
+       ON CONFLICT(user_id, year_month, source_type) DO UPDATE SET last_updated_at = excluded.last_updated_at`,
+    );
+    stmt.run(userId, yearMonth, sourceType, now);
   }
 
   /**
@@ -202,6 +215,8 @@ export class ScoresService {
     const apiUrl = all.llm_api_url || process.env.LLM_API_URL;
     const apiKey = all.llm_api_key || process.env.LLM_API_KEY;
     const model = all.llm_model || process.env.LLM_MODEL || 'gpt-3.5-turbo';
+    const temperature = Math.min(2, Math.max(0, parseFloat(all.llm_temperature ?? '0') || 0));
+    const topP = Math.min(1, Math.max(0, parseFloat(all.llm_top_p ?? '1') || 1));
     if (!apiUrl || !apiKey) throw new BadRequestException('请先在系统设置中配置 LLM API 地址与 API Key');
 
     const prompt = `你是一位工作考核评分员。请严格按照以下考核标准（Markdown 格式）对工作内容进行评分，为每项考核标准生成 0-100 分的分数和简短评语。
@@ -216,7 +231,7 @@ export class ScoresService {
     const res = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }] }),
+      body: JSON.stringify({ model, temperature, top_p: topP, messages: [{ role: 'user', content: prompt }] }),
     });
     if (!res.ok) {
       const body = await res.text().catch(() => '');
@@ -249,6 +264,8 @@ export class ScoresService {
     const apiUrl = all.llm_api_url || process.env.LLM_API_URL;
     const apiKey = all.llm_api_key || process.env.LLM_API_KEY;
     const model = all.llm_model || process.env.LLM_MODEL || 'gpt-3.5-turbo';
+    const temperature = Math.min(2, Math.max(0, parseFloat(all.llm_temperature ?? '0') || 0));
+    const topP = Math.min(1, Math.max(0, parseFloat(all.llm_top_p ?? '1') || 1));
     if (!apiUrl || !apiKey) throw new BadRequestException('请先在系统设置中配置 LLM API 地址与 API Key');
 
     const extraReq = (requirements || '').trim();
@@ -266,7 +283,7 @@ export class ScoresService {
     const res = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }] }),
+      body: JSON.stringify({ model, temperature, top_p: topP, messages: [{ role: 'user', content: prompt }] }),
     });
     if (!res.ok) {
       const body = await res.text().catch(() => '');

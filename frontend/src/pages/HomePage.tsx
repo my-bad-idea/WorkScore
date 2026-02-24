@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import { useAuth } from '../stores/auth';
 import { assessmentsApi } from '../api/client';
 
-type RankingRow = { userId: number; userName: string; score: number; rank: number };
+type RankingRow = { userId: number; userName: string; score: number; workPlanScore?: number; weeklyReportScore?: number; rank: number };
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -61,11 +61,14 @@ export default function HomePage() {
           loading={loading}
           dataSource={data}
           rowKey="userId"
+          size="small"
           pagination={false}
           columns={[
-            { title: '名次', dataIndex: 'rank', key: 'rank', width: 80 },
-            { title: '姓名', dataIndex: 'userName', key: 'userName' },
-            { title: '分数', dataIndex: 'score', key: 'score', render: (v: number) => v.toFixed(1) },
+            { title: '名次', dataIndex: 'rank', key: 'rank', width: 70, align: 'center' as const },
+            { title: '姓名', dataIndex: 'userName', key: 'userName', width: 120 },
+            { title: '工作计划得分', dataIndex: 'workPlanScore', key: 'workPlanScore', width: 100, align: 'right' as const, render: (v: number) => (v ?? 0).toFixed(1) },
+            { title: '周报得分', dataIndex: 'weeklyReportScore', key: 'weeklyReportScore', width: 90, align: 'right' as const, render: (v: number) => (v ?? 0).toFixed(1) },
+            { title: '总分', dataIndex: 'score', key: 'score', width: 80, align: 'right' as const, render: (v: number) => (v ?? 0).toFixed(1) },
           ]}
         />
       </Card>

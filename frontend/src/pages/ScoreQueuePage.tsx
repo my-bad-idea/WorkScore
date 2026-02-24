@@ -75,7 +75,7 @@ export default function ScoreQueuePage() {
   };
 
   const formatDateTime = (v: string | null | undefined) =>
-    v ? dayjs(v).format('YYYY-MM-DD HH:mm:ss.SSS') : '';
+    v ? dayjs(v).format('YYYY-MM-DD HH:mm:ss') : '';
 
   const copyError = (text: string | null | undefined) => {
     if (!text) return;
@@ -118,11 +118,11 @@ export default function ScoreQueuePage() {
           loading={loading}
           dataSource={list}
           rowKey="id"
+          size="middle"
+          scroll={{ x: 1050 }}
           columns={[
             {
-              title: '类型',
-              dataIndex: 'type',
-              key: 'type',
+              title: '类型', dataIndex: 'type', key: 'type', width: 70,
               render: (v: string, record: QueueItem) => (
                 <a
                   className="score-queue-type-link"
@@ -135,20 +135,18 @@ export default function ScoreQueuePage() {
                 </a>
               ),
             },
-            { title: '所属日期', dataIndex: 'recordDate', key: 'recordDate' },
-            { title: '记录人', dataIndex: 'recorderName', key: 'recorderName' },
+            { title: '所属日期', dataIndex: 'recordDate', key: 'recordDate', width: 110 },
+            { title: '记录人', dataIndex: 'recorderName', key: 'recorderName', width: 90 },
             {
-              title: '状态',
-              dataIndex: 'status',
-              key: 'status',
+              title: '状态', dataIndex: 'status', key: 'status', width: 80, align: 'center' as const,
               render: (v: string) => {
                 const label = statusLabels[v] ?? v;
                 const colorMap: Record<string, string> = { pending: 'blue', processing: 'orange', done: 'green', failed: 'red' };
                 return <Tag color={colorMap[v]} className="score-queue-status-tag">{label}</Tag>;
               },
             },
-            { title: '入队时间', dataIndex: 'createdAt', key: 'createdAt', render: (v: string) => formatDateTime(v) },
-            { title: '处理时间', dataIndex: 'processedAt', key: 'processedAt', render: (v: string | null) => formatDateTime(v) },
+            { title: '入队时间', dataIndex: 'createdAt', key: 'createdAt', width: 160, render: (v: string) => formatDateTime(v) },
+            { title: '处理时间', dataIndex: 'processedAt', key: 'processedAt', width: 160, render: (v: string | null) => formatDateTime(v) },
             {
               title: '错误信息',
               dataIndex: 'errorMessage',

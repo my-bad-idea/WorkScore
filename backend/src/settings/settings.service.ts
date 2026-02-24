@@ -5,7 +5,7 @@ import { validatePasswordStrength } from '../common/password.util';
 /**
  * 系统设置（system_settings 表）。各配置键在代码中的使用位置：
  * - token_expire_hours：auth/auth.service.ts 登录时 JWT 过期时间（小时）
- * - llm_api_url, llm_api_key, llm_model：scores/score-queue.processor.ts AI 考核调用 LLM
+ * - llm_api_url, llm_api_key, llm_model, llm_temperature, llm_top_p：各 LLM 调用处（score-queue.processor、scores.service、ranking-refresh.processor）
  * - llm_assessment_interval_seconds：scores/score-queue.processor.ts 考核队列轮询间隔（秒），onModuleInit 读取，默认 5
  * - llm_assessment_retry_interval_seconds：scores/score-queue.processor.ts 失败任务重新入队的间隔（秒）
  * - llm_assessment_weight_percent：考核排名与总成绩中 AI 评分权重（0–100，默认 80）；assessments/assessments.service.ts、scores/scores.service.ts getSummary
@@ -42,11 +42,17 @@ export class SettingsService {
     for (const [key, value] of Object.entries(body)) {
       stmt.run(key, value, now);
     }
-    if ('llm_assessment_weight_percent' in body) {
+    if ('llm_assessment_weight_percent' in body || 'work_plan_ratio_percent' in body) {
+      // 标记所有已有月度排名需重算：按 (user_id, year_month, source_type) 插入或更新
       db.prepare(
-        `INSERT INTO user_monthly_score_updates (user_id, year_month, last_updated_at)
-         SELECT user_id, year_month, ? FROM user_monthly_rankings
-         ON CONFLICT(user_id, year_month) DO UPDATE SET last_updated_at = excluded.last_updated_at`,
+        `INSERT INTO user_monthly_score_updates (user_id, year_month, source_type, last_updated_at)
+         SELECT user_id, year_month, 'work_record', ? FROM user_monthly_rankings
+         ON CONFLICT(user_id, year_month, source_type) DO UPDATE SET last_updated_at = excluded.last_updated_at`,
+      ).run(now);
+      db.prepare(
+        `INSERT INTO user_monthly_score_updates (user_id, year_month, source_type, last_updated_at)
+         SELECT user_id, year_month, 'work_plan', ? FROM user_monthly_rankings
+         ON CONFLICT(user_id, year_month, source_type) DO UPDATE SET last_updated_at = excluded.last_updated_at`,
       ).run(now);
     }
     return this.getAll();

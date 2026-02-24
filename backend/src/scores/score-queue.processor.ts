@@ -101,6 +101,8 @@ export class ScoreQueueProcessor implements OnApplicationBootstrap, OnModuleDest
       const apiUrl = allSettings.llm_api_url || process.env.LLM_API_URL;
       const apiKey = allSettings.llm_api_key || process.env.LLM_API_KEY;
       const model = allSettings.llm_model || process.env.LLM_MODEL || 'gpt-3.5-turbo';
+      const temperature = Math.min(2, Math.max(0, parseFloat(allSettings.llm_temperature ?? '0') || 0));
+      const topP = Math.min(1, Math.max(0, parseFloat(allSettings.llm_top_p ?? '1') || 1));
       let totalScore = 0;
       const scoreDetails: { item_name: string; score: number; comment: string }[] = [];
 
@@ -135,7 +137,7 @@ ${contextBlock}【考核标准】（Markdown）\n${criteriaMarkdown}
         const res = await fetch(apiUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-          body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }] }),
+          body: JSON.stringify({ model, temperature, top_p: topP, messages: [{ role: 'user', content: prompt }] }),
           signal: ac.signal,
         });
         clearTimeout(timeoutId);

@@ -1,0 +1,40 @@
+.work-plans-filter-bar {
+  margin-bottom: 16px;
+}
+
+.work-plans-select {
+  width: 130px;
+}
+
+.work-plans-input-filter {
+  width: 120px;
+}
+
+.work-plans-action-disabled {
+  color: rgba(0, 0, 0, 0.25);
+  cursor: not-allowed;
+  -webkit-user-select: none;
+  user-select: none;
+}
+[data-theme="dark"] .work-plans-action-disabled {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+/* Table: no line wrap */
+.ant-table .ant-table-cell {
+  white-space: nowrap;
+}
+
+/* Form: row layout helpers */
+.work-plans-form-row {
+  display: flex;
+  gap: 12px;
+}
+.work-plans-form-half {
+  flex: 1;
+  min-width: 0;
+}
+.work-plans-form-flex {
+  flex: 1;
+  min-width: 0;
+}

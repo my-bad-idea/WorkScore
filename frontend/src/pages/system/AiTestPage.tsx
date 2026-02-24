@@ -236,9 +236,9 @@ export default function AiTestPage() {
               dataSource={aiTestResult.scoreDetails}
               rowKey="item_name"
               columns={[
-                { title: '考核项', dataIndex: 'item_name', key: 'item_name' },
+                { title: '考核项', dataIndex: 'item_name', key: 'item_name', width: 140, ellipsis: true },
                 { title: '分数', dataIndex: 'score', key: 'score', width: 80, render: (v: number) => v.toFixed(1) },
-                { title: '评语', dataIndex: 'comment', key: 'comment' },
+                { title: '评语', dataIndex: 'comment', key: 'comment', ellipsis: true },
               ]}
               pagination={false}
             />

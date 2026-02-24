@@ -17,6 +17,7 @@ import { SettingsModule } from './settings/settings.module';
 import { WorkRecordsModule } from './work-records/work-records.module';
 import { ScoresModule } from './scores/scores.module';
 import { AssessmentsModule } from './assessments/assessments.module';
+import { WorkPlansModule } from './work-plans/work-plans.module';
 
 const publicPath = join(__dirname, '..', 'public');
 const hasPublic = existsSync(publicPath) && existsSync(join(publicPath, 'index.html'));
@@ -35,6 +36,7 @@ const hasPublic = existsSync(publicPath) && existsSync(join(publicPath, 'index.h
     WorkRecordsModule,
     ScoresModule,
     AssessmentsModule,
+    WorkPlansModule,
     ...(hasPublic
       ? [
           ServeStaticModule.forRoot({
