@@ -162,6 +162,8 @@ export class DatabaseService implements OnModuleInit {
       llm_model: 'qwen-plus',
       llm_temperature: '0',
       llm_top_p: '1',
+      llm_top_k: '1',
+      llm_stream: 'false',
       llm_assessment_interval_seconds: '5',
       llm_assessment_retry_interval_seconds: '60',
       llm_assessment_weight_percent: '80',

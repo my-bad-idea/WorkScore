@@ -90,6 +90,8 @@ ${lines.join('\n')}`;
           model,
           temperature: 0,
           top_p: 1,
+          top_k: Math.max(1, parseInt(all.llm_top_k ?? '1', 10) || 1),
+          stream: all.llm_stream === 'true',
           seed: 42,
           messages: [{ role: 'user', content: prompt }],
         }),

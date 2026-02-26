@@ -4,7 +4,7 @@ import { DatabaseService } from '../config/database.service';
 import { SettingsService } from '../settings/settings.service';
 
 /** 工作内容评分 Prompt 版本，用于缓存 key，Prompt 变更时需递增以失效旧缓存 */
-const LLM_SCORING_PROMPT_VERSION = '1';
+const LLM_SCORING_PROMPT_VERSION = '3';
 /** 评分一致性：固定 seed 配合 temperature=0 降低随机性（部分 API 支持） */
 const LLM_SCORING_SEED = 42;
 
@@ -214,11 +214,48 @@ export class ScoresService {
   }
 
   /**
-   * 工作内容评分缓存 key：考核标准 + 工作内容 + Prompt 版本，Prompt 变更后旧缓存自动失效。
+   * 工作内容归一化：统一标点、空白、语气词、无意义词与句段顺序，使语义相同的周报得到相同缓存 key 与 prompt，从而评分一致。
+   * 规则：
+   * 1. 句段排序：按。；换行 切分为句段，去掉句首顺序词（首先/然后/接着等）后按字典序排序，使「A。B。」与「B。A。」等价。
+   * 2. 标点与空白：常见分隔标点（，。；、）与任意空白统一为单空格并折叠。
+   * 3. 语气词：去掉常见语气词（呢啊吧哦嘛啦呀哇哟呗咧）。
+   * 4. 无意义/填充词：去掉「一下」「等等」；将「进行了」「做了」统一为「完成了」。
    */
-  private getScoreCacheKey(criteria: string, content: string): string {
+  private normalizeWorkContentForScoring(content: string): string {
+    let s = content.trim();
+    if (!s) return '';
+
+    // 1. 按句/段切分，去掉句首顺序词后排序，消除仅顺序不同带来的差异
+    const segmentBoundary = /[。；\n]+/;
+    const orderWordPrefix = /^(首先|然后|接着|随后|最后|其一|其二|另外|此外)\s*/;
+    const segments = s
+      .split(segmentBoundary)
+      .map((seg) => seg.replace(orderWordPrefix, '').trim())
+      .filter(Boolean);
+    if (segments.length > 0) {
+      segments.sort((a, b) => a.localeCompare(b, 'zh-CN'));
+      s = segments.join(' ');
+    }
+
+    // 2. 标点与空白归一化
+    s = s.replace(/[\s，。；、]+/g, ' ').replace(/\s+/g, ' ').trim();
+    // 3. 语气词
+    s = s.replace(/[呢啊吧哦嘛啦呀哇哟呗咧]/g, '');
+    // 4. 无意义/填充词
+    s = s.replace(/一下/g, '');
+    s = s.replace(/等等/g, '');
+    s = s.replace(/进行了/g, '完成了');
+    s = s.replace(/做了/g, '完成了');
+    s = s.replace(/\s+/g, ' ').trim();
+    return s;
+  }
+
+  /**
+   * 工作内容评分缓存 key：考核标准 + 归一化后工作内容 + Prompt 版本，Prompt 变更后旧缓存自动失效。
+   */
+  private getScoreCacheKey(criteria: string, normalizedContent: string): string {
     return createHash('sha256')
-      .update(criteria + '\n' + content + '\n' + LLM_SCORING_PROMPT_VERSION)
+      .update(criteria + '\n' + normalizedContent + '\n' + LLM_SCORING_PROMPT_VERSION)
       .digest('hex');
   }
 
@@ -236,11 +273,11 @@ export class ScoresService {
     const contextBlock =
       contextLines.length > 0 ? `【被考核人信息】\n${contextLines.join('\n')}\n\n` : '';
 
-    return `你是一位工作考核评分员。请严格按照以下考核标准（Markdown 格式）对工作内容进行评分。
+    return `你是一位工作考核评分员。请严格按照下方【考核标准】对工作内容进行评分。
 
 ## 评分规则
-- 仅依据考核标准中的条目逐项打分，不要添加标准以外的项目。
-- 每项 0-100 分：优秀 85-100，良好 70-84，一般 55-69，不足 0-54；必须给出每项简短评语（扣分理由或亮点）。
+- 仅依据考核标准中的条目逐项打分，考核项名称、分数区间及判定规则均以【考核标准】为准，不要自行增删或改写。
+- 每项 0-100 分，须给出每项简短评语（扣分理由或亮点）。
 - 只返回一个 JSON 数组，不要任何其他说明或 markdown 标记。
 
 ## 输出格式（严格遵循）
@@ -249,16 +286,16 @@ export class ScoresService {
 ## 参考示例
 【示例一】工作内容较笼统时：
 周报内容："本周做了一些开发工作。"
-→ [{"item_name":"工作完成度","score":15,"comment":"描述过于笼统，无具体产出与事项"}]
+→ [{"item_name":"工作完成度","score":20,"comment":"描述过于笼统，无具体产出与事项"}]
 
 【示例二】工作内容具体时：
 周报内容："本周完成用户模块接口开发与单元测试，修复登录超时问题 3 个，下周计划完成权限模块。"
-→ [{"item_name":"工作完成度","score":88,"comment":"事项具体，有产出描述与问题修复"}]
+→ [{"item_name":"工作完成度","score":90,"comment":"事项具体，有产出描述与问题修复"}]
 
 ${contextBlock}【考核标准】（Markdown）
 ${criteria}
 
-【工作内容】
+【工作内容】（已做标点、空白、语气词与无意义词及句段顺序归一化，请仅按语义评分。）
 ${content}`;
   }
 
@@ -275,9 +312,12 @@ ${content}`;
     },
   ): Promise<{ scoreDetails: { item_name: string; score: number; comment: string }[]; totalScore: number; remark: string }> {
     const criteria = criteriaMarkdown.trim();
-    const content = workContent.trim().slice(0, 3000);
+    const rawContent = workContent.trim().slice(0, 3000);
     if (!criteria) throw new BadRequestException('请输入或选择考核标准');
-    if (!content) throw new BadRequestException('请输入周报/日报内容');
+    if (!rawContent) throw new BadRequestException('请输入周报/日报内容');
+
+    const normalizedContent = this.normalizeWorkContentForScoring(rawContent);
+    if (!normalizedContent) throw new BadRequestException('请输入周报/日报内容');
 
     const all = await this.settings.getAll();
     const apiUrl = all.llm_api_url || process.env.LLM_API_URL;
@@ -285,7 +325,7 @@ ${content}`;
     const model = all.llm_model || process.env.LLM_MODEL || 'gpt-3.5-turbo';
     if (!apiUrl || !apiKey) throw new BadRequestException('请先在系统设置中配置 LLM API 地址与 API Key');
 
-    const cacheKey = this.getScoreCacheKey(criteria, content);
+    const cacheKey = this.getScoreCacheKey(criteria, normalizedContent);
     const cached = this.scoreCache.get(cacheKey);
     if (cached) {
       const remark =
@@ -293,11 +333,15 @@ ${content}`;
       return { ...cached, remark };
     }
 
-    const prompt = this.buildWorkScorePrompt(criteria, content, options?.context);
+    const prompt = this.buildWorkScorePrompt(criteria, normalizedContent, options?.context);
+    const topK = Math.max(1, parseInt(all.llm_top_k ?? '1', 10) || 1);
+    const stream = all.llm_stream === 'true';
     const body: Record<string, unknown> = {
       model,
       temperature: 0,
       top_p: 1,
+      top_k: topK,
+      stream,
       seed: LLM_SCORING_SEED,
       messages: [{ role: 'user', content: prompt }],
     };
@@ -322,7 +366,12 @@ ${content}`;
     if (match) {
       const arr = JSON.parse(match[0]) as { item_name: string; score: number; comment?: string }[];
       for (const c of arr) {
-        scoreDetails.push({ item_name: c.item_name, score: Number(c.score) || 0, comment: c.comment ?? '' });
+        const rawScore = Number(c.score) || 0;
+        scoreDetails.push({
+          item_name: c.item_name,
+          score: Math.min(100, Math.max(0, rawScore)),
+          comment: c.comment ?? '',
+        });
       }
     }
     const totalScore =
@@ -350,6 +399,8 @@ ${content}`;
     const model = all.llm_model || process.env.LLM_MODEL || 'gpt-3.5-turbo';
     const temperature = Math.min(2, Math.max(0, parseFloat(all.llm_temperature ?? '0') || 0));
     const topP = Math.min(1, Math.max(0, parseFloat(all.llm_top_p ?? '1') || 1));
+    const topK = Math.max(1, parseInt(all.llm_top_k ?? '1', 10) || 1);
+    const stream = all.llm_stream === 'true';
     if (!apiUrl || !apiKey) throw new BadRequestException('请先在系统设置中配置 LLM API 地址与 API Key');
 
     const extraReq = (requirements || '').trim();
@@ -367,7 +418,14 @@ ${content}`;
     const res = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({ model, temperature, top_p: topP, messages: [{ role: 'user', content: prompt }] }),
+      body: JSON.stringify({
+        model,
+        temperature,
+        top_p: topP,
+        top_k: topK,
+        stream,
+        messages: [{ role: 'user', content: prompt }],
+      }),
     });
     if (!res.ok) {
       const body = await res.text().catch(() => '');

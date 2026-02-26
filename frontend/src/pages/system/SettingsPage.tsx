@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Card, Form, InputNumber, Input, Button, message, Divider, Row, Col } from 'antd';
+import { Card, Form, InputNumber, Input, Button, message, Divider, Row, Col, Switch } from 'antd';
 import { useAuth } from '../../stores/auth';
 import { canManageSystemSettings } from '../../utils/permissions';
 import { settingsApi } from '../../api/client';
@@ -25,6 +25,8 @@ export default function SettingsPage() {
           llm_model: data.llm_model ?? 'gpt-3.5-turbo',
           llm_temperature: data.llm_temperature !== undefined && data.llm_temperature !== '' ? Number(data.llm_temperature) : 0,
           llm_top_p: data.llm_top_p !== undefined && data.llm_top_p !== '' ? Number(data.llm_top_p) : 1,
+          llm_top_k: data.llm_top_k !== undefined && data.llm_top_k !== '' ? Number(data.llm_top_k) : 1,
+          llm_stream: data.llm_stream === 'true',
           llm_assessment_interval_seconds: data.llm_assessment_interval_seconds ? Number(data.llm_assessment_interval_seconds) : 5,
           llm_assessment_retry_interval_seconds: data.llm_assessment_retry_interval_seconds ? Number(data.llm_assessment_retry_interval_seconds) : 60,
           llm_assessment_weight_percent: data.llm_assessment_weight_percent ? Number(data.llm_assessment_weight_percent) : 80,
@@ -46,6 +48,8 @@ export default function SettingsPage() {
     llm_model?: string;
     llm_temperature?: number;
     llm_top_p?: number;
+    llm_top_k?: number;
+    llm_stream?: boolean;
     llm_assessment_interval_seconds?: number;
     llm_assessment_retry_interval_seconds?: number;
     llm_assessment_weight_percent?: number;
@@ -68,6 +72,8 @@ export default function SettingsPage() {
       if (values.llm_model !== undefined) body.llm_model = (values.llm_model || 'gpt-3.5-turbo').trim();
       if (values.llm_temperature !== undefined) body.llm_temperature = String(Math.min(2, Math.max(0, Number(values.llm_temperature) ?? 0)));
       if (values.llm_top_p !== undefined) body.llm_top_p = String(Math.min(1, Math.max(0, Number(values.llm_top_p) ?? 1)));
+      if (values.llm_top_k !== undefined) body.llm_top_k = String(Math.max(1, Math.floor(values.llm_top_k ?? 1)));
+      if (values.llm_stream !== undefined) body.llm_stream = values.llm_stream ? 'true' : 'false';
       if (values.llm_assessment_interval_seconds !== undefined)
         body.llm_assessment_interval_seconds = String(Math.max(1, Math.floor(values.llm_assessment_interval_seconds ?? 5)));
       if (values.llm_assessment_retry_interval_seconds !== undefined)
@@ -161,6 +167,22 @@ export default function SettingsPage() {
             rules={[{ required: true }, { type: 'number', min: 0, max: 1 }]}
           >
             <InputNumber min={0} max={1} step={0.1} style={{ width: '100%' }} disabled={!canEdit} />
+          </Form.Item>
+          <Form.Item
+            name="llm_top_k"
+            label="Top K"
+            extra="采样时保留概率最高的 K 个 token；1 表示仅取最高概率，输出更确定"
+            rules={[{ required: true }, { type: 'number', min: 1, max: 100 }]}
+          >
+            <InputNumber min={1} max={100} step={1} style={{ width: '100%' }} disabled={!canEdit} />
+          </Form.Item>
+          <Form.Item
+            name="llm_stream"
+            label="流式输出"
+            valuePropName="checked"
+            extra="是否以 SSE 流式返回；考核与生成场景建议关闭（false）"
+          >
+            <Switch disabled={!canEdit} />
           </Form.Item>
 
           <Divider orientation="left" style={{ marginTop: 24, marginBottom: 16 }}>

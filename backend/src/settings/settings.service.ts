@@ -5,7 +5,7 @@ import { validatePasswordStrength } from '../common/password.util';
 /**
  * 系统设置（system_settings 表）。各配置键在代码中的使用位置：
  * - token_expire_hours：auth/auth.service.ts 登录时 JWT 过期时间（小时）
- * - llm_api_url, llm_api_key, llm_model, llm_temperature, llm_top_p：各 LLM 调用处（score-queue.processor、scores.service、ranking-refresh.processor）
+ * - llm_api_url, llm_api_key, llm_model, llm_temperature, llm_top_p, llm_top_k, llm_stream：各 LLM 调用处
  * - llm_assessment_interval_seconds：scores/score-queue.processor.ts 考核队列轮询间隔（秒），onModuleInit 读取，默认 5
  * - llm_assessment_retry_interval_seconds：scores/score-queue.processor.ts 失败任务重新入队的间隔（秒）
  * - llm_assessment_weight_percent：考核排名与总成绩中 AI 评分权重（0–100，默认 80）；assessments/assessments.service.ts、scores/scores.service.ts getSummary
