@@ -43,16 +43,14 @@ export class SettingsService {
       stmt.run(key, value, now);
     }
     if ('llm_assessment_weight_percent' in body || 'work_plan_ratio_percent' in body) {
-      // 标记所有已有月度排名需重算：按 (user_id, year_month, source_type) 插入或更新
+      // 标记所有已有月度排名需重算：按 (user_id, year_month, source_type) 插入或替换（兼容旧版 SQLite，避免 ON CONFLICT DO UPDATE）
       db.prepare(
-        `INSERT INTO user_monthly_score_updates (user_id, year_month, source_type, last_updated_at)
-         SELECT user_id, year_month, 'work_record', ? FROM user_monthly_rankings
-         ON CONFLICT(user_id, year_month, source_type) DO UPDATE SET last_updated_at = excluded.last_updated_at`,
+        `INSERT OR REPLACE INTO user_monthly_score_updates (user_id, year_month, source_type, last_updated_at)
+         SELECT user_id, year_month, 'work_record', ? FROM user_monthly_rankings`,
       ).run(now);
       db.prepare(
-        `INSERT INTO user_monthly_score_updates (user_id, year_month, source_type, last_updated_at)
-         SELECT user_id, year_month, 'work_plan', ? FROM user_monthly_rankings
-         ON CONFLICT(user_id, year_month, source_type) DO UPDATE SET last_updated_at = excluded.last_updated_at`,
+        `INSERT OR REPLACE INTO user_monthly_score_updates (user_id, year_month, source_type, last_updated_at)
+         SELECT user_id, year_month, 'work_plan', ? FROM user_monthly_rankings`,
       ).run(now);
     }
     return this.getAll();

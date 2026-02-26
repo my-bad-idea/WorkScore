@@ -1,9 +1,18 @@
+import { createHash } from 'node:crypto';
 import { Injectable, NotFoundException, ConflictException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { DatabaseService } from '../config/database.service';
 import { SettingsService } from '../settings/settings.service';
 
+/** 工作内容评分 Prompt 版本，用于缓存 key，Prompt 变更时需递增以失效旧缓存 */
+const LLM_SCORING_PROMPT_VERSION = '1';
+/** 评分一致性：固定 seed 配合 temperature=0 降低随机性（部分 API 支持） */
+const LLM_SCORING_SEED = 42;
+
 @Injectable()
 export class ScoresService {
+  /** 相同输入复用评分结果，避免重复调用导致的波动；key = hash(考核标准+工作内容+Prompt版本) */
+  private readonly scoreCache = new Map<string, { scoreDetails: { item_name: string; score: number; comment: string }[]; totalScore: number }>();
+
   constructor(
     private readonly db: DatabaseService,
     private readonly settings: SettingsService,
@@ -204,10 +213,69 @@ export class ScoresService {
     }
   }
 
-  /** AI 考核测试：根据考核标准与工作内容调用 LLM 返回评分与评语（不落库） */
-  async aiTest(criteriaMarkdown: string, workContent: string): Promise<{ scoreDetails: { item_name: string; score: number; comment: string }[]; totalScore: number; remark: string }> {
-    const criteria = (criteriaMarkdown || '').trim();
-    const content = (workContent || '').trim().slice(0, 3000);
+  /**
+   * 工作内容评分缓存 key：考核标准 + 工作内容 + Prompt 版本，Prompt 变更后旧缓存自动失效。
+   */
+  private getScoreCacheKey(criteria: string, content: string): string {
+    return createHash('sha256')
+      .update(criteria + '\n' + content + '\n' + LLM_SCORING_PROMPT_VERSION)
+      .digest('hex');
+  }
+
+  /**
+   * 构建工作考核评分的 Prompt：结构化输出 + 评分量表说明 + Few-shot 示例，提升一致性。
+   */
+  private buildWorkScorePrompt(
+    criteria: string,
+    content: string,
+    context?: { departmentName?: string | null; positionName?: string | null },
+  ): string {
+    const contextLines: string[] = [];
+    if (context?.departmentName) contextLines.push(`部门：${context.departmentName}`);
+    if (context?.positionName) contextLines.push(`岗位：${context.positionName}`);
+    const contextBlock =
+      contextLines.length > 0 ? `【被考核人信息】\n${contextLines.join('\n')}\n\n` : '';
+
+    return `你是一位工作考核评分员。请严格按照以下考核标准（Markdown 格式）对工作内容进行评分。
+
+## 评分规则
+- 仅依据考核标准中的条目逐项打分，不要添加标准以外的项目。
+- 每项 0-100 分：优秀 85-100，良好 70-84，一般 55-69，不足 0-54；必须给出每项简短评语（扣分理由或亮点）。
+- 只返回一个 JSON 数组，不要任何其他说明或 markdown 标记。
+
+## 输出格式（严格遵循）
+[{"item_name":"考核项名称","score":数字,"comment":"简短评语"}]
+
+## 参考示例
+【示例一】工作内容较笼统时：
+周报内容："本周做了一些开发工作。"
+→ [{"item_name":"工作完成度","score":15,"comment":"描述过于笼统，无具体产出与事项"}]
+
+【示例二】工作内容具体时：
+周报内容："本周完成用户模块接口开发与单元测试，修复登录超时问题 3 个，下周计划完成权限模块。"
+→ [{"item_name":"工作完成度","score":88,"comment":"事项具体，有产出描述与问题修复"}]
+
+${contextBlock}【考核标准】（Markdown）
+${criteria}
+
+【工作内容】
+${content}`;
+  }
+
+  /**
+   * 调用 LLM 对工作内容按考核标准评分（temperature=0 + seed 保证一致性，支持缓存）。
+   * 供 AI 考核测试与考核队列共用。
+   */
+  async scoreWorkContentWithLlm(
+    criteriaMarkdown: string,
+    workContent: string,
+    options?: {
+      timeoutMs?: number;
+      context?: { departmentName?: string | null; positionName?: string | null };
+    },
+  ): Promise<{ scoreDetails: { item_name: string; score: number; comment: string }[]; totalScore: number; remark: string }> {
+    const criteria = criteriaMarkdown.trim();
+    const content = workContent.trim().slice(0, 3000);
     if (!criteria) throw new BadRequestException('请输入或选择考核标准');
     if (!content) throw new BadRequestException('请输入周报/日报内容');
 
@@ -215,27 +283,37 @@ export class ScoresService {
     const apiUrl = all.llm_api_url || process.env.LLM_API_URL;
     const apiKey = all.llm_api_key || process.env.LLM_API_KEY;
     const model = all.llm_model || process.env.LLM_MODEL || 'gpt-3.5-turbo';
-    const temperature = Math.min(2, Math.max(0, parseFloat(all.llm_temperature ?? '0') || 0));
-    const topP = Math.min(1, Math.max(0, parseFloat(all.llm_top_p ?? '1') || 1));
     if (!apiUrl || !apiKey) throw new BadRequestException('请先在系统设置中配置 LLM API 地址与 API Key');
 
-    const prompt = `你是一位工作考核评分员。请严格按照以下考核标准（Markdown 格式）对工作内容进行评分，为每项考核标准生成 0-100 分的分数和简短评语。
+    const cacheKey = this.getScoreCacheKey(criteria, content);
+    const cached = this.scoreCache.get(cacheKey);
+    if (cached) {
+      const remark =
+        cached.scoreDetails.map((d) => (d.comment ? `${d.item_name}：${d.comment}` : '')).filter(Boolean).join('；') || '无评语';
+      return { ...cached, remark };
+    }
 
-要求：仅依据考核标准中的条目逐项打分并写评语，不要添加标准以外的项目。只返回一个 JSON 数组，不要其他说明。
-格式：[{"item_name":"考核项名称","score":分数,"comment":"简短评语"}]
+    const prompt = this.buildWorkScorePrompt(criteria, content, options?.context);
+    const body: Record<string, unknown> = {
+      model,
+      temperature: 0,
+      top_p: 1,
+      seed: LLM_SCORING_SEED,
+      messages: [{ role: 'user', content: prompt }],
+    };
 
-【考核标准】（Markdown）\n${criteria}
-
-【工作内容】\n${content}`;
-
+    const controller = new AbortController();
+    const timeoutId = options?.timeoutMs ? setTimeout(() => controller.abort(), options.timeoutMs) : undefined;
     const res = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({ model, temperature, top_p: topP, messages: [{ role: 'user', content: prompt }] }),
+      body: JSON.stringify(body),
+      signal: controller.signal,
     });
+    if (timeoutId) clearTimeout(timeoutId);
     if (!res.ok) {
-      const body = await res.text().catch(() => '');
-      throw new BadRequestException(`LLM 接口返回异常: ${res.status} ${body.slice(0, 200)}`);
+      const bodyText = await res.text().catch(() => '');
+      throw new BadRequestException(`LLM 接口返回异常: ${res.status} ${bodyText.slice(0, 200)}`);
     }
     const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
     const text = data.choices?.[0]?.message?.content ?? '';
@@ -251,7 +329,13 @@ export class ScoresService {
       scoreDetails.length > 0 ? scoreDetails.reduce((s, d) => s + d.score, 0) / scoreDetails.length : 0;
     const remark =
       scoreDetails.map((d) => (d.comment ? `${d.item_name}：${d.comment}` : '')).filter(Boolean).join('；') || '无评语';
+    this.scoreCache.set(cacheKey, { scoreDetails, totalScore });
     return { scoreDetails, totalScore, remark };
+  }
+
+  /** AI 考核测试：根据考核标准与工作内容调用 LLM 返回评分与评语（不落库） */
+  async aiTest(criteriaMarkdown: string, workContent: string): Promise<{ scoreDetails: { item_name: string; score: number; comment: string }[]; totalScore: number; remark: string }> {
+    return this.scoreWorkContentWithLlm(criteriaMarkdown, workContent);
   }
 
   /** AI 生成岗位考核标准：根据部门、岗位及可选补充要求生成 Markdown 格式的考核标准（不落库） */
