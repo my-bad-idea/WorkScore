@@ -3,6 +3,7 @@
 /public
 /node_modules
 /release
+.cursor
 
 # 各子项目自管
 backend/node_modules
