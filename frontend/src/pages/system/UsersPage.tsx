@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, Card, Table, Space, Modal, Form, Input, Select, Switch, message } from 'antd';
+import { Button, Card, Table, Space, Modal, Form, Input, Select, Switch, message, Row, Col, Descriptions } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useAuth } from '../../stores/auth';
 import { canEditUser, roleLabel } from '../../utils/permissions';
@@ -36,6 +36,8 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [viewing, setViewing] = useState<UserItem | null>(null);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
 
@@ -75,6 +77,11 @@ export default function UsersPage() {
       enabled: record.enabled,
     });
     setModalOpen(true);
+  };
+
+  const openView = (record: UserItem) => {
+    setViewing(record);
+    setViewModalOpen(true);
   };
 
   const handleSubmit = async () => {
@@ -168,6 +175,9 @@ export default function UsersPage() {
                 const canEdit = canEditUser(currentUser ?? null, record);
                 return (
                   <Space>
+                    <a className="system-table-action-link" onClick={() => openView(record)}>
+                      查看
+                    </a>
                     <a className={`system-table-action-link ${!canEdit ? 'disabled' : ''}`} onClick={() => canEdit && openEdit(record)}>
                       编辑
                     </a>
@@ -189,35 +199,72 @@ export default function UsersPage() {
         confirmLoading={submitting}
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="username" label="账号" rules={[{ required: true }]}>
-            <Input placeholder="登录账号" disabled={editingId != null} />
-          </Form.Item>
-          <Form.Item
-            name="password"
-            label="密码"
-            extra={editingId == null ? '不填则使用系统设置中的默认人员密码' : '不填则不修改'}
-            rules={[passwordStrengthRule()]}
-          >
-            <Input.Password placeholder={editingId != null ? '不填则不修改' : '选填，不填则使用默认密码'} />
-          </Form.Item>
-          <Form.Item name="realName" label="姓名" rules={[{ required: true }]}>
-            <Input placeholder="姓名" />
-          </Form.Item>
-          <Form.Item name="departmentId" label="部门" rules={[{ required: true }]}>
-            <Select placeholder="选择部门" options={departments.map((d) => ({ value: d.id, label: d.name }))} />
-          </Form.Item>
-          <Form.Item name="positionId" label="岗位" rules={[{ required: true, message: '请选择岗位' }]}>
-            <Select placeholder="选择岗位" options={positionOptions} />
-          </Form.Item>
-          {currentUser?.role === 'system_admin' && (
-            <Form.Item name="role" label="角色" rules={[{ required: true, message: '请选择角色' }]}>
-              <Select placeholder="选择角色" options={ROLE_OPTIONS} />
-            </Form.Item>
-          )}
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item name="username" label="账号" rules={[{ required: true }]}>
+                <Input placeholder="登录账号" disabled={editingId != null} />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="password"
+                label="密码"
+                extra={editingId == null ? '不填则使用系统设置中的默认人员密码' : '不填则不修改'}
+                rules={[passwordStrengthRule()]}
+              >
+                <Input.Password placeholder={editingId != null ? '不填则不修改' : '选填，不填则使用默认密码'} />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item name="realName" label="姓名" rules={[{ required: true }]}>
+                <Input placeholder="姓名" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item name="departmentId" label="部门" rules={[{ required: true }]}>
+                <Select placeholder="选择部门" options={departments.map((d) => ({ value: d.id, label: d.name }))} />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item name="positionId" label="岗位" rules={[{ required: true, message: '请选择岗位' }]}>
+                <Select placeholder="选择岗位" options={positionOptions} />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              {currentUser?.role === 'system_admin' && (
+                <Form.Item name="role" label="角色" rules={[{ required: true, message: '请选择角色' }]}>
+                  <Select placeholder="选择角色" options={ROLE_OPTIONS} />
+                </Form.Item>
+              )}
+            </Col>
+          </Row>
           <Form.Item name="enabled" label="启用" valuePropName="checked">
             <Switch />
           </Form.Item>
         </Form>
+      </Modal>
+      <Modal
+        title="查看人员"
+        open={viewModalOpen}
+        onCancel={() => setViewModalOpen(false)}
+        footer={null}
+      >
+        {viewing && (
+          <Descriptions column={1} size="small" bordered>
+            <Descriptions.Item label="账号">{viewing.username}</Descriptions.Item>
+            <Descriptions.Item label="姓名">{viewing.realName}</Descriptions.Item>
+            <Descriptions.Item label="部门">{viewing.departmentName ?? '-'}</Descriptions.Item>
+            <Descriptions.Item label="岗位">{viewing.positionName ?? '-'}</Descriptions.Item>
+            <Descriptions.Item label="角色">
+              {roleLabel((viewing.role === 'system_admin' || viewing.role === 'department_admin' ? viewing.role : 'user') as UserRole)}
+            </Descriptions.Item>
+            <Descriptions.Item label="启用">{viewing.enabled ? '是' : '否'}</Descriptions.Item>
+          </Descriptions>
+        )}
       </Modal>
     </>
   );

@@ -9,14 +9,180 @@
   opacity: 0.5;
 }
 
-/* 岗位管理考核标准 Markdown 编辑器容器 */
+/* 岗位管理：全屏弹窗——消除横向滚动 */
+.positions-fullscreen-modal {
+  overflow: hidden;
+}
+
+.positions-fullscreen-modal .ant-modal {
+  max-width: 100%;
+  margin: 0;
+  top: 0;
+  padding-bottom: 0;
+}
+
+.positions-fullscreen-modal .ant-modal-content {
+  height: 100vh;
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.positions-fullscreen-modal .ant-modal-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 表单整体占满弹窗 body */
+.positions-form {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 考核标准项 —— 打通 Ant Design Form.Item 内部所有嵌套层 */
+.positions-assessment-item {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0 !important;
+}
+
+.positions-assessment-item > .ant-form-item-row {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.positions-assessment-item .ant-form-item-control {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.positions-assessment-item .ant-form-item-control-input {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.positions-assessment-item .ant-form-item-control-input-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Markdown 编辑器容器 + 编辑器本体填满 */
 .positions-md-editor-wrap {
-  min-height: 200px;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.positions-md-editor-wrap .w-md-editor {
+  flex: 1;
+  min-height: 0;
+  width: 100% !important;
+}
+
+/*
+ * 修复预览模式宽度问题：
+ * .w-md-editor-content 是 position: relative 容器
+ * .w-md-editor-input 在预览模式下 width: 0%，不撑开父容器
+ * .w-md-editor-preview 是 position: absolute，也不撑开父容器
+ * 需要让 .w-md-editor-content 在预览模式下自己有明确宽度
+ */
+.positions-md-editor-wrap .w-md-editor-content {
+  width: 100%;
+}
+
+.positions-md-editor-wrap .w-md-editor-show-preview .w-md-editor-input {
+  width: 0% !important;
+  min-width: 0;
+}
+
+.positions-md-editor-wrap .w-md-editor-show-preview .w-md-editor-preview {
+  width: 100% !important;
+  position: relative !important;
+  box-shadow: none;
+}
+
+.positions-md-editor-wrap .wmde-markdown {
+  max-width: none;
+  width: 100%;
+  margin: 0;
+}
+
+/* 启用开关固定在底部，不参与 flex 拉伸 */
+.positions-enabled-item {
+  flex-shrink: 0;
+  margin-top: 8px;
+  margin-bottom: 0 !important;
+}
+
+/* AI 生成考核标准弹窗内的 Markdown 高度控制 */
+.positions-ai-md-editor-wrap .w-md-editor {
+  height: 360px !important;
+}
+
+/* 编辑岗位页：AI 生成考核标准按钮与图标垂直对齐 */
+.positions-ai-generate-btn {
+  padding-left: 0;
+  display: inline-flex;
+  align-items: center;
+  height: auto;
 }
 
 /* AI 考核测试：评分结果区域 */
 .ai-test-result-wrap {
   margin-top: 24px;
+}
+
+/* AI 考核测试：Markdown 编辑器宽度适配卡片 */
+.ai-test-md-editor-wrap .w-md-editor {
+  width: 100%;
+}
+
+/* 系统设置：考核配置提示块 */
+.settings-assessment-hint {
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: var(--ant-color-fill-quaternary);
+  border-radius: 8px;
+}
+
+.settings-assessment-hint-text {
+  font-size: 13px;
+  color: var(--ant-color-text-secondary);
+  margin-bottom: 12px;
+}
+
+.settings-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-slider-row .ant-slider {
+  flex: 1;
+}
+
+.settings-slider-value {
+  width: 48px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--ant-color-text-secondary);
 }
 
 /* 岗位管理：AI 生成考核标准弹窗内边距 */

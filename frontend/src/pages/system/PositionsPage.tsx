@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, Card, Table, Space, Modal, Form, Input, Select, Switch, message } from 'antd';
+import { Button, Card, Table, Space, Modal, Form, Input, Select, Switch, message, Row, Col, Descriptions } from 'antd';
 import { PlusOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import MdEditor from '@uiw/react-md-editor';
 import { getCommands, getExtraCommands } from '@uiw/react-md-editor/commands-cn';
@@ -18,19 +18,28 @@ type PositionItem = {
   departmentName?: string;
 };
 
-function PositionsMdEditor({ value, onChange }: { value?: string; onChange?: (v?: string) => void }) {
+function PositionsMdEditor({
+  value,
+  onChange,
+  previewOnly,
+}: {
+  value?: string;
+  onChange?: (v?: string) => void;
+  previewOnly?: boolean;
+}) {
   const themeMode = useThemeMode();
+  const previewMode = previewOnly === true;
   return (
     <div data-color-mode={themeMode} className="positions-md-editor-wrap">
       <MdEditor
         value={value ?? ''}
         onChange={onChange}
-        commands={getCommands()}
-        extraCommands={getExtraCommands()}
-        preview="live"
-        height={200}
+        commands={previewMode ? [] : getCommands()}
+        extraCommands={previewMode ? [] : getExtraCommands()}
+        preview={previewMode ? 'preview' : 'live'}
+        hideToolbar={previewMode}
         visibleDragbar={false}
-        textareaProps={{ placeholder: '支持 Markdown，描述岗位考核标准…' }}
+        textareaProps={previewMode ? undefined : { placeholder: '支持 Markdown，描述岗位考核标准…' }}
       />
     </div>
   );
@@ -39,7 +48,7 @@ function PositionsMdEditor({ value, onChange }: { value?: string; onChange?: (v?
 function AiCriteriaMdEditor({ value, onChange }: { value?: string; onChange?: (v?: string) => void }) {
   const themeMode = useThemeMode();
   return (
-    <div data-color-mode={themeMode} className="positions-md-editor-wrap">
+    <div data-color-mode={themeMode} className="positions-ai-md-editor-wrap">
       <MdEditor
         value={value ?? ''}
         onChange={onChange}
@@ -62,6 +71,8 @@ export default function PositionsPage() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [viewing, setViewing] = useState<PositionItem | null>(null);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
   const [aiCriteriaModalOpen, setAiCriteriaModalOpen] = useState(false);
@@ -136,6 +147,11 @@ export default function PositionsPage() {
       enabled: record.enabled,
     });
     setModalOpen(true);
+  };
+
+  const openView = (record: PositionItem) => {
+    setViewing(record);
+    setViewModalOpen(true);
   };
 
   const handleSubmit = async () => {
@@ -240,12 +256,15 @@ export default function PositionsPage() {
               title: '操作',
               key: 'action',
               align: 'center',
-              width: 120,
+              width: 180,
               fixed: 'right',
               render: (_, record) => {
                 const canEdit = canEditPosition(user ?? null, record);
                 return (
                   <Space>
+                    <a className="system-table-action-link" onClick={() => openView(record)}>
+                      查看
+                    </a>
                     <a className={`system-table-action-link ${!canEdit ? 'disabled' : ''}`} onClick={() => canEdit && openEdit(record)}>
                       编辑
                     </a>
@@ -260,33 +279,68 @@ export default function PositionsPage() {
         />
       </Card>
       <Modal
+        title="查看岗位"
+        open={viewModalOpen}
+        onCancel={() => setViewModalOpen(false)}
+        footer={null}
+        width="100%"
+        wrapClassName="positions-fullscreen-modal"
+      >
+        {viewing && (
+          <>
+            <Descriptions column={2} size="small" bordered style={{ marginBottom: 16 }}>
+              <Descriptions.Item label="所属部门" span={2}>
+                {viewing.departmentName ?? '-'}
+              </Descriptions.Item>
+              <Descriptions.Item label="岗位名称">{viewing.name}</Descriptions.Item>
+              <Descriptions.Item label="启用">{viewing.enabled ? '是' : '否'}</Descriptions.Item>
+            </Descriptions>
+            <PositionsMdEditor value={viewing.assessmentCriteria} previewOnly />
+          </>
+        )}
+      </Modal>
+      <Modal
         title={editingId != null ? '编辑岗位' : '新增岗位'}
         open={modalOpen}
         onOk={handleSubmit}
         onCancel={() => setModalOpen(false)}
         confirmLoading={submitting}
-        width={520}
+        width="100%"
+        wrapClassName="positions-fullscreen-modal"
       >
         <Form
           form={form}
           layout="vertical"
+          className="positions-form"
           onValuesChange={(_, all) => {
             if (editingId == null) savePositionFormCache(all);
           }}
         >
-          <Form.Item name="departmentId" label="部门" rules={[{ required: true }]}>
-            <Select placeholder="选择部门" options={departments.map((d) => ({ value: d.id, label: d.name }))} />
-          </Form.Item>
-          <Form.Item name="name" label="岗位名称" rules={[{ required: true }]}>
-            <Input placeholder="岗位名称" />
-          </Form.Item>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item name="departmentId" label="部门" rules={[{ required: true }]}>
+                <Select placeholder="选择部门" options={departments.map((d) => ({ value: d.id, label: d.name }))} />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item name="name" label="岗位名称" rules={[{ required: true }]}>
+                <Input placeholder="岗位名称" />
+              </Form.Item>
+            </Col>
+          </Row>
           <Form.Item
             name="assessmentCriteria"
             label="考核标准"
+            className="positions-assessment-item"
             rules={[{ required: true, message: '请输入考核标准' }]}
             extra={
               canAdd ? (
-                <Button type="link" icon={<ThunderboltOutlined />} onClick={openAiCriteriaModal} style={{ paddingLeft: 0 }}>
+                <Button
+                  type="link"
+                  icon={<ThunderboltOutlined />}
+                  onClick={openAiCriteriaModal}
+                  className="positions-ai-generate-btn"
+                >
                   AI 生成考核标准
                 </Button>
               ) : null
@@ -294,7 +348,7 @@ export default function PositionsPage() {
           >
             <PositionsMdEditor />
           </Form.Item>
-          <Form.Item name="enabled" label="启用" valuePropName="checked">
+          <Form.Item name="enabled" label="启用" valuePropName="checked" className="positions-enabled-item">
             <Switch />
           </Form.Item>
         </Form>
@@ -305,6 +359,7 @@ export default function PositionsPage() {
         open={aiCriteriaModalOpen}
         onCancel={() => setAiCriteriaModalOpen(false)}
         width={720}
+        bodyStyle={{ maxHeight: '70vh', overflow: 'auto' }}
         footer={[
           <Button key="generate" type="primary" onClick={handleAiGenerate} loading={aiCriteriaGenerating}>
             生成

@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>月度考核系统 · 原型</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f1117;
+  --bg2: #161920;
+  --bg3: #1e2230;
+  --border: #2a2f3f;
+  --border2: #353b50;
+  --text: #e8eaf0;
+  --text2: #8b91a8;
+  --text3: #555d76;
+  --accent: #5b7fff;
+  --accent2: #3d5fe0;
+  --accent-glow: rgba(91,127,255,0.15);
+  --green: #34c97d;
+  --green-bg: rgba(52,201,125,0.1);
+  --yellow: #f5a623;
+  --yellow-bg: rgba(245,166,35,0.1);
+  --red: #f55858;
+  --red-bg: rgba(245,88,88,0.1);
+  --purple: #a78bfa;
+  --purple-bg: rgba(167,139,250,0.1);
+  --cyan: #22d3ee;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Noto Sans SC', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ===== NAV ===== */
+.nav {
+  position: fixed; top:0; left:0; right:0; z-index:100;
+  height:56px;
+  background: rgba(15,17,23,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display:flex; align-items:center; padding:0 24px;
+  gap: 32px;
+}
+.nav-logo {
+  font-size:15px; font-weight:700; color:var(--text);
+  display:flex; align-items:center; gap:8px;
+}
+.nav-logo-dot {
+  width:8px; height:8px; border-radius:50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+.nav-tabs { display:flex; gap:4px; margin-left:auto; }
+.nav-tab {
+  padding:6px 14px; border-radius:var(--radius-sm);
+  color:var(--text2); cursor:pointer; font-size:13px;
+  transition: all .2s;
+  border: none; background:none;
+}
+.nav-tab:hover { color:var(--text); background:var(--bg3); }
+.nav-tab.active {
+  color:var(--accent); background:var(--accent-glow);
+}
+.nav-user {
+  display:flex; align-items:center; gap:8px;
+  margin-left:16px;
+}
+.avatar {
+  width:32px; height:32px; border-radius:50%;
+  background: linear-gradient(135deg, var(--accent), var(--purple));
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:700; color:#fff;
+}
+
+/* ===== LAYOUT ===== */
+.layout {
+  display:flex; padding-top:56px; min-height:100vh;
+}
+.sidebar {
+  width:220px; flex-shrink:0;
+  background:var(--bg2);
+  border-right:1px solid var(--border);
+  padding:20px 12px;
+  position:fixed; top:56px; bottom:0;
+  overflow-y:auto;
+}
+.sidebar-section { margin-bottom:24px; }
+.sidebar-label {
+  font-size:11px; font-weight:500; color:var(--text3);
+  text-transform:uppercase; letter-spacing:.08em;
+  padding:0 8px; margin-bottom:8px;
+}
+.sidebar-item {
+  display:flex; align-items:center; gap:10px;
+  padding:8px 10px; border-radius:var(--radius-sm);
+  color:var(--text2); cursor:pointer; font-size:13px;
+  transition: all .2s; margin-bottom:2px;
+}
+.sidebar-item:hover { color:var(--text); background:var(--bg3); }
+.sidebar-item.active { color:var(--accent); background:var(--accent-glow); }
+.sidebar-icon { font-size:16px; width:20px; text-align:center; }
+.sidebar-badge {
+  margin-left:auto; background:var(--accent);
+  color:#fff; font-size:10px; font-weight:700;
+  padding:1px 6px; border-radius:10px;
+}
+
+.main {
+  margin-left:220px; flex:1; padding:24px;
+  min-height:calc(100vh - 56px);
+}
+
+/* ===== PAGE SECTIONS ===== */
+.page { display:none; }
+.page.active { display:block; }
+
+/* ===== COMPONENTS ===== */
+.page-header {
+  display:flex; align-items:flex-start; justify-content:space-between;
+  margin-bottom:24px;
+}
+.page-title { font-size:22px; font-weight:700; color:var(--text); }
+.page-subtitle { color:var(--text2); font-size:13px; margin-top:4px; }
+
+.btn {
+  padding:8px 16px; border-radius:var(--radius-sm);
+  font-size:13px; font-weight:500; cursor:pointer;
+  border:none; transition: all .2s;
+  display:inline-flex; align-items:center; gap:6px;
+  font-family: inherit;
+}
+.btn-primary {
+  background:var(--accent); color:#fff;
+}
+.btn-primary:hover { background:var(--accent2); transform:translateY(-1px); }
+.btn-secondary {
+  background:var(--bg3); color:var(--text);
+  border:1px solid var(--border2);
+}
+.btn-secondary:hover { border-color:var(--accent); color:var(--accent); }
+.btn-ghost { background:transparent; color:var(--text2); }
+.btn-ghost:hover { color:var(--text); background:var(--bg3); }
+.btn-sm { padding:5px 12px; font-size:12px; }
+.btn-danger { background:var(--red-bg); color:var(--red); border:1px solid rgba(245,88,88,0.2); }
+
+.card {
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:20px;
+}
+.card-header {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:16px;
+}
+.card-title { font-size:15px; font-weight:600; color:var(--text); }
+
+/* STATUS BADGES */
+.badge {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:3px 10px; border-radius:20px;
+  font-size:12px; font-weight:500;
+}
+.badge::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; opacity:.8; }
+.badge-pending { color:var(--yellow); background:var(--yellow-bg); }
+.badge-ongoing { color:var(--accent); background:var(--accent-glow); }
+.badge-done { color:var(--green); background:var(--green-bg); }
+.badge-fail { color:var(--red); background:var(--red-bg); }
+.badge-purple { color:var(--purple); background:var(--purple-bg); }
+
+/* TABLE */
+.table-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; }
+th {
+  text-align:left; font-size:12px; font-weight:500;
+  color:var(--text3); text-transform:uppercase; letter-spacing:.05em;
+  padding:10px 12px; border-bottom:1px solid var(--border);
+}
+td {
+  padding:12px; border-bottom:1px solid var(--border);
+  color:var(--text2); font-size:13px;
+  vertical-align:middle;
+}
+td:first-child { color:var(--text); font-weight:500; }
+tr:last-child td { border-bottom:none; }
+tr:hover td { background:rgba(255,255,255,0.02); }
+
+/* GRID */
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+.grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+
+/* STAT CARD */
+.stat-card {
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:var(--radius); padding:20px;
+}
+.stat-label { font-size:12px; color:var(--text3); margin-bottom:8px; }
+.stat-value { font-size:28px; font-weight:700; font-family:'DM Mono',monospace; }
+.stat-sub { font-size:12px; color:var(--text3); margin-top:4px; }
+.stat-trend-up { color:var(--green); }
+.stat-trend-down { color:var(--red); }
+
+/* PROGRESS */
+.progress-bar {
+  height:6px; background:var(--bg3); border-radius:3px;
+  overflow:hidden; margin-top:8px;
+}
+.progress-fill {
+  height:100%; border-radius:3px;
+  background: linear-gradient(90deg, var(--accent), var(--purple));
+  transition: width .6s ease;
+}
+
+/* SCORE RING */
+.score-ring-wrap {
+  display:flex; flex-direction:column; align-items:center;
+  gap:8px;
+}
+.score-ring {
+  position:relative; width:72px; height:72px;
+}
+.score-ring svg { transform:rotate(-90deg); }
+.score-ring-val {
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; font-weight:700; font-family:'DM Mono',monospace;
+}
+.score-ring-label { font-size:11px; color:var(--text3); }
+
+/* FORM */
+.form-group { margin-bottom:16px; }
+.form-label { font-size:12px; color:var(--text2); margin-bottom:6px; display:block; font-weight:500; }
+.form-control {
+  width:100%; padding:9px 12px;
+  background:var(--bg3); border:1px solid var(--border);
+  border-radius:var(--radius-sm); color:var(--text);
+  font-size:13px; font-family:inherit;
+  transition: border-color .2s;
+  outline:none;
+}
+.form-control:focus { border-color:var(--accent); }
+.form-control::placeholder { color:var(--text3); }
+select.form-control { cursor:pointer; }
+textarea.form-control { resize:vertical; min-height:80px; }
+
+/* MODAL */
+.modal-overlay {
+  position:fixed; inset:0; z-index:200;
+  background:rgba(0,0,0,0.7); backdrop-filter:blur(4px);
+  display:none; align-items:center; justify-content:center;
+}
+.modal-overlay.open { display:flex; }
+.modal {
+  background:var(--bg2); border:1px solid var(--border2);
+  border-radius:12px; width:600px; max-width:95vw;
+  max-height:85vh; overflow-y:auto;
+  box-shadow:var(--shadow);
+  animation: slideUp .25s ease;
+}
+@keyframes slideUp {
+  from { transform:translateY(20px); opacity:0; }
+  to { transform:translateY(0); opacity:1; }
+}
+.modal-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:20px 24px; border-bottom:1px solid var(--border);
+  position:sticky; top:0; background:var(--bg2); z-index:1;
+}
+.modal-title { font-size:16px; font-weight:700; }
+.modal-close {
+  width:28px; height:28px; border-radius:6px;
+  background:var(--bg3); border:none; cursor:pointer;
+  color:var(--text2); font-size:16px; display:flex;
+  align-items:center; justify-content:center;
+}
+.modal-close:hover { background:var(--border2); color:var(--text); }
+.modal-body { padding:24px; }
+.modal-footer {
+  padding:16px 24px; border-top:1px solid var(--border);
+  display:flex; justify-content:flex-end; gap:10px;
+  position:sticky; bottom:0; background:var(--bg2);
+}
+
+/* TIMELINE */
+.timeline { display:flex; flex-direction:column; gap:0; }
+.timeline-item { display:flex; gap:16px; }
+.timeline-line { display:flex; flex-direction:column; align-items:center; }
+.timeline-dot {
+  width:10px; height:10px; border-radius:50%;
+  background:var(--accent); flex-shrink:0; margin-top:5px;
+  box-shadow: 0 0 6px var(--accent);
+}
+.timeline-dot.done { background:var(--green); box-shadow:0 0 6px var(--green); }
+.timeline-dot.pending { background:var(--text3); box-shadow:none; }
+.timeline-connector {
+  width:1px; flex:1; background:var(--border); min-height:20px;
+}
+.timeline-content { padding-bottom:20px; flex:1; }
+.timeline-title { font-size:13px; font-weight:600; color:var(--text); }
+.timeline-desc { font-size:12px; color:var(--text3); margin-top:2px; }
+
+/* SECTION DIVIDER */
+.divider {
+  height:1px; background:var(--border); margin:20px 0;
+}
+
+/* TAG */
+.tag {
+  display:inline-block; padding:2px 8px; border-radius:4px;
+  font-size:11px; font-weight:500;
+  background:var(--bg3); color:var(--text2);
+  border:1px solid var(--border);
+}
+.tag-dev { background:rgba(91,127,255,0.1); color:var(--accent); border-color:rgba(91,127,255,0.2); }
+.tag-learn { background:var(--purple-bg); color:var(--purple); border-color:rgba(167,139,250,0.2); }
+.tag-ops { background:rgba(34,211,238,0.1); color:var(--cyan); border-color:rgba(34,211,238,0.2); }
+.tag-test { background:var(--yellow-bg); color:var(--yellow); border-color:rgba(245,166,35,0.2); }
+
+/* SCORE INPUT */
+.score-input-wrap {
+  display:flex; align-items:center; gap:12px;
+}
+.score-slider {
+  flex:1; -webkit-appearance:none; height:4px;
+  background:var(--bg3); border-radius:2px; outline:none;
+}
+.score-slider::-webkit-slider-thumb {
+  -webkit-appearance:none; width:16px; height:16px;
+  border-radius:50%; background:var(--accent); cursor:pointer;
+  box-shadow:0 0 8px var(--accent);
+}
+.score-num {
+  font-family:'DM Mono',monospace; font-size:18px;
+  font-weight:700; color:var(--accent); min-width:40px; text-align:right;
+}
+
+/* ALERT */
+.alert {
+  padding:12px 16px; border-radius:var(--radius-sm);
+  font-size:13px; display:flex; gap:10px; align-items:flex-start;
+}
+.alert-warn { background:var(--yellow-bg); border:1px solid rgba(245,166,35,0.2); color:var(--yellow); }
+.alert-info { background:var(--accent-glow); border:1px solid rgba(91,127,255,0.2); color:var(--accent); }
+.alert-success { background:var(--green-bg); border:1px solid rgba(52,201,125,0.2); color:var(--green); }
+
+/* CHIP GROUP */
+.chip-group { display:flex; flex-wrap:wrap; gap:8px; }
+.chip {
+  padding:5px 12px; border-radius:20px; font-size:12px;
+  border:1px solid var(--border2); color:var(--text2);
+  cursor:pointer; transition:all .2s; background:transparent;
+  font-family:inherit;
+}
+.chip:hover { border-color:var(--accent); color:var(--accent); }
+.chip.active { background:var(--accent-glow); border-color:var(--accent); color:var(--accent); }
+
+/* TOOLTIP */
+.tooltip-wrap { position:relative; display:inline-block; }
+.tooltip {
+  position:absolute; bottom:calc(100% + 8px); left:50%;
+  transform:translateX(-50%); background:var(--bg3);
+  border:1px solid var(--border2); color:var(--text);
+  font-size:12px; padding:6px 10px; border-radius:6px;
+  white-space:nowrap; pointer-events:none; opacity:0;
+  transition:opacity .2s; z-index:50;
+}
+.tooltip-wrap:hover .tooltip { opacity:1; }
+
+/* RATIO EDITOR */
+.ratio-row {
+  display:flex; align-items:center; gap:12px;
+  padding:10px 0; border-bottom:1px solid var(--border);
+}
+.ratio-row:last-child { border-bottom:none; }
+.ratio-content { flex:1; font-size:13px; }
+.ratio-label { color:var(--text3); font-size:11px; }
+.ratio-inputs { display:flex; gap:8px; align-items:center; }
+.ratio-input-box { text-align:center; width:64px; }
+.ratio-avg {
+  font-family:'DM Mono',monospace; font-weight:700;
+  color:var(--accent); font-size:14px; min-width:48px;
+  text-align:right;
+}
+
+/* WEEK REPORT REF */
+.report-snippet {
+  background:var(--bg3); border:1px solid var(--border);
+  border-radius:var(--radius-sm); padding:12px;
+  font-size:12px; color:var(--text2); line-height:1.8;
+  margin-top:8px;
+}
+.report-snippet-header {
+  font-size:11px; color:var(--text3); margin-bottom:6px;
+  display:flex; align-items:center; gap:6px;
+}
+.report-keyword {
+  background:rgba(91,127,255,0.2); color:var(--accent);
+  padding:0 3px; border-radius:2px;
+}
+
+/* SCORE COMPARE */
+.score-compare {
+  display:flex; gap:12px; align-items:stretch;
+}
+.score-compare-item {
+  flex:1; background:var(--bg3); border:1px solid var(--border);
+  border-radius:var(--radius-sm); padding:14px;
+  text-align:center;
+}
+.score-compare-label { font-size:11px; color:var(--text3); margin-bottom:8px; }
+.score-compare-val {
+  font-family:'DM Mono',monospace; font-size:24px;
+  font-weight:700;
+}
+
+/* TABS */
+.tabs { display:flex; gap:4px; border-bottom:1px solid var(--border); margin-bottom:20px; }
+.tab-btn {
+  padding:8px 16px; font-size:13px; color:var(--text2);
+  border:none; background:none; cursor:pointer;
+  border-bottom:2px solid transparent; margin-bottom:-1px;
+  font-family:inherit; transition:all .2s;
+}
+.tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+.tab-btn:hover:not(.active) { color:var(--text); }
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+
+/* STEP INDICATOR */
+.steps {
+  display:flex; align-items:center; gap:0;
+  margin-bottom:28px;
+}
+.step-item { display:flex; align-items:center; flex:1; }
+.step-item:last-child { flex:0; }
+.step-circle {
+  width:28px; height:28px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:700; flex-shrink:0;
+  border:1px solid var(--border);
+  background:var(--bg3); color:var(--text3);
+}
+.step-circle.active {
+  background:var(--accent); border-color:var(--accent);
+  color:#fff; box-shadow:0 0 12px var(--accent-glow);
+}
+.step-circle.done { background:var(--green); border-color:var(--green); color:#fff; }
+.step-line { flex:1; height:1px; background:var(--border); }
+.step-line.done { background:var(--green); }
+.step-info { position:absolute; transform:translateX(-50%); }
+
+/* FLOATING VALIDATION */
+.validation-chip {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:4px 10px; border-radius:20px; font-size:11px;
+}
+.validation-ok { background:var(--green-bg); color:var(--green); }
+.validation-err { background:var(--red-bg); color:var(--red); }
+
+/* ============================================================
+   PAGE: DASHBOARD
+   ============================================================ */
+.dash-welcome {
+  background: linear-gradient(135deg, var(--bg2), var(--bg3));
+  border:1px solid var(--border2);
+  border-radius:var(--radius); padding:24px 28px;
+  margin-bottom:20px;
+  position:relative; overflow:hidden;
+}
+.dash-welcome::before {
+  content:'';
+  position:absolute; right:-40px; top:-40px;
+  width:180px; height:180px; border-radius:50%;
+  background: radial-gradient(circle, rgba(91,127,255,0.12), transparent);
+}
+.dash-welcome-title { font-size:18px; font-weight:700; }
+.dash-welcome-sub { color:var(--text2); font-size:13px; margin-top:4px; }
+.dash-welcome-actions { display:flex; gap:10px; margin-top:16px; }
+
+.pending-action-card {
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:var(--radius); padding:16px 20px;
+  display:flex; align-items:center; gap:16px;
+  cursor:pointer; transition:all .2s;
+}
+.pending-action-card:hover { border-color:var(--accent); transform:translateY(-2px); }
+.pending-icon {
+  width:40px; height:40px; border-radius:var(--radius-sm);
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px; flex-shrink:0;
+}
+
+/* scrollbar */
+::-webkit-scrollbar { width:6px; height:6px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo">
+    <div class="nav-logo-dot"></div>
+    考核系统
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('dashboard')">工作台</button>
+    <button class="nav-tab" onclick="showPage('list')">考核列表</button>
+    <button class="nav-tab" onclick="showPage('detail')">考核详情</button>
+    <button class="nav-tab" onclick="showPage('scoring')">打分页面</button>
+    <button class="nav-tab" onclick="showPage('config')">系统配置</button>
+  </div>
+  <div class="nav-user">
+    <div class="avatar">张</div>
+    <span style="font-size:13px;color:var(--text2)">张伟</span>
+  </div>
+</nav>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">我的考核</div>
+      <div class="sidebar-item active" onclick="showPage('dashboard')">
+        <span class="sidebar-icon">⊞</span> 工作台
+      </div>
+      <div class="sidebar-item" onclick="showPage('list')">
+        <span class="sidebar-icon">☰</span> 考核列表
+        <span class="sidebar-badge">3</span>
+      </div>
+      <div class="sidebar-item" onclick="showPage('scoring')">
+        <span class="sidebar-icon">✦</span> 待打分
+        <span class="sidebar-badge">5</span>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">部门管理</div>
+      <div class="sidebar-item" onclick="showPage('list')">
+        <span class="sidebar-icon">◈</span> 部门考核
+      </div>
+      <div class="sidebar-item">
+        <span class="sidebar-icon">◉</span> 考核统计
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">设置</div>
+      <div class="sidebar-item" onclick="showPage('config')">
+        <span class="sidebar-icon">⚙</span> 系统配置
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ==================== PAGE: DASHBOARD ==================== -->
+    <div id="page-dashboard" class="page active">
+      <div class="page-header">
+        <div>
+          <div class="page-title">工作台</div>
+          <div class="page-subtitle">2025年06月 · 当前周期</div>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('modal-apply')">＋ 申请本月考核</button>
+      </div>
+
+      <!-- 欢迎横幅 -->
+      <div class="dash-welcome">
+        <div class="dash-welcome-title">下午好，张伟 👋</div>
+        <div class="dash-welcome-sub">本月考核截止日期：2025-06-28，距今还有 <strong style="color:var(--yellow)">12 天</strong></div>
+        <div class="dash-welcome-actions">
+          <button class="btn btn-primary btn-sm" onclick="showPage('detail')">查看本月考核</button>
+          <button class="btn btn-secondary btn-sm">提交周报</button>
+        </div>
+      </div>
+
+      <!-- 统计卡片 -->
+      <div class="grid-4" style="margin-bottom:20px">
+        <div class="stat-card">
+          <div class="stat-label">本月考核项</div>
+          <div class="stat-value" style="color:var(--accent)">8</div>
+          <div class="stat-sub">共 3 个模块</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">自评完成</div>
+          <div class="stat-value" style="color:var(--green)">6 <span style="font-size:16px;color:var(--text3)">/ 8</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:75%"></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">已收到人工打分</div>
+          <div class="stat-value" style="color:var(--purple)">4</div>
+          <div class="stat-sub">最低要求 3 人</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">AI 预估得分</div>
+          <div class="stat-value" style="color:var(--yellow)">82.5</div>
+          <div class="stat-sub stat-trend-up">↑ 较上月 +3.2</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- 待处理事项 -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">待处理事项</div>
+            <span class="badge badge-pending">2 项</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div class="pending-action-card" onclick="showPage('detail')">
+              <div class="pending-icon" style="background:var(--yellow-bg)">✍</div>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--text)">完成自评打分</div>
+                <div style="font-size:12px;color:var(--text3)">还有 2 项考核内容未填写自评</div>
+              </div>
+              <span style="color:var(--text3);margin-left:auto">›</span>
+            </div>
+            <div class="pending-action-card" onclick="showPage('detail')">
+              <div class="pending-icon" style="background:var(--accent-glow)">⊕</div>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--text)">填写执行人占比</div>
+                <div style="font-size:12px;color:var(--text3)">「用户管理模块」考核项占比未设置</div>
+              </div>
+              <span style="color:var(--text3);margin-left:auto">›</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 考核进度时间轴 -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">考核流程进度</div>
+            <span class="badge badge-ongoing">考核中</span>
+          </div>
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-line">
+                <div class="timeline-dot done"></div>
+                <div class="timeline-connector"></div>
+              </div>
+              <div class="timeline-content">
+                <div class="timeline-title">录入考核明细</div>
+                <div class="timeline-desc">已完成 · 6月1日</div>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-line">
+                <div class="timeline-dot done"></div>
+                <div class="timeline-connector"></div>
+              </div>
+              <div class="timeline-content">
+                <div class="timeline-title">申请考核</div>
+                <div class="timeline-desc">已完成 · 6月10日</div>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-line">
+                <div class="timeline-dot active"></div>
+                <div class="timeline-connector"></div>
+              </div>
+              <div class="timeline-content">
+                <div class="timeline-title">三方打分进行中</div>
+                <div class="timeline-desc">自评 6/8 · AI 已完成 · 人工 4 人已打</div>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-line">
+                <div class="timeline-dot pending"></div>
+              </div>
+              <div class="timeline-content">
+                <div class="timeline-title">负责人确认</div>
+                <div class="timeline-desc">等待打分完成</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PAGE: LIST ==================== -->
+    <div id="page-list" class="page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">考核列表</div>
+          <div class="page-subtitle">部门全员考核记录</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <select class="form-control" style="width:120px">
+            <option>2025年06月</option>
+            <option>2025年05月</option>
+            <option>2025年04月</option>
+          </select>
+          <button class="btn btn-primary">＋ 新增考核明细</button>
+        </div>
+      </div>
+
+      <!-- 筛选栏 -->
+      <div class="card" style="margin-bottom:16px;padding:14px 20px">
+        <div class="chip-group">
+          <button class="chip active">全部</button>
+          <button class="chip">待考核</button>
+          <button class="chip">考核中</button>
+          <button class="chip">已考核</button>
+          <div style="flex:1"></div>
+          <input class="form-control" placeholder="搜索姓名..." style="width:180px">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>考核人</th>
+                <th>考核月份</th>
+                <th>考核项数</th>
+                <th>状态</th>
+                <th>自评</th>
+                <th>AI得分</th>
+                <th>人工均分</th>
+                <th>综合得分</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>张伟</td>
+                <td>2025-06</td>
+                <td>8 项</td>
+                <td><span class="badge badge-ongoing">考核中</span></td>
+                <td><span style="font-family:'DM Mono',monospace;color:var(--text)">78.5</span></td>
+                <td><span style="font-family:'DM Mono',monospace;color:var(--accent)">82.1</span></td>
+                <td><span style="font-family:'DM Mono',monospace;color:var(--purple)">80.3</span></td>
+                <td><span style="font-family:'DM Mono',monospace;color:var(--yellow)">—</span></td>
+                <td>
+                  <button class="btn btn-secondary btn-sm" onclick="showPage('detail')">详情</button>
+                  <button class="btn btn-ghost btn-sm" onclick="showPage('scoring')">打分</button>
+                </td>
+              </tr>
+              <tr>
+                <td>李娜</td>
+                <td>2025-06</td>
+                <td>6 项</td>
+                <td><span class="badge badge-pending">待考核</span></td>
+                <td><span style="color:var(--text3)">—</span></td>
+                <td><span style="color:var(--text3)">—</span></td>
+                <td><span style="color:var(--text3)">—</span></td>
+                <td><span style="color:var(--text3)">—</span></td>
+                <td>
+                  <button class="btn btn-secondary btn-sm" onclick="showPage('detail')">详情</button>
+                  <button class="btn btn-ghost btn-sm">加明细</button>
+                </td>
+              </tr>
+              <tr>
+                <td>王磊</td>
+                <td>2025-06</td>
+                <td>10 项</td>
+                <td><span class="badge badge-ongoing">考核中</span></td>
+                <td><span style="font-family:'DM Mono',monospace;color:var(--text)">85.0</span></td>
+                <td><span style="font-family:'DM Mono',monospace;color:var(--accent)">88.4</span></td>
+                <td><span style="font-family:'DM Mono',monospace;color:var(--purple)">83.7</span></td>
+                <td><span style="color:var(--text3)">—</span></td>
+                <td>
+                  <button class="btn btn-secondary btn-sm" onclick="showPage('detail')">详情</button>
+                  <button class="btn btn-ghost btn-sm" onclick="showPage('scoring')">打分</button>
+                </td>
+              </tr>
+              <tr>
+                <td>陈静</td>
+                <td>2025-05</td>
+                <td>7 项</td>
+                <td><span class="badge badge-done">已考核</span></td>
+                <td><span style="font-family:'DM Mono',monospace;color:var(--text)">90.0</span></td>
+                <td><span style="font-family:'DM Mono',monospace;color:var(--accent)">87.5</span></td>
+                <td><span style="font-family:'DM Mono',monospace;color:var(--purple)">88.2</span></td>
+                <td><span style="font-family:'DM Mono',monospace;color:var(--green);font-weight:700">88.6</span></td>
+                <td>
+                  <button class="btn btn-secondary btn-sm" onclick="showPage('detail')">详情</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PAGE: DETAIL ==================== -->
+    <div id="page-detail" class="page">
+      <div class="page-header">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="btn btn-ghost btn-sm" onclick="showPage('list')">← 返回</button>
+          <div>
+            <div class="page-title">张伟 · 2025年06月考核</div>
+            <div class="page-subtitle" style="display:flex;align-items:center;gap:8px;margin-top:4px">
+              <span class="badge badge-ongoing">考核中</span>
+              <span>打分截止：2025-06-28</span>
+              <span class="validation-chip validation-ok">✓ 占比总计 100%</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-secondary" onclick="openModal('modal-additem')">＋ 添加考核明细</button>
+          <button class="btn btn-primary" onclick="openModal('modal-apply')">申请考核</button>
+        </div>
+      </div>
+
+      <!-- 得分概览 -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header">
+          <div class="card-title">得分概览</div>
+          <span style="font-size:12px;color:var(--text3)">权重：AI 30% · 自评 30% · 人工 40%</span>
+        </div>
+        <div class="score-compare">
+          <div class="score-compare-item">
+            <div class="score-compare-label">自评均分</div>
+            <div class="score-compare-val" style="color:var(--text)">78.5</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:4px">已完成 6/8</div>
+          </div>
+          <div class="score-compare-item">
+            <div class="score-compare-label">AI 均分</div>
+            <div class="score-compare-val" style="color:var(--accent)">82.1</div>
+            <div style="font-size:11px;color:var(--green);margin-top:4px">✓ 全部完成</div>
+          </div>
+          <div class="score-compare-item">
+            <div class="score-compare-label">人工均分</div>
+            <div class="score-compare-val" style="color:var(--purple)">80.3</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:4px">4 人已打分</div>
+          </div>
+          <div class="score-compare-item" style="border:1px solid rgba(91,127,255,0.3);background:var(--accent-glow)">
+            <div class="score-compare-label">综合预估</div>
+            <div class="score-compare-val" style="color:var(--accent)">80.7</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:4px">待最终确认</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('dev')">开发 (4)</button>
+        <button class="tab-btn" onclick="switchTab('learn')">学习 (2)</button>
+        <button class="tab-btn" onclick="switchTab('ops')">运维 (2)</button>
+      </div>
+
+      <!-- 考核明细列表 -->
+      <div id="tab-dev" class="tab-panel active">
+
+        <!-- 明细卡片 1 -->
+        <div class="card" style="margin-bottom:12px">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px">
+            <div>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                <span class="tag tag-dev">开发</span>
+                <span style="font-size:13px;color:var(--text2)">用户权限管理模块</span>
+              </div>
+              <div style="font-size:15px;font-weight:600">实现RBAC权限控制功能，支持动态菜单与按钮权限</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <span class="badge badge-done">已完成</span>
+              <span class="ratio-avg" style="font-size:18px">25%</span>
+            </div>
+          </div>
+
+          <!-- 占比设置行 -->
+          <div style="display:flex;gap:24px;align-items:center;padding:12px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:12px">
+            <div style="flex:1">
+              <div style="font-size:11px;color:var(--text3);margin-bottom:4px">创建人占比</div>
+              <input type="number" class="form-control" value="30" style="width:80px;text-align:center" disabled>
+            </div>
+            <div style="color:var(--text3);font-size:18px">+</div>
+            <div style="flex:1">
+              <div style="font-size:11px;color:var(--text3);margin-bottom:4px">执行人占比</div>
+              <input type="number" class="form-control" value="20" style="width:80px;text-align:center">
+            </div>
+            <div style="color:var(--text3);font-size:18px">÷ 2 =</div>
+            <div style="flex:1">
+              <div style="font-size:11px;color:var(--text3);margin-bottom:4px">最终占比</div>
+              <div style="font-family:'DM Mono',monospace;font-size:20px;font-weight:700;color:var(--accent)">25%</div>
+            </div>
+          </div>
+
+          <!-- 完成情况 -->
+          <div style="margin-bottom:12px">
+            <div style="font-size:12px;color:var(--text3);margin-bottom:6px">完成概要</div>
+            <div class="report-snippet">已完成RBAC核心逻辑开发，实现角色-权限-用户三级绑定，动态菜单加载完成，按钮级权限控制联调完毕，单元测试覆盖率 87%。</div>
+          </div>
+
+          <!-- 打分区 -->
+          <div style="display:flex;gap:12px">
+            <div class="score-compare-item" style="flex:1;text-align:center">
+              <div class="score-compare-label">自评</div>
+              <div class="score-compare-val" style="color:var(--text)">82</div>
+            </div>
+            <div class="score-compare-item" style="flex:1;text-align:center">
+              <div class="score-compare-label">AI</div>
+              <div class="score-compare-val" style="color:var(--accent)">85</div>
+            </div>
+            <div class="score-compare-item" style="flex:1;text-align:center">
+              <div class="score-compare-label">人工均分</div>
+              <div class="score-compare-val" style="color:var(--purple)">81</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:2px">4人 · 去极值</div>
+            </div>
+            <div class="score-compare-item" style="flex:1;text-align:center;border-color:rgba(91,127,255,0.3);background:var(--accent-glow)">
+              <div class="score-compare-label">综合得分</div>
+              <div class="score-compare-val" style="color:var(--accent)">82.8</div>
+            </div>
+          </div>
+
+          <!-- AI 说明 -->
+          <div style="margin-top:12px">
+            <div class="report-snippet">
+              <div class="report-snippet-header">🤖 AI 打分依据</div>
+              完成情况：<span class="report-keyword">已完成</span>；周报关键词匹配：
+              <span class="report-keyword">RBAC</span> <span class="report-keyword">权限控制</span> <span class="report-keyword">动态菜单</span>；
+              周报第3周提及该模块完成联调，执行情况与考核内容高度吻合，故得分 85。
+            </div>
+          </div>
+        </div>
+
+        <!-- 明细卡片 2（未完成） -->
+        <div class="card" style="margin-bottom:12px;opacity:.85">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px">
+            <div>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                <span class="tag tag-dev">开发</span>
+                <span style="font-size:13px;color:var(--text2)">报表导出模块</span>
+              </div>
+              <div style="font-size:15px;font-weight:600">实现Excel/PDF多格式报表导出，支持自定义字段</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <span class="badge badge-pending">进行中</span>
+              <span class="ratio-avg" style="font-size:18px">20%</span>
+            </div>
+          </div>
+          <div class="alert alert-warn" style="margin-bottom:12px">
+            ⚠ 自评未填写 · 请在截止日期前完成
+          </div>
+          <div style="display:flex;gap:12px">
+            <div class="score-compare-item" style="flex:1;text-align:center">
+              <div class="score-compare-label">自评</div>
+              <div class="score-compare-val" style="color:var(--text3)">—</div>
+            </div>
+            <div class="score-compare-item" style="flex:1;text-align:center">
+              <div class="score-compare-label">AI</div>
+              <div class="score-compare-val" style="color:var(--accent)">72</div>
+            </div>
+            <div class="score-compare-item" style="flex:1;text-align:center">
+              <div class="score-compare-label">人工均分</div>
+              <div class="score-compare-val" style="color:var(--text3)">—</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:2px">1人 · 不足</div>
+            </div>
+            <div class="score-compare-item" style="flex:1;text-align:center">
+              <div class="score-compare-label">综合得分</div>
+              <div class="score-compare-val" style="color:var(--text3)">—</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ==================== PAGE: SCORING ==================== -->
+    <div id="page-scoring" class="page">
+      <div class="page-header">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="btn btn-ghost btn-sm" onclick="showPage('list')">← 返回</button>
+          <div>
+            <div class="page-title">为 张伟 打分 · 2025年06月</div>
+            <div class="page-subtitle">参考完成情况及周报进行评分，每项每人限打一次</div>
+          </div>
+        </div>
+        <div class="alert alert-info" style="padding:8px 14px;margin:0">
+          截止：2025-06-28 · 还剩 12 天
+        </div>
+      </div>
+
+      <!-- 参考周报 -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header">
+          <div class="card-title">📋 考核人周报参考（2025年06月）</div>
+          <button class="btn btn-ghost btn-sm">展开全部</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="report-snippet">
+            <div class="report-snippet-header">第1周（6月3日）</div>
+            完成用户模块需求评审，开始RBAC权限设计，输出技术方案文档。
+          </div>
+          <div class="report-snippet">
+            <div class="report-snippet-header">第2周（6月10日）</div>
+            RBAC核心代码实现完毕，完成角色-菜单联动功能，进行代码评审。
+          </div>
+          <div class="report-snippet">
+            <div class="report-snippet-header">第3周（6月17日）</div>
+            权限模块联调完成，报表导出需求澄清中，完成Excel基础导出功能。
+          </div>
+        </div>
+      </div>
+
+      <!-- 逐项打分 -->
+      <div class="card" style="margin-bottom:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="tag tag-dev">开发</span>
+              <span class="tag" style="font-size:12px">占比 25%</span>
+            </div>
+            <div style="font-size:15px;font-weight:600;margin-top:6px">实现RBAC权限控制功能，支持动态菜单与按钮权限</div>
+          </div>
+          <span class="badge badge-done">已完成</span>
+        </div>
+
+        <div class="report-snippet" style="margin-bottom:16px">
+          <div class="report-snippet-header">完成概要</div>
+          已完成RBAC核心逻辑，动态菜单和按钮权限联调完毕，单测覆盖率87%。
+        </div>
+
+        <div style="display:flex;gap:12px;margin-bottom:16px">
+          <div class="score-compare-item" style="flex:1;text-align:center">
+            <div class="score-compare-label">AI 打分</div>
+            <div class="score-compare-val" style="color:var(--accent)">85</div>
+          </div>
+          <div class="score-compare-item" style="flex:1;text-align:center">
+            <div class="score-compare-label">当事人自评</div>
+            <div class="score-compare-val" style="color:var(--text)">82</div>
+          </div>
+          <div class="score-compare-item" style="flex:1;text-align:center">
+            <div class="score-compare-label">已收人工均分</div>
+            <div class="score-compare-val" style="color:var(--purple)">81.0</div>
+          </div>
+        </div>
+
+        <div style="border-top:1px solid var(--border);padding-top:16px">
+          <div class="form-label">我的打分</div>
+          <div class="score-input-wrap" style="margin-bottom:12px">
+            <input type="range" class="score-slider" min="0" max="100" value="83" id="slider1" oninput="document.getElementById('val1').textContent=this.value">
+            <span class="score-num" id="val1">83</span>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <textarea class="form-control" placeholder="打分说明（可选）...">RBAC功能完成度高，周报中有明确记录，联调结果良好，略扣分因报表模块进度滞后。</textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="tag tag-dev">开发</span>
+              <span class="tag" style="font-size:12px">占比 20%</span>
+            </div>
+            <div style="font-size:15px;font-weight:600;margin-top:6px">实现Excel/PDF多格式报表导出，支持自定义字段</div>
+          </div>
+          <span class="badge badge-pending">进行中</span>
+        </div>
+        <div class="report-snippet" style="margin-bottom:16px">
+          <div class="report-snippet-header">完成概要</div>
+          需求澄清中，已完成Excel基础导出，PDF及自定义字段功能尚未完成。
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:16px">
+          <div class="form-label">我的打分</div>
+          <div class="score-input-wrap" style="margin-bottom:12px">
+            <input type="range" class="score-slider" min="0" max="100" value="60" id="slider2" oninput="document.getElementById('val2').textContent=this.value">
+            <span class="score-num" id="val2">60</span>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <textarea class="form-control" placeholder="打分说明（可选）..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align:right;margin-top:16px">
+        <button class="btn btn-secondary" style="margin-right:8px">保存草稿</button>
+        <button class="btn btn-primary">提交全部打分</button>
+      </div>
+    </div>
+
+    <!-- ==================== PAGE: CONFIG ==================== -->
+    <div id="page-config" class="page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">系统配置</div>
+          <div class="page-subtitle">配置考核权重及打分规则</div>
+        </div>
+        <button class="btn btn-primary">保存配置</button>
+      </div>
+
+      <div class="grid-2" style="align-items:start">
+        <!-- 权重配置 -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">打分权重配置</div>
+            <span class="validation-chip validation-ok" id="weight-valid">✓ 合计 100%</span>
+          </div>
+          <div class="alert alert-info" style="margin-bottom:16px">
+            权重修改仅对新建考核生效，已创建考核使用快照值
+          </div>
+          <div class="form-group">
+            <div class="form-label">AI 考核权重</div>
+            <div class="score-input-wrap">
+              <input type="range" class="score-slider" min="0" max="100" value="30" id="w-ai" oninput="updateWeights()">
+              <span class="score-num" id="w-ai-val" style="color:var(--accent)">30%</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="form-label">自评权重</div>
+            <div class="score-input-wrap">
+              <input type="range" class="score-slider" min="0" max="100" value="30" id="w-self" oninput="updateWeights()">
+              <span class="score-num" id="w-self-val" style="color:var(--text)">30%</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="form-label">人工考核权重</div>
+            <div class="score-input-wrap">
+              <input type="range" class="score-slider" min="0" max="100" value="40" id="w-manual" oninput="updateWeights()">
+              <span class="score-num" id="w-manual-val" style="color:var(--purple)">40%</span>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:13px;color:var(--text2)">三项合计</span>
+            <span id="weight-total" style="font-family:'DM Mono',monospace;font-size:20px;font-weight:700;color:var(--green)">100%</span>
+          </div>
+        </div>
+
+        <!-- 规则配置 -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div class="card">
+            <div class="card-title" style="margin-bottom:16px">人工打分规则</div>
+            <div class="form-group">
+              <div class="form-label">最低人工打分人数（达到后允许负责人确认）</div>
+              <input type="number" class="form-control" value="3" style="width:100px">
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <div class="form-label" style="display:flex;align-items:center;justify-content:space-between">
+                启用去极值均值计算（去掉最高分和最低分后取均值）
+                <label style="cursor:pointer">
+                  <input type="checkbox" checked style="accent-color:var(--accent)"> 启用
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title" style="margin-bottom:16px">自评缺失处理策略</div>
+            <div class="chip-group">
+              <button class="chip active">以 0 分计入</button>
+              <button class="chip">不计入（按剩余权重归一化）</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title" style="margin-bottom:16px">AI 打分失败处理</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text2)">
+                <input type="radio" name="ai-fail" checked style="accent-color:var(--accent)">
+                允许负责人手动重试
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text2)">
+                <input type="radio" name="ai-fail" style="accent-color:var(--accent)">
+                标记无效，按剩余权重重新计算
+              </label>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title" style="margin-bottom:16px">打分截止时间</div>
+            <div class="form-group" style="margin-bottom:0">
+              <div class="form-label">每月打分截止日（固定日期）</div>
+              <input type="number" class="form-control" value="28" style="width:100px" min="1" max="31">
+              <div style="font-size:11px;color:var(--text3);margin-top:4px">超出当月天数时取月底最后一天</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ==================== MODAL: 申请考核 ==================== -->
+<div class="modal-overlay" id="modal-apply">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">申请考核</div>
+      <button class="modal-close" onclick="closeModal('modal-apply')">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- 步骤 -->
+      <div class="steps">
+        <div class="step-item">
+          <div class="step-circle done">✓</div>
+          <div class="step-line done"></div>
+        </div>
+        <div class="step-item">
+          <div class="step-circle done">✓</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-item">
+          <div class="step-circle active">3</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:-12px;margin-bottom:20px">
+        <span>录入明细</span>
+        <span style="margin-right:20px">设置占比</span>
+        <span>申请确认</span>
+      </div>
+
+      <div class="alert alert-success" style="margin-bottom:16px">✓ 前置校验全部通过</div>
+
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:1px solid var(--border)">
+          <span style="color:var(--text2)">考核项总数</span>
+          <span style="font-weight:600">8 项</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:1px solid var(--border)">
+          <span style="color:var(--text2)">占比总计</span>
+          <span style="font-weight:600;color:var(--green)">100%</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:1px solid var(--border)">
+          <span style="color:var(--text2)">当月周报</span>
+          <span style="font-weight:600;color:var(--green)">已提交 3 份</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 0">
+          <span style="color:var(--text2)">打分截止时间</span>
+          <span style="font-weight:600">2025-06-28 23:59</span>
+        </div>
+      </div>
+
+      <div class="alert alert-warn">
+        ⚠ 申请后，考核明细及周报将<strong>锁定无法修改</strong>，请确认信息无误后提交。
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-apply')">取消</button>
+      <button class="btn btn-primary">确认申请考核</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL: 添加明细 ==================== -->
+<div class="modal-overlay" id="modal-additem">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">添加考核明细</div>
+      <button class="modal-close" onclick="closeModal('modal-additem')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">考核类型</label>
+          <select class="form-control">
+            <option>开发</option>
+            <option>学习</option>
+            <option>研究</option>
+            <option>运维</option>
+            <option>测试</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">系统模块</label>
+          <input class="form-control" placeholder="如：用户权限模块">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">考核内容</label>
+        <textarea class="form-control" placeholder="详细描述本项考核内容及预期目标..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">创建人设置占比（%）</label>
+        <div class="score-input-wrap">
+          <input type="range" class="score-slider" min="0" max="100" value="20" id="ratio-slider" oninput="document.getElementById('ratio-val').textContent=this.value+'%'">
+          <span class="score-num" id="ratio-val" style="font-size:16px">20%</span>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">当前已用占比：80%，剩余可分配：20%</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-additem')">取消</button>
+      <button class="btn btn-primary">添加</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach((t, i) => {
+    const pages = ['dashboard','list','detail','scoring','config'];
+    t.classList.toggle('active', pages[i] === name);
+  });
+  document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+}
+
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if(e.target === o) o.classList.remove('open'); });
+});
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    const names = ['dev','learn','ops'];
+    b.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  const panel = document.getElementById('tab-'+name);
+  if(panel) panel.classList.add('active');
+}
+
+function updateWeights() {
+  const ai = parseInt(document.getElementById('w-ai').value);
+  const self = parseInt(document.getElementById('w-self').value);
+  const manual = parseInt(document.getElementById('w-manual').value);
+  document.getElementById('w-ai-val').textContent = ai + '%';
+  document.getElementById('w-self-val').textContent = self + '%';
+  document.getElementById('w-manual-val').textContent = manual + '%';
+  const total = ai + self + manual;
+  const el = document.getElementById('weight-total');
+  el.textContent = total + '%';
+  el.style.color = total === 100 ? 'var(--green)' : 'var(--red)';
+  const valid = document.getElementById('weight-valid');
+  if(total === 100) {
+    valid.textContent = '✓ 合计 100%';
+    valid.className = 'validation-chip validation-ok';
+  } else {
+    valid.textContent = '✕ 合计 ' + total + '%';
+    valid.className = 'validation-chip validation-err';
+  }
+}
+</script>
+</body>
+</html>

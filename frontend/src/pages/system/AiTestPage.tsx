@@ -1,5 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
-import { Card, Form, Input, Button, message, Divider, Radio, Select, Table, Typography, Alert } from 'antd';
+import { Card, Form, Input, Button, message, Divider, Radio, Select, Table, Typography, Alert, Row, Col } from 'antd';
+import MdEditor from '@uiw/react-md-editor';
+import { getCommands, getExtraCommands } from '@uiw/react-md-editor/commands-cn';
+import { useThemeMode } from '../../theme/ThemeContext';
 import { useAuth } from '../../stores/auth';
 import { canUseAiAssessment } from '../../utils/permissions';
 import { departmentsApi, positionsApi, scoresApi, settingsApi } from '../../api/client';
@@ -48,6 +51,34 @@ type AiTestResult = {
   totalScore: number;
   remark: string;
 };
+
+function AiTestMdEditor({
+  value,
+  onChange,
+  placeholder,
+  height = 220,
+}: {
+  value?: string;
+  onChange?: (v?: string) => void;
+  placeholder?: string;
+  height?: number;
+}) {
+  const themeMode = useThemeMode();
+  return (
+    <div data-color-mode={themeMode} className="ai-test-md-editor-wrap">
+      <MdEditor
+        value={value ?? ''}
+        onChange={onChange}
+        commands={getCommands()}
+        extraCommands={getExtraCommands()}
+        preview="live"
+        height={height}
+        visibleDragbar={false}
+        textareaProps={{ placeholder }}
+      />
+    </div>
+  );
+}
 
 export default function AiTestPage() {
   const { user } = useAuth();
@@ -176,47 +207,49 @@ export default function AiTestPage() {
             />
           </Form.Item>
           {criteriaSource === 'position' && (
-            <>
-              <Form.Item label="部门">
-                <Select
-                  placeholder="选择部门"
-                  allowClear
-                  style={{ width: 200 }}
-                  value={testDepartmentId}
-                  onChange={(v) => {
-                    setTestDepartmentId(v ?? undefined);
-                    setTestPositionId(undefined);
-                    setTestCriteria('');
-                  }}
-                  options={departments.map((d) => ({ value: d.id, label: d.name }))}
-                />
-              </Form.Item>
-              <Form.Item label="岗位">
-                <Select
-                  placeholder="选择岗位"
-                  allowClear
-                  style={{ width: 200 }}
-                  value={testPositionId}
-                  onChange={onPositionSelect}
-                  options={positionOptionsByDept.map((p) => ({ value: p.id, label: p.name }))}
-                />
-              </Form.Item>
-            </>
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item label="部门">
+                  <Select
+                    placeholder="选择部门"
+                    allowClear
+                    value={testDepartmentId}
+                    onChange={(v) => {
+                      setTestDepartmentId(v ?? undefined);
+                      setTestPositionId(undefined);
+                      setTestCriteria('');
+                    }}
+                    options={departments.map((d) => ({ value: d.id, label: d.name }))}
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item label="岗位">
+                  <Select
+                    placeholder="选择岗位"
+                    allowClear
+                    value={testPositionId}
+                    onChange={onPositionSelect}
+                    options={positionOptionsByDept.map((p) => ({ value: p.id, label: p.name }))}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
           )}
           <Form.Item label="考核标准" extra="从岗位获取后会填入该岗位的考核标准，也可手工编辑">
-            <Input.TextArea
-              rows={6}
+            <AiTestMdEditor
               value={testCriteria}
-              onChange={(e) => setTestCriteria(e.target.value)}
-              placeholder="Markdown 或 JSON 格式的考核标准"
+              onChange={(v) => setTestCriteria(v ?? '')}
+              placeholder="使用 Markdown（简体中文）编写考核标准，例如按考核项分级描述"
+              height={220}
             />
           </Form.Item>
           <Form.Item label="周报/日报内容">
-            <Input.TextArea
-              rows={8}
+            <AiTestMdEditor
               value={testWorkContent}
-              onChange={(e) => setTestWorkContent(e.target.value)}
-              placeholder="粘贴或输入待考核的工作记录内容"
+              onChange={(v) => setTestWorkContent(v ?? '')}
+              placeholder="使用 Markdown（简体中文）编写周报/日报内容，建议条目化列出工作事项"
+              height={260}
             />
           </Form.Item>
           <Form.Item>

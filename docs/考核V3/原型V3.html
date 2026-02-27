@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>月度考核系统</title>
+<style>
+/* ─── LOCAL FONT FALLBACKS (no remote request) ─── */
+@font-face{
+  font-family:'Noto Sans SC';
+  src:local('Noto Sans SC'),local('Source Han Sans SC'),local('PingFang SC'),local('Microsoft YaHei');
+  font-display:swap;
+}
+@font-face{
+  font-family:'Noto Serif SC';
+  src:local('Noto Serif SC'),local('Source Han Serif SC'),local('Songti SC'),local('STSong');
+  font-display:swap;
+}
+@font-face{
+  font-family:'JetBrains Mono';
+  src:local('JetBrains Mono'),local('Cascadia Mono'),local('Consolas');
+  font-display:swap;
+}
+/* ─── THEME: light (default for no-preference) ─── */
+:root{
+  --font-sans:'Noto Sans SC','Source Han Sans SC','PingFang SC','Microsoft YaHei',sans-serif;
+  --font-serif:'Noto Serif SC','Source Han Serif SC','Songti SC','STSong',serif;
+  --font-mono:'JetBrains Mono','Cascadia Mono','Consolas','Courier New',monospace;
+  --bg:#f1f5f9;--bg2:#ffffff;--bg3:#f8fafc;--bg4:#e2e8f0;
+  --surface:#ffffff;--border:#e2e8f0;--border2:#cbd5e1;
+  --text:#0f172a;--text2:#334155;--text3:#64748b;
+  --accent:#465fff;--accent2:#3641f5;--alit:rgba(70,95,255,.12);--amd:rgba(70,95,255,.32);
+  --blue:#3b82f6;--blit:rgba(59,130,246,.12);--bmd:rgba(59,130,246,.32);
+  --gold:#d97706;--glit:rgba(217,119,6,.12);--gmd:rgba(217,119,6,.3);
+  --red:#dc2626;--rlit:rgba(220,38,38,.12);--rmd:rgba(220,38,38,.3);
+  --purple:#7c3aed;--plit:rgba(124,58,237,.12);--pmd:rgba(124,58,237,.3);
+  --orange:#ea580c;--olit:rgba(234,88,12,.12);
+  --teal:#0891b2;--tlit:rgba(8,145,178,.12);--tmd:rgba(8,145,178,.3);
+  --pink:#db2777;--pklit:rgba(219,39,119,.12);
+  --hero-a:#1d4ed8;--hero-b:#0f766e;--hero-glow:rgba(147,197,253,.35);
+  --hero-title:#f8fbff;--hero-sub:rgba(239,246,255,.9);
+  --header-h:56px;--sidebar-w:238px;--sidebar-collapsed:84px;
+  --r:10px;--rs:7px;--rx:4px;
+  --shadow:0 6px 24px rgba(15,23,42,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0f172a;--bg2:#111827;--bg3:#1e293b;--bg4:#334155;
+    --surface:#111827;--border:#243045;--border2:#334155;
+    --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+    --accent:#6d7dff;--accent2:#5b6df8;--alit:rgba(109,125,255,.16);--amd:rgba(109,125,255,.34);
+    --blue:#60a5fa;--blit:rgba(96,165,250,.16);--bmd:rgba(96,165,250,.34);
+    --gold:#f59e0b;--glit:rgba(245,158,11,.16);--gmd:rgba(245,158,11,.34);
+    --red:#f87171;--rlit:rgba(248,113,113,.16);--rmd:rgba(248,113,113,.34);
+    --purple:#a78bfa;--plit:rgba(167,139,250,.16);--pmd:rgba(167,139,250,.34);
+    --orange:#fb923c;--olit:rgba(251,146,60,.16);
+    --teal:#22d3ee;--tlit:rgba(34,211,238,.14);--tmd:rgba(34,211,238,.32);
+    --pink:#f472b6;--pklit:rgba(244,114,182,.14);
+    --hero-a:#111827;--hero-b:#1e3a8a;--hero-glow:rgba(59,130,246,.24);
+    --hero-title:#f8fafc;--hero-sub:rgba(226,232,240,.84);
+    --shadow:0 10px 28px rgba(2,6,23,.38);
+  }
+}
+[data-theme="dark"]{
+  --bg:#0f172a;--bg2:#111827;--bg3:#1e293b;--bg4:#334155;
+  --surface:#111827;--border:#243045;--border2:#334155;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+  --accent:#6d7dff;--accent2:#5b6df8;--alit:rgba(109,125,255,.16);--amd:rgba(109,125,255,.34);
+  --blue:#60a5fa;--blit:rgba(96,165,250,.16);--bmd:rgba(96,165,250,.34);
+  --gold:#f59e0b;--glit:rgba(245,158,11,.16);--gmd:rgba(245,158,11,.34);
+  --red:#f87171;--rlit:rgba(248,113,113,.16);--rmd:rgba(248,113,113,.34);
+  --purple:#a78bfa;--plit:rgba(167,139,250,.16);--pmd:rgba(167,139,250,.34);
+  --orange:#fb923c;--olit:rgba(251,146,60,.16);
+  --teal:#22d3ee;--tlit:rgba(34,211,238,.14);--tmd:rgba(34,211,238,.32);
+  --pink:#f472b6;--pklit:rgba(244,114,182,.14);
+  --hero-a:#111827;--hero-b:#1e3a8a;--hero-glow:rgba(59,130,246,.24);
+  --hero-title:#f8fafc;--hero-sub:rgba(226,232,240,.84);
+  --shadow:0 10px 28px rgba(2,6,23,.38);
+}
+[data-theme="light"]{
+  --bg:#f1f5f9;--bg2:#ffffff;--bg3:#f8fafc;--bg4:#e2e8f0;
+  --surface:#ffffff;--border:#e2e8f0;--border2:#cbd5e1;
+  --text:#0f172a;--text2:#334155;--text3:#64748b;
+  --accent:#465fff;--accent2:#3641f5;--alit:rgba(70,95,255,.12);--amd:rgba(70,95,255,.32);
+  --blue:#3b82f6;--blit:rgba(59,130,246,.12);--bmd:rgba(59,130,246,.32);
+  --gold:#d97706;--glit:rgba(217,119,6,.12);--gmd:rgba(217,119,6,.3);
+  --red:#dc2626;--rlit:rgba(220,38,38,.12);--rmd:rgba(220,38,38,.3);
+  --purple:#7c3aed;--plit:rgba(124,58,237,.12);--pmd:rgba(124,58,237,.3);
+  --orange:#ea580c;--olit:rgba(234,88,12,.12);
+  --teal:#0891b2;--tlit:rgba(8,145,178,.12);--tmd:rgba(8,145,178,.3);
+  --pink:#db2777;--pklit:rgba(219,39,119,.12);
+  --hero-a:#1d4ed8;--hero-b:#0f766e;--hero-glow:rgba(147,197,253,.35);
+  --hero-title:#f8fbff;--hero-sub:rgba(239,246,255,.9);
+  --shadow:0 6px 24px rgba(15,23,42,.06);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--font-sans);background:radial-gradient(1100px 700px at 100% -10%,var(--blit),transparent 48%),radial-gradient(900px 560px at 0% 100%,var(--alit),transparent 46%),var(--bg);color:var(--text);font-size:13px;line-height:1.65;}
+.app-wrap{display:flex;min-height:100vh;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+
+/* ─── SIDEBAR (left nav) ─── */
+.sidebar{width:var(--sidebar-w);flex-shrink:0;position:fixed;left:0;top:0;bottom:0;z-index:300;
+  background:var(--bg2);border-right:1px solid var(--border);box-shadow:var(--shadow);
+  display:flex;flex-direction:column;overflow:hidden;}
+.sidebar .nb{font-family:var(--font-serif);font-size:15px;font-weight:700;
+  display:flex;align-items:center;gap:10px;padding:0 18px;height:var(--header-h);border-bottom:1px solid var(--border);flex-shrink:0;}
+.sidebar .nd{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);}
+.brand-title{white-space:nowrap;letter-spacing:.02em;}
+.sidebar .nm{flex:1;overflow-y:auto;overflow-x:hidden;padding:10px 0;}
+.sidebar .nsep{height:1px;background:var(--border);margin:8px 14px;}
+.sidebar .ngroup{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;padding:12px 18px 6px;}
+.sidebar .ni{width:100%;padding:8px 18px;border-radius:0;color:var(--text2);font-size:12px;
+  cursor:pointer;transition:all .15s;border:none;background:none;font-family:inherit;
+  text-align:left;display:flex;align-items:center;gap:10px;border-left:3px solid transparent;}
+.sidebar .ni:hover{color:var(--text);background:var(--bg3);}
+.sidebar .ni.active{color:var(--accent);background:var(--alit);border-left-color:var(--accent);}
+.ni-ic{width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;border-radius:5px;
+  color:var(--text3);background:transparent;transition:all .15s;}
+.ni.active .ni-ic{color:var(--accent);background:var(--alit);}
+.ni-tx{white-space:nowrap;}
+.sidebar .nib{background:var(--red);color:#fff;font-size:9px;font-weight:700;
+  padding:1px 5px;border-radius:8px;line-height:1.3;margin-left:auto;}
+.sidebar .nib-y{background:var(--gold);}
+.sidebar .nib-g{background:var(--accent2);}
+.topbar{height:var(--header-h);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:0 24px;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:320;}
+.topl{display:flex;align-items:center;gap:10px;}
+.topr{display:flex;align-items:center;gap:12px;}
+.nav-toggle{width:30px;height:30px;border-radius:8px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;font-size:14px;line-height:1;transition:all .15s;}
+.nav-toggle:hover{border-color:var(--accent);color:var(--accent);background:var(--alit);}
+.top-tag{font-size:11px;color:var(--text3);padding:4px 10px;border:1px solid var(--border);border-radius:999px;background:var(--bg3);}
+.theme-select,.lang-select{padding:4px 10px;border-radius:var(--rs);font-size:11px;border:1px solid var(--border2);
+  background:var(--bg3);color:var(--text);cursor:pointer;font-family:inherit;}
+.theme-select:focus,.lang-select:focus{outline:none;border-color:var(--accent);}
+.av{width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--blue));
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;}
+.ntag{font-size:11px;color:var(--text3);background:var(--bg3);
+  padding:2px 8px;border-radius:20px;border:1px solid var(--border);}
+.side-user{padding:12px 16px;border-top:1px solid var(--border);flex-shrink:0;}
+.usr{display:flex;align-items:center;gap:10px;}
+.usr-meta{display:flex;flex-direction:column;gap:3px;}
+.usr-name{font-size:13px;font-weight:600;line-height:1;}
+.usr-role{font-size:11px;color:var(--text3);line-height:1.2;}
+
+/* ─── LAYOUT ─── */
+.main-content{flex:1;margin-left:var(--sidebar-w);display:flex;flex-direction:column;min-height:100vh;transition:margin-left .2s ease;}
+.main{padding:20px 26px 32px;min-height:calc(100vh - var(--header-h));max-width:1400px;margin:0 auto;width:100%;}
+.page{display:none;}
+.page.active{display:block;animation:fi .2s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
+.app-wrap.sidebar-collapsed .sidebar{width:var(--sidebar-collapsed);}
+.app-wrap.sidebar-collapsed .main-content{margin-left:var(--sidebar-collapsed);}
+.app-wrap.sidebar-collapsed .brand-title,.app-wrap.sidebar-collapsed .ngroup,.app-wrap.sidebar-collapsed .ni-tx,.app-wrap.sidebar-collapsed .usr-meta,.app-wrap.sidebar-collapsed .nib{display:none;}
+.app-wrap.sidebar-collapsed .sidebar .nb,.app-wrap.sidebar-collapsed .side-user{padding-left:10px;padding-right:10px;justify-content:center;}
+.app-wrap.sidebar-collapsed .sidebar .ni{justify-content:center;padding-left:10px;padding-right:10px;border-left-color:transparent;}
+.app-wrap.sidebar-collapsed .sidebar .ni.active{border-left-color:transparent;}
+.app-wrap.sidebar-collapsed .sidebar .nsep{margin-left:10px;margin-right:10px;}
+.app-wrap.sidebar-collapsed .av{width:34px;height:34px;}
+
+/* ─── TYPE ─── */
+.pt{font-family:var(--font-serif);font-size:20px;font-weight:700;}
+.ps{color:var(--text3);font-size:12px;margin-top:3px;}
+
+/* ─── GRID & FLEX ─── */
+.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
+.g13{display:grid;grid-template-columns:1fr 3fr;gap:14px;}
+.g31{display:grid;grid-template-columns:3fr 1fr;gap:14px;}
+.fx{display:flex;align-items:center;}
+.g6{gap:6px;}.g8{gap:8px;}.g12{gap:12px;}
+.mla{margin-left:auto;}
+.fw6{font-weight:600;}
+.mn{font-family:var(--font-mono);}
+.mt8{margin-top:8px;}.mt12{margin-top:12px;}.mt16{margin-top:16px;}
+.mb8{margin-bottom:8px;}.mb10{margin-bottom:10px;}.mb12{margin-bottom:12px;}.mb14{margin-bottom:14px;}.mb16{margin-bottom:16px;}
+.mb0{margin-bottom:0;}
+.wrap{flex-wrap:wrap;}
+
+/* ─── CARD ─── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);}
+.ct{font-size:13px;font-weight:600;}
+.ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+
+/* ─── BADGE ─── */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;}
+.badge::before{content:'';width:4px;height:4px;border-radius:50%;background:currentColor;opacity:.8;}
+.bw{color:var(--gold);background:var(--glit);}
+.bo{color:var(--blue);background:var(--blit);}
+.bd{color:var(--accent);background:var(--alit);}
+.br{color:var(--red);background:var(--rlit);}
+.bp{color:var(--purple);background:var(--plit);}
+.bg{color:var(--orange);background:var(--olit);}
+.bt{color:var(--teal);background:var(--tlit);}
+.bsp{color:var(--gold);background:var(--glit);border:1px solid var(--gmd);}
+.bpk{color:var(--pink);background:var(--pklit);}
+.blt{color:var(--accent);background:var(--alit);}
+.bmd2{color:var(--gold);background:var(--glit);}
+.bhv{color:var(--red);background:var(--rlit);}
+
+/* ─── BTN ─── */
+.btn{padding:6px 14px;border-radius:var(--rs);font-size:12px;font-weight:500;
+  cursor:pointer;border:none;transition:all .15s;display:inline-flex;
+  align-items:center;gap:5px;font-family:inherit;line-height:1;}
+.btn-p{background:var(--accent2);color:#fff;}
+.btn-p:hover{background:var(--accent);transform:translateY(-1px);}
+.btn-s{background:var(--bg3);color:var(--text);border:1px solid var(--border2);}
+.btn-s:hover{border-color:var(--accent);color:var(--accent);}
+.btn-g{background:transparent;color:var(--text2);}
+.btn-g:hover{color:var(--text);background:var(--bg3);}
+.btn-d{background:var(--rlit);color:var(--red);border:1px solid var(--rmd);}
+.btn-y{background:var(--glit);color:var(--gold);border:1px solid var(--gmd);}
+.btn-t{background:var(--tlit);color:var(--teal);border:1px solid var(--tmd);}
+.btn-pu{background:var(--plit);color:var(--purple);border:1px solid var(--pmd);}
+.btn-sm{padding:4px 10px;font-size:11px;}
+.btn-xs{padding:3px 8px;font-size:10px;}
+.btn-h{height:34px;padding:0 14px;display:inline-flex;align-items:center;justify-content:center;}
+
+/* ─── TABLE ─── */
+.tw{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;font-size:10px;font-weight:600;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;
+  border-bottom:1px solid var(--border);background:var(--bg2);}
+td{padding:10px;border-bottom:1px solid var(--border);color:var(--text2);font-size:12px;vertical-align:middle;}
+td:first-child{color:var(--text);font-weight:500;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.02);}
+
+/* ─── STAT ─── */
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;box-shadow:var(--shadow);}
+.slbl{font-size:10px;color:var(--text3);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em;}
+.sval{font-size:24px;font-weight:700;font-family:var(--font-mono);line-height:1;}
+.snote{font-size:10px;color:var(--text3);margin-top:4px;}
+.prog{height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;margin-top:6px;}
+.pf{height:100%;border-radius:2px;background:var(--accent);}
+.pf-b{background:var(--blue);}
+.pf-y{background:var(--gold);}
+.pf-r{background:var(--red);}
+.pf-t{background:var(--teal);}
+.pf-p{background:var(--purple);}
+
+/* ─── FORM ─── */
+.fg{margin-bottom:12px;}
+.fl{font-size:11px;color:var(--text2);margin-bottom:4px;display:block;font-weight:500;}
+.fc{width:100%;padding:7px 10px;background:var(--bg3);border:1px solid var(--border2);
+  border-radius:var(--rs);color:var(--text);font-size:12px;font-family:inherit;
+  outline:none;transition:border-color .15s;}
+.fc:focus{border-color:var(--accent);}
+.fc::placeholder{color:var(--text3);}
+select.fc{cursor:pointer;}
+textarea.fc{resize:vertical;min-height:70px;}
+.divl{height:1px;background:var(--border);margin:14px 0;}
+
+/* ─── TAGS ─── */
+.tag{display:inline-block;padding:2px 7px;border-radius:var(--rx);font-size:10px;font-weight:500;background:var(--bg3);color:var(--text2);border:1px solid var(--border);}
+.tdev{background:var(--blit);color:var(--blue);border-color:rgba(74,158,255,.25);}
+.tlrn{background:var(--plit);color:var(--purple);border-color:var(--pmd);}
+.tops{background:var(--tlit);color:var(--teal);border-color:var(--tmd);}
+.ttst{background:var(--olit);color:var(--orange);border-color:rgba(255,140,66,.25);}
+.tdim{background:var(--glit);color:var(--gold);border-color:var(--gmd);}
+.tres{background:var(--pklit);color:var(--pink);border-color:rgba(244,114,182,.25);}
+
+/* ─── TIMELINE ─── */
+.tl{display:flex;flex-direction:column;}
+.tli{display:flex;gap:10px;}
+.tlln{display:flex;flex-direction:column;align-items:center;}
+.tldt{width:9px;height:9px;border-radius:50%;background:var(--border2);flex-shrink:0;margin-top:4px;border:2px solid var(--border);}
+.tldt.done{background:var(--accent);border-color:var(--accent);}
+.tldt.act{background:var(--blue);border-color:var(--blue);box-shadow:0 0 0 3px var(--blit);}
+.tldt.warn{background:var(--gold);border-color:var(--gold);box-shadow:0 0 0 3px var(--glit);}
+.tldt.sp{background:var(--purple);border-color:var(--purple);box-shadow:0 0 0 3px var(--plit);}
+.tlcon{width:1px;flex:1;background:var(--border);min-height:14px;margin:2px 0;}
+.tlcon.done{background:var(--amd);}
+.tlct{padding-bottom:16px;flex:1;}
+.tltit{font-size:12px;font-weight:600;}
+.tldsc{font-size:11px;color:var(--text3);margin-top:1px;}
+
+/* ─── SCORE BOXES ─── */
+.sbs{display:flex;gap:6px;}
+.sb{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:10px;text-align:center;}
+.sbl{font-size:9px;color:var(--text3);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em;}
+.sbv{font-family:var(--font-mono);font-size:20px;font-weight:700;}
+.sbn{font-size:9px;color:var(--text3);margin-top:2px;}
+.sb.hl{background:var(--alit);border-color:var(--amd);}
+.sb.hlb{background:var(--blit);border-color:var(--bmd);}
+.sb.hlg{background:var(--glit);border-color:var(--gmd);}
+
+/* ─── ALERT ─── */
+.alert{padding:9px 12px;border-radius:var(--rs);font-size:11px;display:flex;gap:7px;align-items:flex-start;line-height:1.6;}
+.ali{background:var(--blit);border:1px solid var(--bmd);color:var(--blue);}
+.alw{background:var(--glit);border:1px solid var(--gmd);color:var(--gold);}
+.als{background:var(--alit);border:1px solid var(--amd);color:var(--accent);}
+.ald{background:var(--rlit);border:1px solid var(--rmd);color:var(--red);}
+.alt{background:var(--tlit);border:1px solid var(--tmd);color:var(--teal);}
+.alp{background:var(--plit);border:1px solid var(--pmd);color:var(--purple);}
+
+/* ─── CHECKLIST ─── */
+.cl{display:flex;flex-direction:column;gap:5px;}
+.cli{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--rs);font-size:12px;}
+.cli.ok{background:var(--alit);color:var(--accent);}
+.cli.err{background:var(--rlit);color:var(--red);}
+.cli.warn{background:var(--glit);color:var(--gold);}
+.cli.info{background:var(--blit);color:var(--blue);}
+
+/* ─── CHIPS ─── */
+.chips{display:flex;flex-wrap:wrap;gap:5px;}
+.chip{padding:3px 10px;border-radius:20px;font-size:11px;border:1px solid var(--border2);
+  color:var(--text2);cursor:pointer;transition:all .15s;background:transparent;font-family:inherit;}
+.chip:hover{border-color:var(--accent);color:var(--accent);}
+.chip.on{background:var(--alit);border-color:var(--amd);color:var(--accent);font-weight:500;}
+
+/* ─── CONFIG UI ─── */
+.wrow{display:flex;align-items:center;gap:10px;padding:6px 0;}
+.wname{width:90px;font-weight:600;color:var(--text);}
+.wval{width:48px;text-align:right;font-family:var(--font-mono);}
+.pill{padding:6px 12px;border-radius:14px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;font-size:12px;}
+.pill.on{border-color:var(--accent);color:var(--accent);background:var(--alit);font-weight:600;}
+.distbar{height:10px;border-radius:6px;overflow:hidden;display:flex;background:var(--bg3);border:1px solid var(--border2);}
+.dist-seg{height:100%;}
+.dist-ex{background:var(--accent);}
+.dist-good{background:var(--blue);}
+.dist-bad{background:var(--red);}
+.dist-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.dchip{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;border:1px solid var(--border);background:var(--bg3);font-size:10px;color:var(--text2);}
+.quota{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.quota .dchip strong{font-family:var(--font-mono);color:var(--text);}
+.dist-two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
+.dist-row{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text3);}
+.dist-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.dist-dot.ex{background:var(--accent);}
+.dist-dot.good{background:var(--blue);}
+.dist-dot.bad{background:var(--red);}
+
+/* ─── TABS ─── */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:14px;}
+.tabb{padding:7px 14px;font-size:12px;color:var(--text2);border:none;background:none;
+  cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;
+  font-family:inherit;transition:all .15s;}
+.tabb.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
+.tabb:hover:not(.active){color:var(--text);}
+.tabp{display:none;}
+.tabp.active{display:block;}
+
+/* ─── SLIDER ─── */
+.slw{display:flex;align-items:center;gap:8px;}
+.sl{flex:1;appearance:none;-webkit-appearance:none;height:3px;background:var(--bg4);border-radius:2px;outline:none;cursor:pointer;}
+.sl::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.3);}
+.slv{font-family:var(--font-mono);font-size:16px;font-weight:600;color:var(--accent);min-width:36px;text-align:right;}
+
+/* ─── MODAL ─── */
+.overlay{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:10px;width:560px;max-width:96vw;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.6);animation:mi .2s ease;}
+.modal-lg{width:700px;}
+@keyframes mi{from{transform:scale(.96) translateY(8px);opacity:0;}to{transform:none;opacity:1;}}
+.mhd{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:1;}
+.mtit{font-size:14px;font-weight:700;font-family:var(--font-serif);}
+.mx{width:24px;height:24px;border-radius:4px;background:var(--bg3);border:none;cursor:pointer;color:var(--text2);font-size:13px;display:flex;align-items:center;justify-content:center;}
+.mx:hover{background:var(--bg4);}
+.mbdy{padding:18px;}
+.mft{padding:12px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;position:sticky;bottom:0;background:var(--bg2);}
+
+/* ─── EVIDENCE / REPORT ─── */
+.evbox{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--rs) var(--rs) 0;padding:9px 11px;font-size:11px;color:var(--text2);line-height:1.7;}
+.evbox.t{border-left-color:var(--teal);}
+.evbox.y{border-left-color:var(--gold);}
+.evbox.p{border-left-color:var(--purple);}
+.evhd{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.rsnip{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:9px 11px;font-size:11px;color:var(--text2);line-height:1.7;}
+.rshd{font-size:9px;color:var(--text3);margin-bottom:4px;}
+.kw{background:rgba(63,184,132,.15);color:var(--accent);padding:0 3px;border-radius:2px;font-weight:500;}
+.kwt{background:var(--tlit);color:var(--teal);padding:0 3px;border-radius:2px;font-weight:500;}
+.kwb{background:var(--blit);color:var(--blue);padding:0 3px;border-radius:2px;font-weight:500;}
+
+/* ─── ANCHOR BAR ─── */
+.abar{display:flex;border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;font-size:10px;}
+.abi{flex:1;padding:5px 7px;border-right:1px solid var(--border);text-align:center;}
+.abi:last-child{border-right:none;}
+.abi.cur{background:var(--alit);}
+.abr{font-weight:600;font-size:11px;}
+.abd{color:var(--text3);margin-top:1px;font-size:9px;}
+
+/* ─── PILL ─── */
+.pill{display:inline-flex;align-items:center;gap:4px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:2px 9px;font-size:10px;color:var(--text2);cursor:pointer;transition:all .15s;}
+.pill:hover{border-color:var(--accent);color:var(--accent);}
+.pill.t{border-color:var(--tmd);color:var(--teal);background:var(--tlit);}
+.pill.b{border-color:var(--bmd);color:var(--blue);background:var(--blit);}
+.pill.g{border-color:var(--gmd);color:var(--gold);background:var(--glit);}
+.pill.p{border-color:var(--pmd);color:var(--purple);background:var(--plit);}
+
+/* ─── HERO ─── */
+.hero{background:linear-gradient(135deg,var(--hero-a) 0%,var(--hero-b) 100%);border:1px solid rgba(255,255,255,.14);border-radius:var(--r);padding:20px 24px;margin-bottom:14px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;right:-30px;top:-30px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,var(--hero-glow),transparent);}
+.htit{font-family:var(--font-serif);font-size:17px;font-weight:700;margin-bottom:3px;color:var(--hero-title);}
+.hsub{font-size:11px;color:var(--hero-sub);}
+.hact{display:flex;gap:7px;margin-top:14px;flex-wrap:wrap;}
+
+/* ─── SUSPEND ─── */
+.scard{border:1px solid var(--tmd);background:rgba(34,211,238,.04);border-radius:var(--r);padding:14px;margin-bottom:10px;}
+.scard-hd{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.sseq{width:20px;height:20px;border-radius:50%;background:var(--tlit);border:1px solid var(--tmd);color:var(--teal);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.slvl{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:var(--rs);font-size:11px;font-weight:600;}
+.sllt{background:var(--alit);color:var(--accent);border:1px solid var(--amd);}
+.slmd{background:var(--glit);color:var(--gold);border:1px solid var(--gmd);}
+.slhv{background:var(--rlit);color:var(--red);border:1px solid var(--rmd);}
+
+/* ─── DIM ROW ─── */
+.drow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+.drow:last-child{border-bottom:none;}
+.dname{font-size:12px;font-weight:500;flex:0 0 70px;}
+.dbarw{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.dbarf{height:100%;border-radius:3px;background:var(--accent);}
+.dscore{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--accent);min-width:34px;text-align:right;}
+.dwt{font-size:10px;color:var(--text3);min-width:28px;text-align:right;}
+
+/* ─── DIST BAR ─── */
+.distbar{display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px;margin-top:6px;}
+.dseg{height:100%;border-radius:3px;}
+
+/* ─── STEPS ─── */
+.steps{display:flex;align-items:flex-start;margin-bottom:20px;}
+.stn{display:flex;flex-direction:column;align-items:center;}
+.stc{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;border:1px solid var(--border);background:var(--bg3);color:var(--text3);}
+.stc.act{background:var(--blue);border-color:var(--blue);color:#fff;}
+.stc.done{background:var(--accent);border-color:var(--accent);color:#fff;}
+.stlbl{font-size:9px;color:var(--text3);margin-top:3px;white-space:nowrap;}
+.stlbl.act{color:var(--blue);}
+.stlbl.done{color:var(--accent);}
+.stline{flex:1;height:1px;background:var(--border);margin-top:12px;}
+.stline.done{background:var(--amd);}
+
+/* ─── VC ─── */
+.vc{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500;}
+.vco{background:var(--alit);color:var(--accent);}
+.vce{background:var(--rlit);color:var(--red);}
+.vcw{background:var(--glit);color:var(--gold);}
+.vci{background:var(--blit);color:var(--blue);}
+
+/* ─── PENDING ─── */
+.pend{display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--rs);border:1px solid var(--border);cursor:pointer;transition:all .15s;margin-bottom:7px;background:var(--surface);}
+.pend:hover{border-color:var(--accent);transform:translateX(2px);}
+.picon{width:32px;height:32px;border-radius:var(--rs);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+
+/* ─── ANCHOR TABLE ─── */
+.atbl{width:100%;border-collapse:collapse;margin-top:8px;font-size:11px;}
+.atbl th{background:var(--bg3);color:var(--text3);padding:6px 8px;border:1px solid var(--border);text-align:left;font-weight:600;font-size:10px;}
+.atbl td{padding:6px 8px;border:1px solid var(--border);color:var(--text2);vertical-align:top;}
+.atbl tr:nth-child(1) td{background:rgba(63,184,132,.07);color:var(--accent);}
+.atbl tr:nth-child(2) td{background:rgba(240,180,41,.05);}
+.atbl tr:nth-child(3) td{background:rgba(255,140,66,.05);}
+.atbl tr:nth-child(4) td{background:rgba(245,94,94,.07);color:var(--red);}
+
+/* ─── WEIGHT ROW ─── */
+.wrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.wrow:last-child{border-bottom:none;}
+.wname{font-size:12px;color:var(--text2);flex:0 0 90px;}
+.wval{font-family:var(--font-mono);font-size:15px;font-weight:600;min-width:40px;text-align:right;}
+
+/* ─── CALIB ROW ─── */
+.crow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+.crow:last-child{border-bottom:none;}
+
+/* ─── SCORE HISTORY ─── */
+.shrow{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);}
+.shrow:last-child{border-bottom:none;}
+.shmon{font-size:11px;color:var(--text3);flex:0 0 64px;}
+.shbar{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.shfill{height:100%;border-radius:3px;}
+.shsc{font-family:var(--font-mono);font-size:13px;font-weight:600;min-width:36px;text-align:right;}
+
+/* ─── PERSONA ─── */
+.persona{display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);}
+.pavatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;}
+
+/* ─── FEEDBACK CARD ─── */
+.fcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px;}
+.fcard.fdone{border-left:3px solid var(--accent);}
+.fcard.fpend{border-left:3px solid var(--gold);}
+.fcard.fsched{border-left:3px solid var(--blue);}
+
+/* ─── WEEKLY SECTION ─── */
+.wrsec{border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;margin-bottom:8px;}
+.wrshd{background:var(--bg3);padding:8px 12px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+.wrshd:hover{background:var(--bg4);}
+.wrsbdy{padding:12px;}
+.wr-grid{align-items:stretch;}
+.wr-grid>div{display:flex;flex-direction:column;}
+.wr-grid .evbox{flex:1;}
+.eq-cards{align-items:stretch;}
+.eq-cards>div{display:flex;flex-direction:column;}
+.eq-cards .evbox{flex:1;}
+#page-list th:last-child,#page-list td:last-child{white-space:nowrap;width:200px;min-width:200px;}
+#page-list td:last-child .fx{display:flex;gap:6px;flex-wrap:nowrap;justify-content:flex-start;align-items:center;}
+#page-stats .g5{gap:16px;}
+#page-stats .g2{gap:16px;}
+#page-stats .card,#page-stats .stat{padding:16px;}
+#page-detail .g2,#page-scoring .g2{gap:12px;}
+#page-detail .card,#page-detail .scard,#page-scoring .card,#page-scoring .scard{margin-bottom:12px;}
+#page-detail .tabp .card:last-child,#page-detail .tabp .scard:last-child,#page-scoring .card:last-child,#page-scoring .scard:last-child{margin-bottom:0;}
+@media (max-width:1100px){
+  .g5{grid-template-columns:repeat(2,1fr);}
+  .g4{grid-template-columns:repeat(2,1fr);}
+  .g3{grid-template-columns:1fr 1fr;}
+  .g2{grid-template-columns:1fr;}
+  #page-config .g2[style*="grid-template-columns"]{grid-template-columns:1fr!important;}
+}
+@media (max-width:780px){
+  .main{padding:14px;}
+  .topbar{padding:0 12px;}
+  .top-tag{display:none;}
+  .sidebar{width:var(--sidebar-collapsed);}
+  .main-content{margin-left:var(--sidebar-collapsed);}
+  .brand-title,.ngroup,.ni-tx,.usr-meta,.nib{display:none;}
+  .sidebar .nb,.side-user{padding-left:10px;padding-right:10px;justify-content:center;}
+  .sidebar .ni{justify-content:center;padding-left:10px;padding-right:10px;border-left-color:transparent;}
+}
+</style>
+</head>
+<body class="app-wrap">
+
+<!-- SIDEBAR (left) -->
+<aside class="sidebar">
+  <div class="nb"><div class="nd"></div><span class="brand-title" data-i18n="appName">月度考核</span></div>
+  <div class="nm">
+    <div class="ngroup" data-i18n="navGroupWork">工作</div>
+    <button class="ni active" onclick="go('dashboard')" data-page="dashboard"><span class="ni-ic">▦</span><span class="ni-tx" data-i18n="navDashboard">工作台</span></button>
+    <button class="ni" onclick="go('list')" data-page="list"><span class="ni-ic">☰</span><span class="ni-tx" data-i18n="navList">考核列表</span></button>
+    <button class="ni" onclick="go('detail')" data-page="detail"><span class="ni-ic">▤</span><span class="ni-tx" data-i18n="navDetail">考核详情</span></button>
+    <button class="ni" onclick="go('scoring')" data-page="scoring"><span class="ni-ic">✎</span><span class="ni-tx" data-i18n="navScoring">打分</span><span class="nib">5</span></button>
+    <button class="ni" onclick="go('suspend')" data-page="suspend"><span class="ni-ic">⏸</span><span class="ni-tx" data-i18n="navSuspend">搁置管理</span><span class="nib nib-y">2</span></button>
+    <button class="ni" onclick="go('weekly')" data-page="weekly"><span class="ni-ic">☷</span><span class="ni-tx" data-i18n="navWeekly">周报管理</span></button>
+    <button class="ni" onclick="go('statement')" data-page="statement"><span class="ni-ic">⌘</span><span class="ni-tx" data-i18n="navStatement">自述材料</span></button>
+    <div class="nsep"></div>
+    <div class="ngroup" data-i18n="navGroupReview">评审</div>
+    <button class="ni" onclick="go('calibration')" data-page="calibration"><span class="ni-ic">◎</span><span class="ni-tx" data-i18n="navCalibration">跨组校准</span><span class="nib nib-g">!</span></button>
+    <button class="ni" onclick="go('appeal')" data-page="appeal"><span class="ni-ic">?</span><span class="ni-tx" data-i18n="navAppeal">异议处理</span><span class="nib">1</span></button>
+    <button class="ni" onclick="go('feedback')" data-page="feedback"><span class="ni-ic">◌</span><span class="ni-tx" data-i18n="navFeedback">反馈面谈</span></button>
+    <button class="ni" onclick="go('stats')" data-page="stats"><span class="ni-ic">▮</span><span class="ni-tx" data-i18n="navStats">考核统计</span></button>
+    <div class="nsep"></div>
+    <button class="ni" onclick="go('config')" data-page="config"><span class="ni-ic">⚙</span><span class="ni-tx" data-i18n="navConfig">系统配置</span></button>
+  </div>
+  <div class="side-user">
+    <div class="usr">
+      <div class="av">张</div>
+      <div class="usr-meta"><div class="usr-name">张伟</div><div class="usr-role" data-i18n="roleLead">技术负责人</div></div>
+    </div>
+  </div>
+</aside>
+
+<div class="main-content">
+  <header class="topbar">
+    <div class="topl">
+      <button id="navToggle" class="nav-toggle" type="button" title="收缩导航" aria-label="收缩导航">«</button>
+    </div>
+    <div class="topr">
+      <select class="theme-select" id="themeSelect" title="Theme">
+        <option value="system" data-i18n="themeSystem">跟随系统</option>
+        <option value="light" data-i18n="themeLight">浅色</option>
+        <option value="dark" data-i18n="themeDark">深色</option>
+      </select>
+      <select class="lang-select" id="langSelect" title="Language">
+        <option value="zh" data-i18n="langZh">中文</option>
+        <option value="en" data-i18n="langEn">English</option>
+      </select>
+    </div>
+  </header>
+<div class="main">
+
+<!-- ══════════ DASHBOARD ══════════ -->
+<div id="page-dashboard" class="page active">
+  <div class="hero">
+    <div class="htit">下午好，张伟 👋</div>
+    <div class="hsub">2025年06月 · 打分截止 06-28 · 距今 <strong style="color:var(--gold)">12天</strong> · <span style="color:var(--teal)">⏸ 本月已搁置3次</span></div>
+    <div class="hact">
+      <button class="btn btn-p" onclick="go('detail')">查看本月考核</button>
+      <button class="btn btn-s" onclick="openM('m-apply')">申请考核</button>
+      <button class="btn btn-t btn-sm" onclick="go('suspend')">⏸ 申请搁置</button>
+      <button class="btn btn-s btn-sm" onclick="go('weekly')">📋 提交周报</button>
+      <button class="btn btn-s btn-sm" onclick="go('statement')">📝 自述材料</button>
+    </div>
+  </div>
+  <div class="g5 mb12">
+    <div class="stat"><div class="slbl">有效考核项</div><div class="sval">6<span style="font-size:13px;color:var(--text3)">/8</span></div><div class="snote" style="color:var(--teal)">⏸ 2项搁置</div></div>
+    <div class="stat"><div class="slbl">搁置级别</div><div style="margin-top:6px"><span class="slvl slmd" style="font-size:10px;padding:3px 9px">◈ 中度·3次</span></div><div class="snote">再搁置1次→重度</div></div>
+    <div class="stat"><div class="slbl">自评进度</div><div class="sval" style="color:var(--accent)">4<span style="font-size:13px;color:var(--text3)">/6</span></div><div class="prog"><div class="pf" style="width:67%"></div></div></div>
+    <div class="stat"><div class="slbl">同行已打分</div><div class="sval" style="color:var(--blue)">4</div><div class="snote">最低3人 ✓</div></div>
+    <div class="stat"><div class="slbl">AI预估分</div><div class="sval" style="color:var(--gold)">83.2</div><div class="snote" style="color:var(--accent)">↑ +3.2 含系数×1.18</div></div>
+  </div>
+  <div class="alert alw mb12">⚠ 本月累计3次客观搁置（中度），工作量调整系数 ×1.18 已生效。若再次搁置将升级重度，当月标注「特殊月份」不纳入年度排名。</div>
+  <div class="g2">
+    <div class="card">
+      <div class="ch"><div class="ct">待处理事项</div><span class="badge br">5项</span></div>
+      <div class="pend" onclick="go('detail')"><div class="picon" style="background:var(--glit)">✍</div><div><div class="fw6">完成自评打分</div><div style="font-size:10px;color:var(--text3)">2项未填写（不含搁置项）</div></div><span style="color:var(--text3);margin-left:auto">›</span></div>
+      <div class="pend" onclick="go('weekly')"><div class="picon" style="background:var(--blit)">📋</div><div><div class="fw6">提交第4周周报</div><div style="font-size:10px;color:var(--text3)">截止 06-22，已逾期</div></div><span style="color:var(--text3);margin-left:auto">›</span></div>
+      <div class="pend" onclick="go('statement')"><div class="picon" style="background:var(--plit)">📝</div><div><div class="fw6">完善自述材料</div><div style="font-size:10px;color:var(--text3)">申请考核前需确认</div></div><span style="color:var(--text3);margin-left:auto">›</span></div>
+      <div class="pend" onclick="go('suspend')"><div class="picon" style="background:var(--tlit)">⏸</div><div><div class="fw6">搁置申请待审核</div><div style="font-size:10px;color:var(--text3)">「微服务学习」审核超时预警</div></div><span style="color:var(--text3);margin-left:auto">›</span></div>
+      <div class="pend" onclick="go('appeal')"><div class="picon" style="background:var(--rlit)">⚠</div><div><div class="fw6">异议处理</div><div style="font-size:10px;color:var(--text3)">赵敏·窗口剩余1天4小时</div></div><span style="color:var(--text3);margin-left:auto">›</span></div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct">本月考核流程</div><span class="badge bo">考核中</span></div>
+      <div class="tl">
+        <div class="tli"><div class="tlln"><div class="tldt done"></div><div class="tlcon done"></div></div><div class="tlct"><div class="tltit">月初对齐会 · 行为锚定锁定</div><div class="tldsc">已完成 · 6月2日</div></div></div>
+        <div class="tli"><div class="tlln"><div class="tldt done"></div><div class="tlcon done"></div></div><div class="tlct"><div class="tltit">自述材料提交 · 申请考核</div><div class="tldsc">已完成 · 6月10日</div></div></div>
+        <div class="tli"><div class="tlln"><div class="tldt warn"></div><div class="tlcon"></div></div><div class="tlct"><div class="tltit">客观搁置处理中 <span class="badge bt" style="margin-left:4px">中度·3次</span></div><div class="tldsc">2项已审核·1项待审核·系数×1.18已生效</div></div></div>
+        <div class="tli"><div class="tlln"><div class="tldt act"></div><div class="tlcon"></div></div><div class="tlct"><div class="tltit">四方打分进行中</div><div class="tldsc">自评4/6 · AI✓ · 同行4人 · 管理者待打</div></div></div>
+        <div class="tli"><div class="tlln"><div class="tldt"></div><div class="tlcon"></div></div><div class="tlct"><div class="tltit">跨组校准</div><div class="tldsc">等待打分完成</div></div></div>
+        <div class="tli"><div class="tlln"><div class="tldt"></div><div class="tlcon"></div></div><div class="tlct"><div class="tltit">结果公示 · 异议窗口（3天）</div><div class="tldsc">待完成</div></div></div>
+        <div class="tli"><div class="tlln"><div class="tldt sp"></div></div><div class="tlct"><div class="tltit">一对一反馈面谈</div><div class="tldsc">已考核状态后由管理者发起，聚焦成长路径</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ LIST ══════════ -->
+<div id="page-list" class="page">
+  <div class="ph">
+    <div><div class="pt" data-i18n="pageListTitle">考核列表</div><div class="ps"><span data-i18n="pageListSub">部门全员</span> · 2025年06月</div></div>
+    <div class="fx g8"><select class="fc" style="width:110px"><option>2025年06月</option><option>2025年05月</option></select><button class="btn btn-p btn-h" onclick="openM('m-additem')">＋ 添加考核明细</button></div>
+  </div>
+  <div class="card mb12" style="padding:10px 14px">
+    <div class="chips">
+      <button class="chip on">全部</button><button class="chip">待考核</button><button class="chip">考核中</button><button class="chip">公示期</button><button class="chip">异议中</button><button class="chip">已考核</button>
+      <button class="chip" style="border-color:var(--tmd);color:var(--teal)">含搁置项</button>
+      <button class="chip" style="border-color:var(--gmd);color:var(--gold)">特殊月份</button>
+      <div class="mla"><input class="fc" placeholder="搜索…" style="width:140px"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="tw">
+      <table>
+        <thead><tr><th>考核人</th><th>角色</th><th>有效/总项</th><th>搁置</th><th>状态</th><th>自评</th><th>AI</th><th>同行</th><th>管理者</th><th>综合分</th><th>操作</th></tr></thead>
+        <tbody>
+          <tr><td>张伟</td><td><span class="badge bp">技术负责人</span></td><td class="mn">6/8</td><td><span class="badge bt">中度·3次</span></td><td><span class="badge bo">考核中</span></td><td class="mn">78.5</td><td class="mn" style="color:var(--blue)">83.2</td><td class="mn" style="color:var(--accent)">80.3</td><td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td><td><div class="fx g6"><button class="btn btn-s btn-sm" onclick="go('detail')">详情</button><button class="btn btn-g btn-sm" onclick="go('scoring')">打分</button></div></td></tr>
+          <tr><td>王磊</td><td><span class="badge bg">高级工程师</span></td><td class="mn">10/10</td><td style="color:var(--text3);font-size:10px">无</td><td><span class="badge bo">考核中</span></td><td class="mn">85.0</td><td class="mn" style="color:var(--blue)">88.4</td><td class="mn" style="color:var(--accent)">83.7</td><td class="mn">86.0</td><td style="color:var(--text3)">—</td><td><div class="fx g6"><button class="btn btn-s btn-sm" onclick="go('detail')">详情</button><button class="btn btn-g btn-sm" onclick="go('scoring')">打分</button></div></td></tr>
+          <tr><td>赵敏</td><td><span class="badge" style="color:#aaa;background:var(--bg3)">中级工程师</span></td><td class="mn">5/7</td><td><span class="badge blt">轻度·1次</span></td><td><span class="badge br">异议中</span></td><td class="mn">72.0</td><td class="mn" style="color:var(--blue)">75.2</td><td class="mn" style="color:var(--accent)">70.1</td><td class="mn">73.0</td><td class="mn" style="color:var(--gold)">72.6</td><td><button class="btn btn-d btn-sm" onclick="go('appeal')">处理异议</button></td></tr>
+          <tr><td>陈静</td><td><span class="badge" style="color:#aaa;background:var(--bg3)">初级工程师</span></td><td class="mn">5/5</td><td style="color:var(--text3);font-size:10px">无</td><td><span class="badge bd">已考核</span></td><td class="mn">90.0</td><td class="mn" style="color:var(--blue)">87.5</td><td class="mn" style="color:var(--accent)">88.2</td><td class="mn">89.0</td><td class="mn fw6" style="color:var(--accent)">88.3</td><td><div class="fx g6"><button class="btn btn-s btn-sm" onclick="go('detail')">详情</button><button class="btn btn-pu btn-sm" onclick="go('feedback')">面谈</button></div></td></tr>
+          <tr style="opacity:.65"><td>李明 <span class="badge bsp" style="margin-left:4px">特殊月份</span></td><td><span class="badge bg">高级工程师</span></td><td class="mn" style="color:var(--red)">3/9</td><td><span class="badge bhv">重度·6次</span></td><td><span class="badge bo">考核中</span></td><td class="mn">76.0</td><td class="mn" style="color:var(--blue)">79.1</td><td class="mn" style="color:var(--accent)">77.3</td><td style="color:var(--text3)">—</td><td style="color:var(--text3)">不参与排名</td><td><button class="btn btn-s btn-sm" onclick="go('detail')">详情</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ DETAIL ══════════ -->
+<div id="page-detail" class="page">
+  <div class="ph">
+    <div class="fx g12">
+      <button class="btn btn-g btn-sm" onclick="go('list')">← 返回</button>
+      <div><div class="pt">张伟 · 2025年06月</div><div class="fx g6 mt8 wrap"><span class="badge bo">考核中</span><span class="badge bt">中度搁置·3次</span><span class="vc vco">✓ 有效项占比100%</span><span class="vc vcw">⚡ 工作量系数×1.18</span></div></div>
+    </div>
+    <div class="fx g8"><button class="btn btn-t btn-h" onclick="openM('m-suspend')">⏸ 申请搁置</button><button class="btn btn-s btn-h" onclick="openM('m-additem')">＋ 添加明细</button><button class="btn btn-p btn-h" onclick="openM('m-apply')">申请考核</button></div>
+  </div>
+  <div class="alert alt mb12">⏸ 本月已发生3次客观搁置（中度），工作量调整系数 ×1.18 已生效。如再次搁置将升级重度，当月标注「特殊月份」不纳入年度排名。</div>
+  <div class="g2 mb12">
+    <div class="card">
+      <div class="ch"><div class="ct">月度综合得分</div><span style="font-size:10px;color:var(--text3)">AI20%·自评20%·同行25%·管理者35%</span></div>
+      <div class="sbs">
+        <div class="sb"><div class="sbl">自评</div><div class="sbv">78.5</div><div class="sbn">4/6完成</div></div>
+        <div class="sb"><div class="sbl">AI</div><div class="sbv" style="color:var(--blue)">83.2</div><div class="sbn" style="color:var(--teal)">含系数</div></div>
+        <div class="sb"><div class="sbl">同行</div><div class="sbv" style="color:var(--accent)">80.3</div><div class="sbn">4人·去极值</div></div>
+        <div class="sb"><div class="sbl">管理者</div><div class="sbv" style="color:var(--text3)">—</div></div>
+        <div class="sb hl"><div class="sbl">综合预估</div><div class="sbv" style="color:var(--accent)">80.7</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct">四维度得分</div><span style="font-size:10px;color:var(--text3)">技术负责人权重</span></div>
+      <div class="drow"><div class="dname">交付质量</div><div class="dbarw"><div class="dbarf" style="width:84%"></div></div><div class="dscore">84.0</div><div class="dwt">25%</div></div>
+      <div class="drow"><div class="dname">工作效率</div><div class="dbarw"><div class="dbarf" style="width:75%;background:var(--blue)"></div></div><div class="dscore" style="color:var(--blue)">75.0</div><div class="dwt">15%</div></div>
+      <div class="drow"><div class="dname">协作贡献</div><div class="dbarw"><div class="dbarf" style="width:82%;background:var(--gold)"></div></div><div class="dscore" style="color:var(--gold)">82.0</div><div class="dwt">30%</div></div>
+      <div class="drow"><div class="dname">成长迭代</div><div class="dbarw"><div class="dbarf" style="width:78%;background:var(--purple)"></div></div><div class="dscore" style="color:var(--purple)">78.0</div><div class="dwt">30%</div></div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tabb active" onclick="stb(this,'td-normal')">正常考核项 (6)</button>
+    <button class="tabb" onclick="stb(this,'td-susp')">搁置项 (2) ⏸</button>
+    <button class="tabb" onclick="stb(this,'td-assign')">委派任务 (1)</button>
+  </div>
+  <div id="td-normal" class="tabp active">
+    <div class="card mb10">
+      <div class="fx g6 mb10"><span class="tdev tag">开发</span><span class="tdim tag">交付质量</span><span style="font-size:11px;color:var(--text3)">用户权限管理模块</span><div class="mla fx g8"><span class="badge bd">已完成</span><span class="mn fw6" style="color:var(--accent)">25%</span></div></div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px">实现RBAC权限控制，支持动态菜单与按钮权限</div>
+      <div class="abar mb10">
+        <div class="abi"><div class="abr" style="color:var(--accent)">90-100</div><div class="abd">零缺陷·主动修复</div></div>
+        <div class="abi cur"><div class="abr" style="color:var(--accent)">75-89 ★</div><div class="abd">按时·自主修复</div></div>
+        <div class="abi"><div class="abr">60-74</div><div class="abd">需协助</div></div>
+        <div class="abi"><div class="abr" style="color:var(--red)">&lt;60</div><div class="abd">影响他人</div></div>
+      </div>
+      <div class="g2 mb10">
+        <div><div class="evhd">完成概要</div><div class="evbox">RBAC核心逻辑完成，动态菜单联调完毕，单测覆盖率87%，按时交付。</div></div>
+        <div><div class="evhd">关联证据</div><div class="fx g6 mt8 wrap"><span class="pill">📋 周报·第3周</span><span class="pill">🔗 T-2245</span><span class="pill">💬 CR#456</span></div></div>
+      </div>
+      <div class="sbs">
+        <div class="sb"><div class="sbl">自评</div><div class="sbv">82</div></div>
+        <div class="sb"><div class="sbl">AI</div><div class="sbv" style="color:var(--blue)">85</div></div>
+        <div class="sb"><div class="sbl">同行</div><div class="sbv" style="color:var(--accent)">81</div></div>
+        <div class="sb"><div class="sbl">管理者</div><div class="sbv" style="color:var(--text3)">—</div></div>
+        <div class="sb hl"><div class="sbl">综合</div><div class="sbv" style="color:var(--accent)">82.8</div></div>
+      </div>
+    </div>
+  </div>
+  <div id="td-susp" class="tabp">
+    <div class="alert alt mb12">⏸ 搁置项按「仅评已完成部分」打分，各方说明须标注「客观搁置项」，不得因整体未完成而直接给低分。</div>
+    <div class="scard">
+      <div class="scard-hd"><span class="badge bt">⏸ 客观搁置·第2次</span><span class="tdev tag">开发</span><div class="mla" style="font-size:10px;color:var(--teal)">策略A·折算计分·已完成50%</div></div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px">实现Excel/PDF多格式报表导出，支持自定义字段</div>
+      <div class="g2 mb10 eq-cards">
+        <div><div class="evhd">搁置信息</div><div class="evbox t">搁置原因：委派「数据迁移」任务<br>委派证据：工单#TASK-890 · 审核人：李总 ✓<br>已完成比例：<strong style="color:var(--teal)">50%</strong></div></div>
+        <div><div class="evhd">折算公式</div><div class="evbox">综合打分 78 × 50% = <strong style="color:var(--gold)">实际得分 39.0</strong><br>占比保持 20% 参与月度总分</div></div>
+      </div>
+      <div class="sbs">
+        <div class="sb"><div class="sbl">自评(已完成部分)</div><div class="sbv">80</div></div>
+        <div class="sb"><div class="sbl">AI</div><div class="sbv" style="color:var(--blue)">78</div><div class="sbn" style="color:var(--teal)">标注搁置</div></div>
+        <div class="sb"><div class="sbl">同行</div><div class="sbv" style="color:var(--accent)">76</div></div>
+        <div class="sb"><div class="sbl">管理者</div><div class="sbv" style="color:var(--text3)">—</div></div>
+        <div class="sb hlg"><div class="sbl">折算后</div><div class="sbv" style="color:var(--gold)">38.5</div></div>
+      </div>
+    </div>
+    <div class="scard">
+      <div class="scard-hd"><span class="badge bt">⏸ 客观搁置·第3次</span><span class="tlrn tag">学习</span><div class="mla" style="font-size:10px;color:var(--gold)">策略B·退出计算·顺延下月</div></div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px">完成微服务架构专项学习并输出分享文档</div>
+      <div class="alert alw mb10">⚠ 搁置时已完成比例仅20%（低于阈值50%），启用策略B：退出本月计算，其余各项占比自动归一化，本项顺延下月补考。</div>
+      <div class="g2">
+        <div><div class="evhd">搁置信息</div><div class="evbox t">搁置原因：紧急委派「线上故障排查」<br>委派证据：工单#INC-201 · 审核人：李总 ✓<br>已完成比例：<strong style="color:var(--gold)">20%</strong></div></div>
+        <div><div class="evhd">退出说明</div><div class="evbox y">本项原占15%已从本月总计中移除<br>其余各项占比已自动归一化至合计100%<br>下月自动生成补考条目（已完成记录保留）</div></div>
+      </div>
+    </div>
+  </div>
+  <div id="td-assign" class="tabp">
+    <div class="alert ali mb12">ℹ 中度搁置：委派任务工时折算为工作量调整系数（×1.18），不单独打分。重度搁置时系统自动为委派任务建立独立考核项。</div>
+    <div class="card">
+      <div class="fx g6 mb10"><span class="badge bt">委派任务</span><span style="font-size:11px;color:var(--text3)">关联搁置第2、3次</span><div class="mla" style="color:var(--gold);font-size:11px">工时48h → 系数×1.18</div></div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px">数据迁移 #TASK-890 + 线上故障排查 #INC-201</div>
+      <div class="evbox">有效工作量 = 160h + 48h = 208h &nbsp;·&nbsp; 调整系数 = min(208/160, 1.3) = <strong style="color:var(--gold)">1.18</strong></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ SCORING ══════════ -->
+<div id="page-scoring" class="page">
+  <div class="ph">
+    <div class="fx g12"><button class="btn btn-g btn-sm" onclick="go('list')">← 返回</button><div><div class="pt">为 张伟 打分 · 2025年06月</div><div class="ps">必须填写说明 · 搁置项仅评已完成部分 · 截止 06-28</div></div></div>
+    <div class="alert ali" style="padding:6px 10px;margin:0">剩余12天</div>
+  </div>
+  <div class="card mb12">
+    <div class="ch"><div class="ct">📋 周报参考</div></div>
+    <div class="g3">
+      <div class="rsnip"><div class="rshd">第1周</div>完成RBAC需求评审，开始权限系统设计，输出技术方案。</div>
+      <div class="rsnip"><div class="rshd">第2周</div>RBAC核心实现，Excel导出基础完成，参与CR2次。<span class="kwt" style="display:block;margin-top:3px">⏸委派数据迁移任务开始</span></div>
+      <div class="rsnip"><div class="rshd">第3周</div>权限模块联调完毕，<span class="kwt">数据迁移完成</span>，学习文档因委派搁置。</div>
+    </div>
+  </div>
+  <div class="card mb10">
+    <div class="fx g6 mb10"><span class="tdev tag">开发</span><span class="tdim tag">交付质量</span><span style="font-size:11px;color:var(--text3)">占比25%</span><div class="mla"><span class="badge bd">已完成</span></div></div>
+    <div style="font-size:13px;font-weight:600;margin-bottom:10px">实现RBAC权限控制，支持动态菜单与按钮权限</div>
+    <div class="abar mb10">
+      <div class="abi"><div class="abr" style="color:var(--accent)">90-100</div><div class="abd">零缺陷</div></div>
+      <div class="abi cur"><div class="abr" style="color:var(--accent)">75-89 ★</div><div class="abd">按时·自主</div></div>
+      <div class="abi"><div class="abr">60-74</div><div class="abd">需协助</div></div>
+      <div class="abi"><div class="abr" style="color:var(--red)">&lt;60</div><div class="abd">影响他人</div></div>
+    </div>
+    <div class="sbs mb10"><div class="sb"><div class="sbl">AI打分</div><div class="sbv" style="color:var(--blue)">85</div></div><div class="sb"><div class="sbl">当事人自评</div><div class="sbv">82</div></div><div class="sb"><div class="sbl">已收同行均分</div><div class="sbv" style="color:var(--accent)">81.0</div></div></div>
+    <div class="divl"></div>
+    <div class="fg"><label class="fl">我的打分 <span style="color:var(--red)">*</span></label><div class="slw"><input type="range" class="sl" min="0" max="100" value="83" id="s1" oninput="sv('v1',this.value)"><span class="slv" id="v1">83</span></div></div>
+    <div class="fg mb0"><label class="fl">打分依据说明 <span style="color:var(--red)">*</span></label><textarea class="fc">RBAC完成度高，周报第2、3周有明确记录，联调结果良好，单测覆盖达标，按锚定75-89分段。</textarea></div>
+  </div>
+  <div class="scard mb12">
+    <div class="scard-hd"><span class="badge bt">⏸ 客观搁置项</span><span class="tdev tag">开发</span><span style="font-size:11px;color:var(--teal)">已完成50%·折算计分</span></div>
+    <div style="font-size:13px;font-weight:600;margin-bottom:8px">实现Excel/PDF多格式报表导出</div>
+    <div class="alert alt mb10">⏸ 此项为客观搁置项，请仅对<strong>已完成的50%工作</strong>打分，勿因整体未完成而给低分。打分说明须注明「客观搁置项」。</div>
+    <div class="g2 mb10">
+      <div class="rsnip"><div class="rshd">已完成部分</div>Excel基础导出完成，需求澄清文档齐全，PDF及自定义字段因委派中止。</div>
+      <div class="rsnip"><div class="rshd">AI说明</div>仅评已完成50%，周报第2周记录 <span class="kw">Excel导出</span> 完成，按锚定75-89分，得分78。</div>
+    </div>
+    <div class="sbs mb10"><div class="sb"><div class="sbl">AI(已完成部分)</div><div class="sbv" style="color:var(--blue)">78</div></div><div class="sb"><div class="sbl">自评</div><div class="sbv">80</div></div></div>
+    <div class="divl"></div>
+    <div class="fg"><label class="fl">我的打分（仅评已完成部分）<span style="color:var(--red)">*</span></label><div class="slw"><input type="range" class="sl" min="0" max="100" value="77" id="s2" oninput="sv('v2',this.value)"><span class="slv" id="v2">77</span></div></div>
+    <div class="fg mb0"><label class="fl">打分依据说明 <span style="color:var(--red)">*</span> <span style="color:var(--teal)">(须注明「客观搁置项」)</span></label><textarea class="fc" placeholder="【客观搁置项】已完成50%部分：Excel基础导出质量良好…"></textarea></div>
+  </div>
+  <div style="text-align:right"><button class="btn btn-s" style="margin-right:6px">保存草稿</button><button class="btn btn-p">提交全部打分</button></div>
+</div>
+
+<!-- ══════════ SUSPEND ══════════ -->
+<div id="page-suspend" class="page">
+  <div class="ph">
+    <div><div class="pt">搁置管理</div><div class="ps">客观搁置申请、审核与处理记录</div></div>
+    <button class="btn btn-p" onclick="openM('m-suspend')">＋ 新增搁置申请</button>
+  </div>
+  <div class="g4 mb12">
+    <div class="stat"><div class="slbl">本月搁置次数</div><div class="sval" style="color:var(--teal)">3</div><div class="snote">触发中度级别</div></div>
+    <div class="stat"><div class="slbl">搁置级别</div><div style="margin-top:6px"><span class="slvl slmd">◈ 中度</span></div><div class="snote">再搁置1次→重度</div></div>
+    <div class="stat"><div class="slbl">工作量调整系数</div><div class="sval" style="color:var(--gold)">×1.18</div><div class="snote">委派任务48h折算</div></div>
+    <div class="stat"><div class="slbl">特殊月份标注</div><div class="sval" style="color:var(--text2);font-size:16px">否</div><div class="snote">重度才标注</div></div>
+  </div>
+  <div class="card mb12">
+    <div class="ch"><div class="ct">搁置分级规则</div></div>
+    <div style="display:flex;gap:8px">
+      <div style="flex:1;padding:12px;border-radius:var(--rs);background:var(--alit);border:1px solid var(--amd)"><div class="fx g6 mb8"><span class="slvl sllt" style="font-size:10px;padding:2px 8px">轻度</span><span style="font-size:10px;color:var(--text3)">≤2次 且 有效项≥70%</span></div><div style="font-size:11px;color:var(--text2)">正常考核，搁置项按策略A/B处理</div></div>
+      <div style="flex:1;padding:12px;border-radius:var(--rs);background:var(--glit);border:1px solid var(--gmd)"><div class="fx g6 mb8"><span class="slvl slmd" style="font-size:10px;padding:2px 8px">中度 ★</span><span style="font-size:10px;color:var(--text3)">3-4次 或 有效项50-70%</span></div><div style="font-size:11px;color:var(--text2)">启用工作量调整系数，管理者专项说明</div></div>
+      <div style="flex:1;padding:12px;border-radius:var(--rs);background:var(--rlit);border:1px solid var(--rmd)"><div class="fx g6 mb8"><span class="slvl slhv" style="font-size:10px;padding:2px 8px">重度</span><span style="font-size:10px;color:var(--text3)">≥5次 或 有效项&lt;50%</span></div><div style="font-size:11px;color:var(--text2)">标注特殊月份，不纳入排名，委派任务单独立项</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch"><div class="ct">本月搁置记录 · 张伟</div></div>
+    <div class="scard mb8"><div class="scard-hd"><div class="sseq">1</div><span class="badge bd">已审核</span><span class="fw6" style="flex:1">RBAC缓存优化</span><span style="font-size:10px;color:var(--text3)">申请06-08·审核06-08</span></div><div class="g3" style="font-size:11px"><div><span style="color:var(--text3)">原因：</span>委派协助支付压测</div><div><span style="color:var(--text3)">完成比例：</span><span class="mn" style="color:var(--teal)">70%</span></div><div><span style="color:var(--text3)">策略：</span><span style="color:var(--accent)">A·折算计分</span></div></div></div>
+    <div class="scard mb8"><div class="scard-hd"><div class="sseq">2</div><span class="badge bd">已审核</span><span class="fw6" style="flex:1">报表导出模块</span><span style="font-size:10px;color:var(--text3)">申请06-15·审核06-16</span></div><div class="g3" style="font-size:11px"><div><span style="color:var(--text3)">原因：</span>委派数据迁移任务</div><div><span style="color:var(--text3)">完成比例：</span><span class="mn" style="color:var(--teal)">50%</span></div><div><span style="color:var(--text3)">策略：</span><span style="color:var(--accent)">A·折算计分</span></div></div></div>
+    <div class="scard"><div class="scard-hd"><div class="sseq">3</div><span class="badge bw">待审核</span><span class="fw6" style="flex:1">微服务学习分享文档</span><span style="font-size:10px;color:var(--red)">申请06-20·审核超时预警 剩余6h</span></div><div class="g3" style="font-size:11px;margin-bottom:10px"><div><span style="color:var(--text3)">原因：</span>委派线上故障排查</div><div><span style="color:var(--text3)">完成比例：</span><span class="mn" style="color:var(--gold)">20%（建议策略B）</span></div><div><span style="color:var(--text3)">委派证据：</span>工单#INC-201 ✓</div></div><div class="fx g8"><select class="fc" style="width:200px"><option>策略B：退出计算·顺延下月</option><option>策略A：折算计分</option></select><textarea class="fc" style="min-height:36px;flex:1" placeholder="审核说明…"></textarea><button class="btn btn-d btn-h">驳回</button><button class="btn btn-p btn-h">审核通过</button></div></div>
+  </div>
+</div>
+<!-- ══════════ WEEKLY ══════════ -->
+<div id="page-weekly" class="page">
+  <div class="ph">
+    <div><div class="pt">周报管理</div><div class="ps">2025年06月 · 周报是AI打分和各方打分的核心参考依据</div></div>
+    <button class="btn btn-p" onclick="openM('m-wr-edit')">＋ 提交本周周报</button>
+  </div>
+  <div class="alert ali mb12">ℹ 周报将作为AI打分、同行打分、管理者打分的重要参考。申请考核后周报锁定，无法修改。建议每周五前提交。</div>
+  <div class="g2 mb14">
+    <div class="card">
+      <div class="ch"><div class="ct">本月提交情况</div></div>
+      <div class="g2 mb12">
+        <div class="stat"><div class="slbl">已提交</div><div class="sval" style="color:var(--accent)">3</div><div class="snote">共4周</div></div>
+        <div class="stat"><div class="slbl">第4周状态</div><div class="sval" style="color:var(--red);font-size:16px">逾期未提</div><div class="snote" style="color:var(--red)">截止已过</div></div>
+      </div>
+      <div class="prog"><div class="pf" style="width:75%"></div></div>
+      <div style="font-size:10px;color:var(--text3);margin-top:4px">提交率75% · 第4周逾期未提将影响AI打分质量</div>
+      <div class="alert ald mt8">⚠ 第4周周报逾期，AI评分将标注「部分周报缺失」，建议立即补提。</div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct">本月周报关键词分布</div><span style="font-size:10px;color:var(--text3)">AI匹配·用于考核关联</span></div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        <span class="pill b" style="font-size:11px">RBAC <span style="background:var(--bg4);border-radius:10px;padding:1px 5px;margin-left:3px;font-size:10px">×5</span></span>
+        <span class="pill" style="font-size:11px">权限控制 <span style="background:var(--bg4);border-radius:10px;padding:1px 5px;margin-left:3px;font-size:10px">×4</span></span>
+        <span class="pill" style="font-size:11px">代码评审 <span style="background:var(--bg4);border-radius:10px;padding:1px 5px;margin-left:3px;font-size:10px">×3</span></span>
+        <span class="pill t" style="font-size:11px">数据迁移 <span style="background:var(--tlit);border-radius:10px;padding:1px 5px;margin-left:3px;font-size:10px">×2</span></span>
+        <span class="pill g" style="font-size:11px">单元测试 <span style="background:var(--glit);border-radius:10px;padding:1px 5px;margin-left:3px;font-size:10px">×2</span></span>
+        <span class="pill" style="font-size:11px">Excel导出 <span style="background:var(--bg4);border-radius:10px;padding:1px 5px;margin-left:3px;font-size:10px">×1</span></span>
+        <span class="pill p" style="font-size:11px">架构评审 <span style="background:var(--plit);border-radius:10px;padding:1px 5px;margin-left:3px;font-size:10px">×1</span></span>
+      </div>
+      <div style="font-size:10px;color:var(--text3);margin-top:10px">AI自动提取关键词，与考核项标题匹配度越高，评分依据越充分。</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch"><div class="ct">本月周报记录</div></div>
+    <div class="wrsec">
+      <div class="wrshd" onclick="toggleSection('wr1')">
+        <div class="fx g8"><span class="badge bd">第1周</span><span class="fw6">2025-06-02 ~ 06-06</span><span style="font-size:10px;color:var(--text3)">提交于06-05 18:22</span></div>
+        <div class="fx g6"><span class="vc vco">✓ 已提交</span><span id="wr1-arrow" style="color:var(--text3)">▾</span></div>
+      </div>
+      <div id="wr1" class="wrsbdy">
+        <div class="g3 mb10 wr-grid">
+          <div><div class="evhd">本周完成</div><div class="evbox">完成RBAC权限需求评审，产出技术方案文档，通过架构评审。完成菜单权限数据表设计。</div></div>
+          <div><div class="evhd">遇到问题与解法</div><div class="evbox">问题：动态菜单与路由懒加载冲突。解法：采用函数式路由+按需加载，消除闪屏。</div></div>
+          <div><div class="evhd">下周计划</div><div class="evbox">完成RBAC核心代码，目标实现角色-菜单-用户三级绑定逻辑。</div></div>
+        </div>
+        <div class="fx g8" style="justify-content:flex-end"><button class="btn btn-g btn-sm">🤖 查看AI关键词提取</button><button class="btn btn-s btn-sm">编辑</button></div>
+      </div>
+    </div>
+    <div class="wrsec">
+      <div class="wrshd" onclick="toggleSection('wr2')">
+        <div class="fx g8"><span class="badge bd">第2周</span><span class="fw6">2025-06-09 ~ 06-13</span><span style="font-size:10px;color:var(--text3)">提交于06-13 17:55</span></div>
+        <div class="fx g6"><span class="vc vco">✓ 已提交</span><span id="wr2-arrow" style="color:var(--text3)">▾</span></div>
+      </div>
+      <div id="wr2" class="wrsbdy" style="display:none">
+        <div class="g3 mb10 wr-grid">
+          <div><div class="evhd">本周完成</div><div class="evbox">RBAC核心代码实现，角色-菜单联动完成，参与代码评审2次，发现安全漏洞1处。完成Excel基础导出。<span class="kwt" style="display:block;margin-top:4px">⏸ 周三委派数据迁移任务（#TASK-890）</span></div></div>
+          <div><div class="evhd">遇到问题与解法</div><div class="evbox">SQL慢查询导致权限校验超时，增加索引并引入Redis缓存，响应时间降至15ms以内。</div></div>
+          <div><div class="evhd">下周计划</div><div class="evbox">完成权限模块联调测试，推进数据迁移任务。</div></div>
+        </div>
+        <div class="fx g8" style="justify-content:flex-end"><button class="btn btn-g btn-sm">🤖 查看AI关键词提取</button><button class="btn btn-s btn-sm">编辑</button></div>
+      </div>
+    </div>
+    <div class="wrsec">
+      <div class="wrshd" onclick="toggleSection('wr3')">
+        <div class="fx g8"><span class="badge bd">第3周</span><span class="fw6">2025-06-16 ~ 06-20</span><span style="font-size:10px;color:var(--text3)">提交于06-20 16:40</span></div>
+        <div class="fx g6"><span class="vc vco">✓ 已提交</span><span id="wr3-arrow" style="color:var(--text3)">▾</span></div>
+      </div>
+      <div id="wr3" class="wrsbdy" style="display:none">
+        <div class="g3 mb10 wr-grid">
+          <div><div class="evhd">本周完成</div><div class="evbox">权限模块联调完成，单测覆盖率87%。<span class="kwt">数据迁移任务完成</span>，数据一致性校验通过。报表搁置中。</div></div>
+          <div><div class="evhd">遇到问题与解法</div><div class="evbox">迁移中发现字符集不一致，使用iconv-lite转换解决乱码问题。</div></div>
+          <div><div class="evhd">下周计划</div><div class="evbox">报表导出功能恢复后优先处理PDF导出，推进搁置顺延项。</div></div>
+        </div>
+        <div class="fx g8" style="justify-content:flex-end"><button class="btn btn-g btn-sm">🤖 查看AI关键词提取</button><button class="btn btn-s btn-sm">编辑</button></div>
+      </div>
+    </div>
+    <div class="wrsec" style="border-color:var(--rmd)">
+      <div class="wrshd" style="background:var(--rlit)">
+        <div class="fx g8"><span class="badge br">第4周</span><span class="fw6">2025-06-23 ~ 06-27</span><span style="font-size:10px;color:var(--red)">截止06-22 · 已逾期</span></div>
+        <div class="fx g6"><span class="vc vce">✕ 未提交</span><button class="btn btn-p btn-sm" onclick="openM('m-wr-edit')">立即补提</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ STATEMENT ══════════ -->
+<div id="page-statement" class="page">
+  <div class="ph">
+    <div><div class="pt">自述材料</div><div class="ps">申请考核前必须提交 · 供各方打分时参考 · 申请后锁定</div></div>
+    <div class="fx g8"><span class="vc vco">✓ 本月已提交·06-10</span><button class="btn btn-s btn-sm" onclick="openM('m-stmt-edit')">编辑</button></div>
+  </div>
+  <div class="alert ali mb12">ℹ 自述材料在「考核中」状态下对同行和管理者可见，是了解被考核人视角的重要参考。</div>
+  <div class="g2 mb14">
+    <div class="card">
+      <div class="ch"><div class="ct">📝 2025年06月 · 自述材料</div><span class="badge bd">已提交·已锁定</span></div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div><div class="evhd">本月主要工作</div><div class="evbox p">完成用户权限系统RBAC核心功能开发，实现角色-菜单-用户三级权限绑定，动态菜单与按钮权限控制联调完毕，单元测试覆盖率87%。期间参与代码评审2次，发现SQL注入安全漏洞。因委派任务影响，报表导出模块进度滞后，目前完成Excel基础导出。</div></div>
+        <div><div class="evhd">遇到的挑战</div><div class="evbox p">1. 动态路由与懒加载冲突，通过架构调整解决；2. 数据迁移字符集乱码，采用iconv-lite处理；3. 临时委派导致原计划学习任务完全中止，需下月补完。</div></div>
+        <div><div class="evhd">自我评价</div><div class="evbox p">核心交付项质量较高，代码规范和单测覆盖均达标。但因客观原因部分考核项未能完成。协作贡献方面主动性有所提升。成长迭代方面略有欠缺，下月计划优先补完学习任务。</div></div>
+        <div><div class="evhd">下月重点计划</div><div class="evbox p">1. 补完微服务架构学习并输出分享；2. 完成报表导出模块（含PDF及自定义字段）；3. 主导一次团队技术分享。</div></div>
+        <div><div class="evhd">搁置说明（本月搁置3次·中度）</div><div class="evbox p" style="border-left-color:var(--teal)">第1次：协助支付压测（已完成70%）；第2次：数据迁移委派（已完成50%）；第3次：线上故障排查（已完成20%，建议退出计算）。三次委派均有工单记录，累计工时约48小时。</div></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="card">
+        <div class="ch"><div class="ct">历史自述记录</div></div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px;padding:8px;border-radius:var(--rs);background:var(--bg3)"><span class="mn" style="color:var(--text3);font-size:11px">2025-05</span><span class="badge bd">已考核</span><span style="font-size:11px;color:var(--text2);flex:1">无搁置 · 综合分85.1</span><button class="btn btn-g btn-xs">查看</button></div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px;border-radius:var(--rs);background:var(--bg3)"><span class="mn" style="color:var(--text3);font-size:11px">2025-04</span><span class="badge bd">已考核</span><span style="font-size:11px;color:var(--text2);flex:1">轻度搁置1次 · 综合分82.4</span><button class="btn btn-g btn-xs">查看</button></div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px;border-radius:var(--rs);background:var(--bg3)"><span class="mn" style="color:var(--text3);font-size:11px">2025-03</span><span class="badge bd">已考核</span><span style="font-size:11px;color:var(--text2);flex:1">无搁置 · 综合分79.8</span><button class="btn btn-g btn-xs">查看</button></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><div class="ct">提交要求</div></div>
+        <div class="cl">
+          <div class="cli ok"><span>✓</span>本月主要工作（必填）</div>
+          <div class="cli ok"><span>✓</span>遇到的挑战（必填）</div>
+          <div class="cli ok"><span>✓</span>自我评价（必填）</div>
+          <div class="cli ok"><span>✓</span>下月计划（必填）</div>
+          <div class="cli ok"><span>✓</span>搁置说明（有搁置时必填）</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><div class="ct">打分方可见内容</div></div>
+        <div style="font-size:11px;color:var(--text2);line-height:2">
+          <div class="fx g8"><span style="color:var(--text3)">AI：</span><span>自述材料 + 周报全文 + 任务记录</span></div>
+          <div class="fx g8"><span style="color:var(--text3)">同行：</span><span>自述材料摘要（工作+自评部分）</span></div>
+          <div class="fx g8"><span style="color:var(--text3)">管理者：</span><span>自述材料全文 + 周报全文</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ CALIBRATION ══════════ -->
+<div id="page-calibration" class="page">
+  <div class="ph">
+    <div><div class="pt">跨组校准</div><div class="ps">对比组间分布，修正偏差，特殊月份人员隔离排名</div></div>
+    <button class="btn btn-p" onclick="openM('m-calib')">确认完成校准</button>
+  </div>
+  <div class="alert alw mb12">⚠ 本月含1名重度搁置人员（李明），其结果标注「特殊月份」，<strong>不参与跨组横向排名比较</strong>，已在下方统计中排除。</div>
+  <div class="g2 mb12">
+    <div class="card">
+      <div class="ch"><div class="ct">各组分布对比（排除特殊月份）</div></div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div><div class="fx g8 mb8"><span class="fw6" style="flex:0 0 50px">A组</span><span style="font-size:10px;color:var(--text3)">均分83.2 · 优秀25% · 良好55% · 待改20%</span></div><div class="distbar"><div class="dseg" style="width:25%;background:var(--accent)"></div><div class="dseg" style="width:55%;background:var(--blue)"></div><div class="dseg" style="width:20%;background:var(--red)"></div></div></div>
+        <div><div class="fx g8 mb8"><span class="fw6" style="flex:0 0 50px">B组</span><span style="font-size:10px;color:var(--text3)">均分87.6 · 优秀40% · 良好50% · 待改10%</span><span class="badge br mla">偏高</span></div><div class="distbar"><div class="dseg" style="width:40%;background:var(--accent)"></div><div class="dseg" style="width:50%;background:var(--blue)"></div><div class="dseg" style="width:10%;background:var(--red)"></div></div></div>
+        <div><div class="fx g8 mb8"><span class="fw6" style="flex:0 0 50px">目标</span><span style="font-size:10px;color:var(--text3)">优秀20% · 良好50% · 待改30%</span></div><div class="distbar"><div class="dseg" style="width:20%;background:var(--accent)"></div><div class="dseg" style="width:50%;background:var(--blue)"></div><div class="dseg" style="width:30%;background:var(--red)"></div></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct">需关注项</div><span class="badge br">3项</span></div>
+      <div class="crow"><div style="flex:1"><div class="fw6">王磊 · 工作效率</div><div style="font-size:10px;color:var(--text3)">管理者95 vs 同行76 · 差值19</div></div><button class="btn btn-s btn-sm">审查</button></div>
+      <div class="crow"><div style="flex:1"><div class="fw6 fx g6">李明 <span class="badge bsp">特殊月份</span></div><div style="font-size:10px;color:var(--teal)">重度搁置·已排除排名·委派任务单独立项</div></div><button class="btn btn-t btn-sm">查看</button></div>
+      <div class="crow"><div style="flex:1"><div class="fw6">张伟 · 工作量系数</div><div style="font-size:10px;color:var(--gold)">中度搁置·系数×1.18·需管理者专项说明</div></div><button class="btn btn-y btn-sm">填写说明</button></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch"><div class="ct">人员明细（含搁置状态）</div></div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>考核人</th><th>搁置级别</th><th>有效/总项</th><th>自评</th><th>AI</th><th>同行</th><th>管理者</th><th>综合分</th><th>分布档</th><th>备注</th></tr></thead>
+        <tbody>
+          <tr><td>张伟</td><td><span class="badge bt">中度·3次</span></td><td class="mn">6/8</td><td class="mn">78.5</td><td class="mn" style="color:var(--blue)">83.2</td><td class="mn" style="color:var(--accent)">80.3</td><td class="mn">82.0</td><td class="mn fw6">80.8</td><td><span class="badge bo">良好</span></td><td style="font-size:10px;color:var(--gold)">系数×1.18已计入</td></tr>
+          <tr><td>王磊</td><td style="color:var(--text3);font-size:10px">无</td><td class="mn">10/10</td><td class="mn">85.0</td><td class="mn" style="color:var(--blue)">88.4</td><td class="mn" style="color:var(--accent)">83.7</td><td class="mn" style="color:var(--red)">95.0</td><td class="mn fw6">87.8</td><td><span class="badge bd">优秀</span></td><td style="font-size:10px;color:var(--red)">管理者分异常</td></tr>
+          <tr><td>赵敏</td><td><span class="badge blt">轻度·1次</span></td><td class="mn">5/7</td><td class="mn">72.0</td><td class="mn" style="color:var(--blue)">75.2</td><td class="mn" style="color:var(--accent)">70.1</td><td class="mn">73.0</td><td class="mn fw6">72.6</td><td><span class="badge bg">待改进</span></td><td style="font-size:10px;color:var(--teal)">搁置项折算已计</td></tr>
+          <tr style="opacity:.5"><td>李明 <span class="badge bsp">特殊月份</span></td><td><span class="badge bhv">重度·6次</span></td><td class="mn" style="color:var(--red)">3/9</td><td class="mn">76.0</td><td class="mn" style="color:var(--blue)">79.1</td><td class="mn" style="color:var(--accent)">77.3</td><td style="color:var(--text3)">—</td><td class="mn" style="color:var(--text3)">不参与排名</td><td><span class="badge bsp">隔离</span></td><td style="font-size:10px;color:var(--teal)">委派任务单独立项</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ APPEAL ══════════ -->
+<div id="page-appeal" class="page">
+  <div class="ph">
+    <div><div class="pt">异议处理</div><div class="ps">公示期异议 · 搁置策略异议 · 3天窗口内处理</div></div>
+    <span class="badge br" style="padding:5px 12px;font-size:12px">1条待处理</span>
+  </div>
+  <div class="card mb12">
+    <div class="fx g8 mb12">
+      <div style="flex:1"><div class="fx g8 mb8"><span class="fw6" style="font-size:14px">赵敏</span><span class="badge br">待处理</span><span style="font-size:10px;color:var(--text3)">提交于06-30 10:23</span><span class="vc vce mla">⏰ 剩余1天4小时</span></div><div style="font-size:11px;color:var(--text3)">2025年06月 · 异议项：搁置策略选择</div></div>
+    </div>
+    <div class="g2 mb12">
+      <div><div class="evhd">异议说明</div><div class="evbox">客观搁置项（工单#T-780）采用了策略A折算计分，但该项已完成比例仅40%，应触发策略B退出计算。折算后得分拉低了月度综合分，请复核策略选择是否正确。</div></div>
+      <div><div class="evhd">提交证据</div><div class="fx g6 wrap mt8"><span class="pill t">⏸ 搁置申请#SUS-034</span><span class="pill t">📊 完成比例截图</span></div></div>
+    </div>
+    <div class="sbs mb12">
+      <div class="sb hlg"><div class="sbl">原策略A折算分</div><div class="sbv" style="color:var(--gold)">62.4</div></div>
+      <div class="sb hl"><div class="sbl">若策略B退出估算</div><div class="sbv" style="color:var(--accent)">+2.8</div></div>
+      <div class="sb hlb"><div class="sbl">原综合得分</div><div class="sbv" style="color:var(--blue)">72.6</div></div>
+    </div>
+    <div class="alert ali mb12">ℹ 核查：系统记录该项已完成比例为40%，低于策略切换阈值（50%），确实应触发策略B。</div>
+    <div class="g2 mb12">
+      <div class="fg mb0"><label class="fl">处理意见 <span style="color:var(--red)">*</span></label><textarea class="fc">核实：搁置时已完成比例确为40%（低于50%阈值），应触发策略B退出计算。将该项改为退出本月计算并顺延下月，月度综合分重新归一化。</textarea></div>
+      <div><div class="fg"><label class="fl">处理方式</label><div class="chips"><button class="chip on">策略修正为B（退出计算）</button><button class="chip">维持策略A</button></div></div><div class="alert als">采纳后综合分预计从 72.6 → 74.8（+2.2）</div></div>
+    </div>
+    <div class="fx g8" style="justify-content:flex-end"><button class="btn btn-d btn-sm">驳回异议</button><button class="btn btn-p btn-sm">采纳并更新策略</button></div>
+  </div>
+  <div class="card" style="opacity:.65">
+    <div class="fx g8 mb8"><span class="fw6" style="font-size:14px">李娜</span><span class="badge bd">已采纳</span><span style="font-size:10px;color:var(--text3)">处理于06-30 16:45</span></div>
+    <div style="font-size:12px;color:var(--text2)">异议项：协作贡献 · 管理者打分由71调整至79 · 综合分由74.3更新至76.8</div>
+  </div>
+</div>
+
+<!-- ══════════ FEEDBACK ══════════ -->
+<div id="page-feedback" class="page">
+  <div class="ph">
+    <div><div class="pt">一对一反馈面谈</div><div class="ps">考核完成后由管理者发起 · 聚焦成长路径而非解释分数</div></div>
+    <button class="btn btn-p" onclick="openM('m-fb-new')">＋ 发起新面谈</button>
+  </div>
+  <div class="alert alp mb12">💬 面谈的核心不是解释分数，而是讨论下一步成长路径。建议面谈后双方共同确认行动计划并在系统中留档。</div>
+
+  <div class="fcard fdone">
+    <div class="fx g8 mb12">
+      <div class="pavatar">陈</div>
+      <div style="flex:1">
+        <div class="fx g8 mb4"><span class="fw6" style="font-size:14px">陈静</span><span class="badge bd">已完成</span><span style="font-size:10px;color:var(--text3)">2025-07-03 14:00 · 30分钟 · 线上</span></div>
+        <div style="font-size:11px;color:var(--text3)">2025年06月考核 · 综合分88.3 · 初级工程师</div>
+      </div>
+      <button class="btn btn-g btn-sm">查看记录</button>
+    </div>
+    <div class="g2 mb12">
+      <div><div class="evhd">面谈重点摘要</div><div class="evbox">亮点：交付质量维度满分，代码规范性突出，主动发现安全漏洞获好评。<br>建议：加强跨模块协作主动性，下季度可参与架构设计讨论，挑战更复杂的系统设计。</div></div>
+      <div><div class="evhd">行动计划（双方确认）</div><div class="evbox">1. 7月参与支付模块架构评审<br>2. 8月主导一次技术分享（Spring Boot最佳实践）<br>3. 下月考核「协作贡献」维度占比提升至20%</div></div>
+    </div>
+    <div class="fx g8" style="justify-content:flex-end"><span class="vc vco">✓ 行动计划已双方确认 · 07-03 15:20</span></div>
+  </div>
+
+  <div class="fcard fpend">
+    <div class="fx g8 mb12">
+      <div class="pavatar" style="background:linear-gradient(135deg,var(--gold),var(--orange))">张</div>
+      <div style="flex:1">
+        <div class="fx g8 mb4"><span class="fw6" style="font-size:14px">张伟</span><span class="badge bw">待面谈</span><span style="font-size:10px;color:var(--text3)">建议本月内完成</span></div>
+        <div style="font-size:11px;color:var(--text3)">2025年06月考核 · 预计综合分~80.7 · 技术负责人 · 中度搁置3次</div>
+      </div>
+      <button class="btn btn-p btn-sm" onclick="openM('m-fb-new')">预约面谈</button>
+    </div>
+    <div class="alert alw mb12">⚠ 本月存在中度搁置（3次），面谈时建议重点讨论：任务规划与执行节奏的优化，以及如何减少非计划委派。</div>
+    <div class="g3">
+      <div><div class="evhd">本月亮点</div><div class="evbox y">RBAC权限系统按时高质量交付，代码评审中主动发现安全漏洞，协作贡献得分较高。</div></div>
+      <div><div class="evhd">待改进项</div><div class="evbox y">成长迭代维度得分偏低（78），学习类考核项连续受搁置影响，月初规划需留更多缓冲。</div></div>
+      <div><div class="evhd">建议面谈议题</div><div class="evbox y">1. 月初任务规划如何留缓冲<br>2. 技术分享计划制定<br>3. 下月考核项重心调整</div></div>
+    </div>
+  </div>
+
+  <div class="fcard fsched">
+    <div class="fx g8">
+      <div class="pavatar" style="background:linear-gradient(135deg,var(--purple),var(--blue))">王</div>
+      <div style="flex:1">
+        <div class="fx g8 mb4"><span class="fw6" style="font-size:14px">王磊</span><span class="badge bo">已预约</span><span style="font-size:10px;color:var(--blue)">2025-07-08 10:00 · 线上会议</span></div>
+        <div style="font-size:11px;color:var(--text3)">2025年06月考核 · 综合分87.8 · 高级工程师 · 跨组校准中管理者分异常待解释</div>
+      </div>
+      <div class="fx g6"><button class="btn btn-s btn-sm">重新预约</button><button class="btn btn-g btn-sm">取消</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ STATS ══════════ -->
+<div id="page-stats" class="page">
+  <div class="ph">
+    <div><div class="pt">考核统计</div><div class="ps">部门全员 · 多维度数据分析</div></div>
+    <div class="fx g8"><select class="fc" style="width:100px"><option>2025年</option><option>2024年</option></select><select class="fc" style="width:100px"><option>全部人员</option><option>仅我自己</option></select><button class="btn btn-s btn-h">导出报表</button></div>
+  </div>
+  <div class="g5 mb14">
+    <div class="stat"><div class="slbl">部门人员数</div><div class="sval">12</div><div class="snote">本月参与考核12人</div></div>
+    <div class="stat"><div class="slbl">部门平均分</div><div class="sval" style="color:var(--accent)">81.4</div><div class="snote" style="color:var(--accent)">↑ +2.1 较上月</div></div>
+    <div class="stat"><div class="slbl">本月特殊月份</div><div class="sval" style="color:var(--gold)">1</div><div class="snote">李明·重度搁置</div></div>
+    <div class="stat"><div class="slbl">搁置总次数</div><div class="sval" style="color:var(--teal)">7</div><div class="snote">涉及4人</div></div>
+    <div class="stat"><div class="slbl">已发起面谈</div><div class="sval" style="color:var(--purple)">3</div><div class="snote">已完成1·预约1·待发起1</div></div>
+  </div>
+  <div class="g2 mb14">
+    <div class="card">
+      <div class="ch"><div class="ct">张伟 · 近6月得分趋势</div><span style="font-size:10px;color:var(--text3)">综合分</span></div>
+      <div style="display:flex;flex-direction:column;gap:0">
+        <div class="shrow"><div class="shmon">2025-01</div><div class="shbar"><div class="shfill" style="width:80%;background:var(--accent)"></div></div><div class="shsc" style="color:var(--accent)">79.8</div></div>
+        <div class="shrow"><div class="shmon">2025-02</div><div class="shbar"><div class="shfill" style="width:81%;background:var(--accent)"></div></div><div class="shsc" style="color:var(--accent)">81.2</div></div>
+        <div class="shrow"><div class="shmon">2025-03</div><div class="shbar"><div class="shfill" style="width:80%;background:var(--accent)"></div></div><div class="shsc" style="color:var(--accent)">79.8</div></div>
+        <div class="shrow"><div class="shmon">2025-04 ⏸×1</div><div class="shbar"><div class="shfill" style="width:82%;background:var(--blue)"></div></div><div class="shsc" style="color:var(--blue)">82.4</div></div>
+        <div class="shrow"><div class="shmon">2025-05</div><div class="shbar"><div class="shfill" style="width:85%;background:var(--gold)"></div></div><div class="shsc" style="color:var(--gold)">85.1</div></div>
+        <div class="shrow"><div class="shmon">2025-06 ⏸×3</div><div class="shbar"><div class="shfill" style="width:81%;background:var(--purple);opacity:.6"></div></div><div class="shsc" style="color:var(--text3)">~80.7</div></div>
+      </div>
+      <div style="font-size:10px;color:var(--text3);margin-top:6px">⏸ 含搁置月份 · 虚色为预估值</div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct">四维度得分（本月）</div><span style="font-size:10px;color:var(--text3)">张伟 vs 部门均分</span></div>
+      <div class="drow"><div class="dname">交付质量</div><div class="dbarw"><div class="dbarf" style="width:84%"></div></div><div class="dscore">84.0</div><div class="dwt" style="color:var(--text3);font-size:10px">均84.2</div></div>
+      <div class="drow"><div class="dname">工作效率</div><div class="dbarw"><div class="dbarf" style="width:75%;background:var(--blue)"></div></div><div class="dscore" style="color:var(--blue)">75.0</div><div class="dwt" style="color:var(--text3);font-size:10px">均80.1</div></div>
+      <div class="drow"><div class="dname">协作贡献</div><div class="dbarw"><div class="dbarf" style="width:82%;background:var(--gold)"></div></div><div class="dscore" style="color:var(--gold)">82.0</div><div class="dwt" style="color:var(--text3);font-size:10px">均78.5</div></div>
+      <div class="drow"><div class="dname">成长迭代</div><div class="dbarw"><div class="dbarf" style="width:78%;background:var(--purple)"></div></div><div class="dscore" style="color:var(--purple)">78.0</div><div class="dwt" style="color:var(--text3);font-size:10px">均75.3</div></div>
+      <div class="alert ali mt8">ℹ 工作效率低于部门均分5.1，成长迭代受搁置影响较大，建议下月重点关注。</div>
+    </div>
+  </div>
+  <div class="g2 mb14">
+    <div class="card">
+      <div class="ch"><div class="ct">部门排名（排除特殊月份）</div><span style="font-size:10px;color:var(--text3)">2025年06月</span></div>
+      <div class="tw">
+        <table>
+          <thead><tr><th>排名</th><th>姓名</th><th>搁置</th><th>综合分</th><th>分布档</th></tr></thead>
+          <tbody>
+            <tr><td style="color:var(--gold)">🥇 1</td><td>陈静</td><td style="color:var(--text3);font-size:10px">无</td><td class="mn fw6" style="color:var(--accent)">88.3</td><td><span class="badge bd">优秀</span></td></tr>
+            <tr><td style="color:var(--text3)">2</td><td>王磊</td><td style="color:var(--text3);font-size:10px">无</td><td class="mn fw6" style="color:var(--accent)">87.8</td><td><span class="badge bd">优秀</span></td></tr>
+            <tr style="background:rgba(63,184,132,.04)"><td style="color:var(--text3)">3</td><td>张伟 <span style="font-size:10px;color:var(--teal)">（我）</span></td><td><span class="badge bt">中度·3次</span></td><td class="mn fw6" style="color:var(--blue)">~80.7</td><td><span class="badge bo">良好</span></td></tr>
+            <tr><td style="color:var(--text3)">4</td><td>赵敏</td><td><span class="badge blt">轻度·1次</span></td><td class="mn fw6" style="color:var(--gold)">72.6</td><td><span class="badge bg">待改进</span></td></tr>
+            <tr style="opacity:.45"><td>—</td><td>李明 <span class="badge bsp">特殊月份</span></td><td><span class="badge bhv">重度·6次</span></td><td class="mn" style="color:var(--text3)">不参与排名</td><td><span class="badge bsp">隔离</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct">搁置频率统计（近6月）</div><span style="font-size:10px;color:var(--text3)">部门全员</span></div>
+      <div class="tw">
+        <table>
+          <thead><tr><th>月份</th><th>搁置次数</th><th>涉及人数</th><th>重度/特殊</th><th>平均系数</th></tr></thead>
+          <tbody>
+            <tr><td>2025-01</td><td class="mn">2</td><td class="mn">2</td><td class="mn">0</td><td class="mn" style="color:var(--accent)">—</td></tr>
+            <tr><td>2025-02</td><td class="mn">3</td><td class="mn">2</td><td class="mn">0</td><td class="mn">×1.08</td></tr>
+            <tr><td>2025-03</td><td class="mn">1</td><td class="mn">1</td><td class="mn">0</td><td class="mn" style="color:var(--accent)">—</td></tr>
+            <tr><td>2025-04</td><td class="mn">4</td><td class="mn">3</td><td class="mn">0</td><td class="mn">×1.12</td></tr>
+            <tr><td>2025-05</td><td class="mn">2</td><td class="mn">2</td><td class="mn">0</td><td class="mn" style="color:var(--accent)">—</td></tr>
+            <tr style="background:rgba(34,211,238,.05)"><td>2025-06</td><td class="mn" style="color:var(--teal)">7</td><td class="mn" style="color:var(--teal)">4</td><td class="mn" style="color:var(--red)">1</td><td class="mn" style="color:var(--gold)">×1.18</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="alert alw mt8">⚠ 06月搁置次数显著上升，建议管理层审查任务规划流程，减少临时委派。</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ CONFIG ══════════ -->
+<div id="page-config" class="page">
+  <div class="ph">
+    <div><div class="pt" data-i18n="pageConfigTitle">系统配置</div><div class="ps">权重 · 规则 · 分布预期（修改后仅作用于新建考核，已创建的使用快照）</div></div>
+    <button class="btn btn-p" data-i18n="configSave">保存配置</button>
+  </div>
+  <div class="g2" style="align-items:start;grid-template-columns:2fr 1.1fr">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="card">
+        <div class="ch"><div class="ct">打分权重配置</div><span class="vc vco" id="wst">✓ 合计100%</span></div>
+        <div class="alert alp" style="margin-bottom:10px">三权重之和必须等于100%，否则无法保存。</div>
+        <div class="wrow"><div class="wname" style="color:var(--blue)">AI 考核</div><input type="range" class="sl" style="flex:1" min="0" max="100" value="20" id="wai" oninput="cw()"><div class="wval" style="color:var(--blue)" id="wai-v">20%</div></div>
+        <div class="wrow"><div class="wname">自评</div><input type="range" class="sl" style="flex:1" min="0" max="100" value="20" id="wse" oninput="cw()"><div class="wval" id="wse-v">20%</div></div>
+        <div class="wrow"><div class="wname" style="color:var(--accent)">同行评价</div><input type="range" class="sl" style="flex:1" min="0" max="100" value="25" id="wpe" oninput="cw()"><div class="wval" style="color:var(--accent)" id="wpe-v">25%</div></div>
+        <div class="wrow"><div class="wname" style="color:var(--gold)">管理者</div><input type="range" class="sl" style="flex:1" min="0" max="100" value="35" id="wma" oninput="cw()"><div class="wval" style="color:var(--gold)" id="wma-v">35%</div></div>
+        <div class="divl"></div>
+        <div class="fx g8"><span style="font-size:11px;color:var(--text2)">合计</span><span class="mla mn fw6" id="wt" style="font-size:18px;color:var(--accent)">100%</span></div>
+      </div>
+      <div class="card">
+        <div class="ch"><div class="ct">维度权重（按角色）</div><span class="ntag">已锁定，月初快照</span></div>
+        <div class="tw">
+          <table>
+            <thead><tr><th>维度</th><th>初级</th><th>中级</th><th>高级</th><th>负责人</th></tr></thead>
+            <tbody>
+              <tr><td>交付质量</td><td class="mn">50%</td><td class="mn">40%</td><td class="mn">35%</td><td class="mn">25%</td></tr>
+              <tr><td>工作效率</td><td class="mn">25%</td><td class="mn">25%</td><td class="mn">20%</td><td class="mn">15%</td></tr>
+              <tr><td>协作贡献</td><td class="mn">15%</td><td class="mn">20%</td><td class="mn">25%</td><td class="mn">30%</td></tr>
+              <tr><td>成长迭代</td><td class="mn">10%</td><td class="mn">15%</td><td class="mn">20%</td><td class="mn">30%</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><div class="ct">强制分布预期</div><span style="font-size:11px;color:var(--text3)">按部门校准</span></div>
+        <div class="dist-head">
+          <span class="dchip">部门：平台研发部</span>
+          <span class="dchip">本月参与：<strong id="dept-size-view">12</strong> 人</span>
+          <span class="dchip">当前实际：优 3 · 良 6 · 待改进 3</span>
+        </div>
+        <div class="fg"><label class="fl">参与校准人数（部门）</label><input type="number" class="fc" id="dept-size" value="12" style="width:120px" oninput="updDist()"></div>
+        <div class="g3">
+          <div class="fg mb0"><label class="fl">优秀 (%)</label><input type="number" class="fc" id="dist-ex" value="20" style="width:80px" oninput="updDist()"></div>
+          <div class="fg mb0"><label class="fl">良好 (%)</label><input type="number" class="fc" id="dist-good" value="50" style="width:80px" oninput="updDist()"></div>
+          <div class="fg mb0"><label class="fl">待改进 (%)</label><input type="number" class="fc" id="dist-bad" value="30" style="width:80px" oninput="updDist()"></div>
+        </div>
+        <div class="distbar mt12">
+          <div class="dist-seg dist-ex" id="dist-ex-bar" style="width:20%"></div>
+          <div class="dist-seg dist-good" id="dist-good-bar" style="width:50%"></div>
+          <div class="dist-seg dist-bad" id="dist-bad-bar" style="width:30%"></div>
+        </div>
+        <div class="quota">
+          <span class="dchip">建议优秀：<strong id="quota-ex">2</strong> 人</span>
+          <span class="dchip">建议良好：<strong id="quota-good">6</strong> 人</span>
+          <span class="dchip">建议待改进：<strong id="quota-bad">4</strong> 人</span>
+        </div>
+        <div class="dist-two">
+          <div class="dist-row"><span class="dist-dot ex"></span><span>当前实际优秀：3 人（25%）</span></div>
+          <div class="dist-row"><span class="dist-dot good"></span><span>当前实际良好：6 人（50%）</span></div>
+          <div class="dist-row"><span class="dist-dot bad"></span><span>当前实际待改进：3 人（25%）</span></div>
+          <div class="dist-row"><span>可用作校准参考，不直接改动结果分</span></div>
+        </div>
+        <div class="fx g8" style="margin-top:8px;font-size:11px;color:var(--text3)">
+          <span>总和需为 100%</span><span class="mla" id="dist-tip" style="color:var(--accent)">✓ 可用于校准参考</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="card">
+        <div class="ch"><div class="ct">同行打分规则</div></div>
+        <div class="fg"><label class="fl">最低同行打分人数</label><input type="number" class="fc" value="3" style="width:80px"></div>
+        <div class="fg mb0"><label class="fx g8" style="cursor:pointer"><input type="checkbox" checked style="accent-color:var(--accent)"> 去掉最高/最低分后取均值</label></div>
+      </div>
+      <div class="card">
+        <div class="ch"><div class="ct">异议机制</div></div>
+        <div class="fg"><label class="fl">结果公示后异议窗口（天）</label><input type="number" class="fc" value="3" style="width:80px"></div>
+        <div class="fg mb0"><label class="fl">每月打分截止日</label><input type="number" class="fc" value="28" style="width:80px"><div style="font-size:10px;color:var(--text3);margin-top:3px">超过截止日将标注逾期，影响AI打分权重归一化</div></div>
+      </div>
+      <div class="card">
+        <div class="ch"><div class="ct">自评缺失处理策略</div></div>
+        <div class="chips">
+          <button class="chip on">记 0 分计入权重</button>
+          <button class="chip">按剩余权重归一化</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><div class="ct">AI 打分失败处理</div></div>
+        <div class="chips">
+          <button class="chip on">允许管理者手动重试</button>
+          <button class="chip">标记无效，剩余权重归一化</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><div class="ct">客观搁置规则</div></div>
+        <div class="fg"><label class="fl">搁置申请有效时间（小时）</label><input type="number" class="fc" value="48" style="width:80px"></div>
+        <div class="g3">
+          <div class="fg mb0"><label class="fl">轻度上限</label><input type="number" class="fc" value="2" style="width:60px"></div>
+          <div class="fg mb0"><label class="fl">中度上限</label><input type="number" class="fc" value="4" style="width:60px"></div>
+          <div class="fg mb0"><label class="fl">有效项下限 (%)</label><input type="number" class="fc" value="50" style="width:60px"></div>
+        </div>
+        <div class="fg mb0"><label class="fl">年度可剔除特殊月份数</label><input type="number" class="fc" value="1" style="width:80px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end main -->
+</div><!-- end main-content -->
+
+<!-- ══ MODALS ══ -->
+
+<!-- 申请考核 -->
+<div class="overlay" id="m-apply">
+  <div class="modal">
+    <div class="mhd"><div class="mtit">申请考核</div><button class="mx" onclick="closeM('m-apply')">✕</button></div>
+    <div class="mbdy">
+      <div class="steps" style="padding:0 10px;margin-bottom:20px">
+        <div class="stn"><div class="stc done">✓</div><div class="stlbl done">录入明细</div></div>
+        <div class="stline done"></div>
+        <div class="stn"><div class="stc done">✓</div><div class="stlbl done">行为锚定</div></div>
+        <div class="stline done"></div>
+        <div class="stn"><div class="stc done">✓</div><div class="stlbl done">自述材料</div></div>
+        <div class="stline done"></div>
+        <div class="stn"><div class="stc done">✓</div><div class="stlbl done">周报提交</div></div>
+        <div class="stline"></div>
+        <div class="stn"><div class="stc act">5</div><div class="stlbl act">确认申请</div></div>
+      </div>
+      <div class="cl mb12">
+        <div class="cli ok"><span>✓</span>行为锚定描述全部填写并锁定</div>
+        <div class="cli ok"><span>✓</span>执行人占比设置完毕，有效项合计100%</div>
+        <div class="cli ok"><span>✓</span>关联证据已填写</div>
+        <div class="cli ok"><span>✓</span>自述材料已提交</div>
+        <div class="cli warn"><span>⚠</span>第4周周报逾期未提，AI打分将标注「周报缺失」</div>
+        <div class="cli info"><span>ℹ</span>搁置项：2项已审核，1项待审核（不阻断申请）</div>
+      </div>
+      <div class="alert alt mb12">⏸ 本月搁置级别：中度（3次）· 工作量系数 ×1.18 已生效 · 系统将快照当前配置</div>
+      <div class="alert alw">⚠ 申请后考核明细、行为锚定、周报全部锁定，搁置待审核项在审核通过前仍可处理。</div>
+    </div>
+    <div class="mft"><button class="btn btn-s" onclick="closeM('m-apply')">取消</button><button class="btn btn-p">确认申请考核</button></div>
+  </div>
+</div>
+
+<!-- 申请搁置 -->
+<div class="overlay" id="m-suspend">
+  <div class="modal modal-lg">
+    <div class="mhd"><div class="mtit">⏸ 申请客观搁置</div><button class="mx" onclick="closeM('m-suspend')">✕</button></div>
+    <div class="mbdy">
+      <div class="alert alt mb12">申请须在委派任务发生后 <strong>48小时内</strong> 提交，超时需附加说明并由部门负责人审核。</div>
+      <div class="g2">
+        <div class="fg"><label class="fl">搁置考核项 <span style="color:var(--red)">*</span></label><select class="fc"><option>报表导出模块 · 交付质量</option><option>微服务学习分享 · 成长迭代</option><option>API文档编写 · 协作贡献</option></select></div>
+        <div class="fg"><label class="fl">当前已完成比例 <span style="color:var(--red)">*</span></label><div class="slw"><input type="range" class="sl" min="0" max="100" value="50" id="sr" oninput="sv('srv',this.value+'%')"><span class="slv" id="srv" style="font-size:14px">50%</span></div><div style="font-size:10px;color:var(--teal);margin-top:3px">≥50% 建议策略A（折算），&lt;50% 建议策略B（退出）</div></div>
+      </div>
+      <div class="fg"><label class="fl">搁置原因 <span style="color:var(--red)">*</span></label><textarea class="fc" placeholder="具体说明委派任务内容及搁置原因…"></textarea></div>
+      <div class="g2">
+        <div class="fg"><label class="fl">委派任务工单号 <span style="color:var(--red)">*</span></label><input class="fc" placeholder="如：#TASK-890 / #INC-201"></div>
+        <div class="fg"><label class="fl">委派任务预估工时（小时）<span style="color:var(--red)">*</span></label><input type="number" class="fc" value="24" placeholder="用于计算工作量调整系数"></div>
+      </div>
+      <div class="fg"><label class="fl">其他证据附件说明</label><input class="fc" placeholder="邮件日期 / 审批单号 / 其他可追溯记录…"></div>
+      <div class="fg mb0"><label class="fl">建议处理策略</label><div class="chips"><button class="chip on">策略A：折算计分（已完成部分参与计算）</button><button class="chip">策略B：退出计算·顺延下月</button></div></div>
+    </div>
+    <div class="mft"><button class="btn btn-s" onclick="closeM('m-suspend')">取消</button><button class="btn btn-p">提交搁置申请</button></div>
+  </div>
+</div>
+
+<!-- 添加考核明细 -->
+<div class="overlay" id="m-additem">
+  <div class="modal modal-lg">
+    <div class="mhd"><div class="mtit">添加考核明细</div><button class="mx" onclick="closeM('m-additem')">✕</button></div>
+    <div class="mbdy">
+      <div class="g2">
+        <div class="fg"><label class="fl">考核维度 <span style="color:var(--red)">*</span></label><select class="fc"><option>交付质量</option><option>工作效率</option><option>协作贡献</option><option>成长迭代</option></select></div>
+        <div class="fg"><label class="fl">考核类型 <span style="color:var(--red)">*</span></label><select class="fc"><option>开发</option><option>学习</option><option>研究</option><option>运维</option><option>测试</option></select></div>
+      </div>
+      <div class="fg"><label class="fl">系统模块</label><input class="fc" placeholder="如：用户权限管理模块"></div>
+      <div class="fg"><label class="fl">考核内容 <span style="color:var(--red)">*</span></label><textarea class="fc" placeholder="详细描述本项考核内容及预期目标…"></textarea></div>
+      <div class="fg">
+        <label class="fl">行为锚定描述 <span style="color:var(--red)">*</span> <span style="color:var(--text3);font-weight:400">（申请考核后锁定）</span></label>
+        <table class="atbl">
+          <thead><tr><th>分数段</th><th>对应行为描述</th></tr></thead>
+          <tbody>
+            <tr><td style="color:var(--accent)">90-100</td><td><input class="fc" placeholder="超额完成，主动发现并解决范围外问题…"></td></tr>
+            <tr><td>75-89</td><td><input class="fc" placeholder="按时完成，质量达标，问题可自主解决…"></td></tr>
+            <tr><td>60-74</td><td><input class="fc" placeholder="基本完成，存在小问题或轻微延期…"></td></tr>
+            <tr><td style="color:var(--red)">&lt;60</td><td><input class="fc" placeholder="未完成或影响他人工作…"></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="fg mb0"><label class="fl">创建人设置占比（%）</label><div class="slw"><input type="range" class="sl" min="0" max="100" value="20" id="sr2" oninput="sv('srv2',this.value+'%')"><span class="slv" id="srv2" style="font-size:14px">20%</span></div><div style="font-size:10px;color:var(--text3);margin-top:3px">维度已用80%，剩余20%</div></div>
+    </div>
+    <div class="mft"><button class="btn btn-s" onclick="closeM('m-additem')">取消</button><button class="btn btn-p">添加</button></div>
+  </div>
+</div>
+
+<!-- 校准确认 -->
+<div class="overlay" id="m-calib">
+  <div class="modal">
+    <div class="mhd"><div class="mtit">确认完成跨组校准</div><button class="mx" onclick="closeM('m-calib')">✕</button></div>
+    <div class="mbdy">
+      <div class="cl mb12">
+        <div class="cli err"><span>✕</span>B组优秀占比40%超出目标20%，尚未处理</div>
+        <div class="cli err"><span>✕</span>王磊工作效率管理者分异常（差值19），尚未审查</div>
+        <div class="cli info"><span>ℹ</span>李明（特殊月份）已从排名中隔离，不影响校准</div>
+        <div class="cli ok"><span>✓</span>张伟工作量系数×1.18管理者专项说明已填写</div>
+      </div>
+      <div class="alert ald">仍有2项异常未处理，建议处理后再确认。</div>
+    </div>
+    <div class="mft"><button class="btn btn-s" onclick="closeM('m-calib')">返回处理</button><button class="btn btn-d btn-sm">强制确认（忽略异常）</button></div>
+  </div>
+</div>
+
+<!-- 提交周报 -->
+<div class="overlay" id="m-wr-edit">
+  <div class="modal modal-lg">
+    <div class="mhd"><div class="mtit">提交周报 · 第4周（2025-06-23~06-27）</div><button class="mx" onclick="closeM('m-wr-edit')">✕</button></div>
+    <div class="mbdy">
+      <div class="alert ald mb12">⚠ 第4周已逾期，系统将标注「补提」。建议在提交时详细说明内容以弥补对AI打分的影响。</div>
+      <div class="fg"><label class="fl">本周完成事项 <span style="color:var(--red)">*</span></label><textarea class="fc" placeholder="列举本周主要完成的工作内容，尽量与考核项关键词匹配…" style="min-height:90px"></textarea></div>
+      <div class="fg"><label class="fl">遇到问题与解法 <span style="color:var(--red)">*</span></label><textarea class="fc" placeholder="描述遇到的技术难点及解决思路…"></textarea></div>
+      <div class="fg mb0"><label class="fl">下周计划 <span style="color:var(--red)">*</span></label><textarea class="fc" placeholder="下周重点工作计划…"></textarea></div>
+    </div>
+    <div class="mft"><button class="btn btn-s" onclick="closeM('m-wr-edit')">取消</button><button class="btn btn-p">提交周报</button></div>
+  </div>
+</div>
+
+<!-- 编辑自述材料 -->
+<div class="overlay" id="m-stmt-edit">
+  <div class="modal modal-lg">
+    <div class="mhd"><div class="mtit">编辑自述材料 · 2025年06月</div><button class="mx" onclick="closeM('m-stmt-edit')">✕</button></div>
+    <div class="mbdy">
+      <div class="alert alw mb12">⚠ 申请考核后自述材料将锁定，无法修改。</div>
+      <div class="fg"><label class="fl">本月主要工作 <span style="color:var(--red)">*</span></label><textarea class="fc" style="min-height:80px">完成用户权限系统RBAC核心功能开发，实现角色-菜单-用户三级权限绑定…</textarea></div>
+      <div class="fg"><label class="fl">遇到的挑战 <span style="color:var(--red)">*</span></label><textarea class="fc">1. 动态路由与懒加载冲突；2. 数据迁移字符集乱码；3. 临时委派导致计划中止。</textarea></div>
+      <div class="fg"><label class="fl">自我评价 <span style="color:var(--red)">*</span></label><textarea class="fc">核心交付项质量较高，代码规范和单测均达标。协作贡献有所提升。</textarea></div>
+      <div class="fg"><label class="fl">下月重点计划 <span style="color:var(--red)">*</span></label><textarea class="fc">1. 补完微服务学习分享；2. 完成报表导出模块；3. 主导一次技术分享。</textarea></div>
+      <div class="fg mb0"><label class="fl">搁置说明（本月搁置3次）</label><textarea class="fc">第1次：协助支付压测（已完成70%）；第2次：数据迁移委派（已完成50%）；第3次：线上故障排查（已完成20%）。</textarea></div>
+    </div>
+    <div class="mft"><button class="btn btn-s" onclick="closeM('m-stmt-edit')">取消</button><button class="btn btn-p">保存</button></div>
+  </div>
+</div>
+
+<!-- 发起面谈 -->
+<div class="overlay" id="m-fb-new">
+  <div class="modal">
+    <div class="mhd"><div class="mtit">发起面谈预约</div><button class="mx" onclick="closeM('m-fb-new')">✕</button></div>
+    <div class="mbdy">
+      <div class="fg"><label class="fl">被面谈人 <span style="color:var(--red)">*</span></label><select class="fc"><option>张伟（技术负责人）</option><option>王磊（高级工程师）</option></select></div>
+      <div class="g2">
+        <div class="fg"><label class="fl">面谈时间 <span style="color:var(--red)">*</span></label><input type="datetime-local" class="fc"></div>
+        <div class="fg"><label class="fl">面谈方式</label><select class="fc"><option>线上会议</option><option>线下面谈</option></select></div>
+      </div>
+      <div class="fg"><label class="fl">预设议题</label><textarea class="fc" placeholder="1. 本月亮点讨论&#10;2. 待改进项&#10;3. 下月成长计划&#10;4. 搁置情况复盘（如有）"></textarea></div>
+      <div class="fg mb0"><label class="fl">面谈时长（分钟）</label><input type="number" class="fc" value="30" style="width:80px"></div>
+    </div>
+    <div class="mft"><button class="btn btn-s" onclick="closeM('m-fb-new')">取消</button><button class="btn btn-p">发送预约邀请</button></div>
+  </div>
+</div>
+
+<script>
+const pages=['dashboard','list','detail','scoring','suspend','weekly','statement','calibration','appeal','feedback','stats','config'];
+const i18n={
+  zh:{
+    appName:'月度考核',
+    navGroupWork:'工作',navGroupReview:'评审',
+    navDashboard:'工作台',navList:'考核列表',navDetail:'考核详情',navScoring:'打分',navSuspend:'搁置管理',navWeekly:'周报管理',navStatement:'自述材料',
+    navCalibration:'跨组校准',navAppeal:'异议处理',navFeedback:'反馈面谈',navStats:'考核统计',navConfig:'系统配置',
+    roleLead:'技术负责人',
+    themeSystem:'跟随系统',themeLight:'浅色',themeDark:'深色',
+    langZh:'中文',langEn:'English',
+    themeLabel:'主题',langLabel:'语言',
+    pageListTitle:'考核列表',pageListSub:'部门全员',
+    pageDetailTitle:'考核详情',pageSuspendTitle:'搁置管理',pageWeeklyTitle:'周报管理',pageStatementTitle:'自述材料',
+    pageCalibrationTitle:'跨组校准',pageAppealTitle:'异议处理',pageFeedbackTitle:'一对一反馈面谈',pageStatsTitle:'考核统计',pageConfigTitle:'系统配置',
+    btnApply:'申请考核',btnSave:'保存',btnCancel:'取消',btnSubmit:'提交',btnAdd:'添加',btnExport:'导出报表',
+    scoringTitle:'打分',suspendApply:'申请搁置',configSave:'保存配置'
+  },
+  en:{
+    appName:'Monthly Assessment',
+    navGroupWork:'Work',navGroupReview:'Review',
+    navDashboard:'Dashboard',navList:'Assessment List',navDetail:'Assessment Detail',navScoring:'Score',navSuspend:'Suspension',navWeekly:'Weekly Reports',navStatement:'Self Statement',
+    navCalibration:'Calibration',navAppeal:'Appeals',navFeedback:'Feedback',navStats:'Statistics',navConfig:'Settings',
+    roleLead:'Tech Lead',
+    themeSystem:'Follow system',themeLight:'Light',themeDark:'Dark',
+    langZh:'中文',langEn:'English',
+    themeLabel:'Theme',langLabel:'Language',
+    pageListTitle:'Assessment List',pageListSub:'Department',
+    pageDetailTitle:'Assessment Detail',pageSuspendTitle:'Suspension',pageWeeklyTitle:'Weekly Reports',pageStatementTitle:'Self Statement',
+    pageCalibrationTitle:'Calibration',pageAppealTitle:'Appeals',pageFeedbackTitle:'Feedback',pageStatsTitle:'Statistics',pageConfigTitle:'Settings',
+    btnApply:'Apply',btnSave:'Save',btnCancel:'Cancel',btnSubmit:'Submit',btnAdd:'Add',btnExport:'Export',
+    scoringTitle:'Score',suspendApply:'Apply suspension',configSave:'Save'
+  }
+};
+function storageGet(key,fallback){
+  try{
+    const v=localStorage.getItem(key);
+    return v===null?fallback:v;
+  }catch(e){
+    return fallback;
+  }
+}
+function storageSet(key,value){
+  try{localStorage.setItem(key,value);}catch(e){}
+}
+let LANG=storageGet('assessment-lang','zh');
+function t(key){return i18n[LANG]?.[key]||i18n.zh[key]||key;}
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k=el.getAttribute('data-i18n');
+    if(k&&t(k))el.textContent=t(k);
+  });
+  document.querySelectorAll('option[data-i18n]').forEach(el=>{
+    const k=el.getAttribute('data-i18n');
+    if(k&&t(k))el.textContent=t(k);
+  });
+  document.documentElement.lang=LANG==='zh'?'zh-CN':'en';
+  document.title=LANG==='zh'?'月度考核系统':'Monthly Assessment';
+}
+function setLang(lang){LANG=lang;storageSet('assessment-lang',lang);applyLang();}
+function applyTheme(v){
+  if(v==='system')document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme',v);
+  storageSet('assessment-theme',v);
+}
+function initTheme(){
+  const v=storageGet('assessment-theme','system');
+  const sel=document.getElementById('themeSelect');
+  if(sel)sel.value=v;
+  applyTheme(v);
+}
+function applySidebarCollapsed(collapsed){
+  const isCollapsed=!!collapsed;
+  document.body.classList.toggle('sidebar-collapsed',isCollapsed);
+  const btn=document.getElementById('navToggle');
+  if(btn){
+    const label=isCollapsed?'展开导航':'收缩导航';
+    btn.textContent=isCollapsed?'»':'«';
+    btn.title=label;
+    btn.setAttribute('aria-label',label);
+  }
+}
+function initSidebar(){
+  const collapsed=storageGet('assessment-sidebar','0')==='1';
+  applySidebarCollapsed(collapsed);
+}
+function toggleSidebar(){
+  const collapsed=!document.body.classList.contains('sidebar-collapsed');
+  applySidebarCollapsed(collapsed);
+  storageSet('assessment-sidebar',collapsed?'1':'0');
+}
+const pageAliases={
+  'page-dashboard':'dashboard',
+  'page-list':'list',
+  'page-detail':'detail',
+  'page-scoring':'scoring',
+  'page-suspend':'suspend',
+  'page-weekly':'weekly',
+  'page-statement':'statement',
+  'page-calibration':'calibration',
+  'page-appeal':'appeal',
+  'page-feedback':'feedback',
+  'page-stats':'stats',
+  'page-config':'config',
+  '系统配置':'config',
+  'settings':'config'
+};
+function validPage(n){return pages.includes(n);}
+function normalizePageName(v){
+  if(!v)return '';
+  const raw=String(v).trim().replace(/^#/,'');
+  let decoded=raw;
+  try{decoded=decodeURIComponent(raw);}catch(e){}
+  decoded=decoded.trim();
+  const lower=decoded.toLowerCase();
+  if(validPage(lower))return lower;
+  if(pageAliases[decoded])return pageAliases[decoded];
+  if(pageAliases[lower])return pageAliases[lower];
+  return '';
+}
+function currentPage(){
+  const active=document.querySelector('.page.active')?.id||'';
+  return normalizePageName(active)||'dashboard';
+}
+function go(n,skipHash){
+  const target=normalizePageName(n)||currentPage();
+  if(!validPage(target))return;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const el=document.getElementById('page-'+target);
+  if(el)el.classList.add('active');
+  document.querySelectorAll('.sidebar .ni[data-page]').forEach(b=>b.classList.toggle('active',b.getAttribute('data-page')===target));
+  if(!skipHash){
+    try{history.replaceState(null,'','#'+target);}catch(e){location.hash='#'+target;}
+    storageSet('assessment-page',target);
+  }
+  window.scrollTo(0,0);
+}
+function initPage(){
+  const hash=normalizePageName(window.location.hash);
+  const saved=normalizePageName(storageGet('assessment-page',''));
+  const target=hash||saved||'dashboard';
+  go(target,true);
+}
+window.addEventListener('hashchange',()=>{
+  const h=normalizePageName(location.hash);
+  if(h)go(h,true);
+});
+function openM(id){document.getElementById(id)?.classList.add('open');}
+function closeM(id){document.getElementById(id)?.classList.remove('open');}
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+function sv(id,val){const el=document.getElementById(id);if(el)el.textContent=val;}
+function stb(btn,id){
+  const tabs=btn.closest('.tabs');
+  if(tabs)tabs.querySelectorAll('.tabb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const pane=document.getElementById(id);
+  if(!pane)return;
+  const parent=pane.parentElement;
+  parent.querySelectorAll('.tabp').forEach(p=>p.classList.remove('active'));
+  pane.classList.add('active');
+}
+function toggleSection(id){
+  const el=document.getElementById(id);
+  const arrow=document.getElementById(id+'-arrow');
+  if(!el)return;
+  const hidden=el.style.display==='none';
+  el.style.display=hidden?'block':'none';
+  if(arrow)arrow.textContent=hidden?'▴':'▾';
+}
+function cw(){
+  const ids=['wai','wse','wpe','wma'],vs=['wai-v','wse-v','wpe-v','wma-v'];
+  let t=0;
+  ids.forEach((id,i)=>{
+    const v=parseInt(document.getElementById(id)?.value||0);
+    const el=document.getElementById(vs[i]);
+    if(el)el.textContent=v+'%';
+    t+=v;
+  });
+  const wt=document.getElementById('wt');
+  const ws=document.getElementById('wst');
+  if(wt)wt.textContent=t+'%';
+  if(wt)wt.style.color=t===100?'var(--accent)':'var(--red)';
+  if(ws){ws.textContent=t===100?'✓ 合计100%':'✕ 合计'+t+'%';ws.className='vc '+(t===100?'vco':'vce');}
+}
+function updDist(){
+  const ex=parseInt(document.getElementById('dist-ex')?.value||0);
+  const gd=parseInt(document.getElementById('dist-good')?.value||0);
+  const bd=parseInt(document.getElementById('dist-bad')?.value||0);
+  const size=Math.max(0,parseInt(document.getElementById('dept-size')?.value||0));
+  const tot=ex+gd+bd;
+  const norm=tot>0?100/tot:0;
+  const setW=(id,v)=>{const el=document.getElementById(id);if(el)el.style.width=(v*norm)+'%';};
+  setW('dist-ex-bar',ex);setW('dist-good-bar',gd);setW('dist-bad-bar',bd);
+  const raw=[ex,gd,bd].map(v=>Math.max(v,0)*size/(tot||1));
+  const base=raw.map(v=>Math.floor(v));
+  let remain=Math.max(0,size-base.reduce((a,b)=>a+b,0));
+  const order=raw.map((v,i)=>({i,f:v-base[i]})).sort((a,b)=>b.f-a.f);
+  let idx=0;
+  while(remain>0){
+    base[order[idx%3].i]+=1;
+    idx+=1;
+    remain-=1;
+  }
+  const setTxt=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=String(val);};
+  setTxt('quota-ex',base[0]);setTxt('quota-good',base[1]);setTxt('quota-bad',base[2]);setTxt('dept-size-view',size);
+  const tip=document.getElementById('dist-tip');
+  if(tip){
+    tip.textContent=tot===100?'✓ 可用于校准参考':'✕ 总和 '+tot+'%，需=100%';
+    tip.style.color=tot===100?'var(--accent)':'var(--red)';
+  }
+}
+document.querySelectorAll('.chips').forEach(g=>{
+  g.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{
+    g.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));c.classList.add('on');
+  }));
+});
+function syncThemeSelects(v){['themeSelect','themeSelectConfig'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=v;});}
+function syncLangSelects(v){['langSelect','langSelectConfig'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=v;});}
+document.getElementById('themeSelect')?.addEventListener('change',e=>{applyTheme(e.target.value);syncThemeSelects(e.target.value);});
+document.getElementById('themeSelectConfig')?.addEventListener('change',e=>{applyTheme(e.target.value);syncThemeSelects(e.target.value);});
+document.getElementById('langSelect')?.addEventListener('change',e=>{setLang(e.target.value);syncLangSelects(e.target.value);});
+document.getElementById('langSelectConfig')?.addEventListener('change',e=>{setLang(e.target.value);syncLangSelects(e.target.value);});
+document.getElementById('navToggle')?.addEventListener('click',toggleSidebar);
+const savedLang=storageGet('assessment-lang','zh');
+syncLangSelects(savedLang);
+initTheme();
+initSidebar();
+syncThemeSelects(storageGet('assessment-theme','system'));
+initPage();
+cw();
+updDist();
+applyLang();
+</script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, Card, Table, Space, Modal, Form, Input, Switch, message } from 'antd';
+import { Button, Card, Table, Space, Modal, Form, Input, Switch, message, Descriptions } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useAuth } from '../../stores/auth';
 import { canEditDepartment } from '../../utils/permissions';
@@ -13,6 +13,8 @@ export default function DepartmentsPage() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [viewing, setViewing] = useState<{ id: number; name: string; enabled: boolean } | null>(null);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
 
@@ -42,6 +44,11 @@ export default function DepartmentsPage() {
     setEditingId(record.id);
     form.setFieldsValue({ name: record.name, enabled: record.enabled });
     setModalOpen(true);
+  };
+
+  const openView = (record: { id: number; name: string; enabled: boolean }) => {
+    setViewing(record);
+    setViewModalOpen(true);
   };
 
   const handleSubmit = async () => {
@@ -100,10 +107,13 @@ export default function DepartmentsPage() {
               title: '操作',
               key: 'action',
               align: 'center',
-              width: 120,
+              width: 160,
               fixed: 'right',
               render: (_, record) => (
                 <Space>
+                  <a className="system-table-action-link" onClick={() => openView(record)}>
+                    查看
+                  </a>
                   <a className={`system-table-action-link ${!canEdit ? 'disabled' : ''}`} onClick={() => canEdit && openEdit(record)}>
                     编辑
                   </a>
@@ -131,6 +141,20 @@ export default function DepartmentsPage() {
             <Switch />
           </Form.Item>
         </Form>
+      </Modal>
+      <Modal
+        title="查看部门"
+        open={viewModalOpen}
+        onCancel={() => setViewModalOpen(false)}
+        footer={null}
+      >
+        {viewing && (
+          <Descriptions column={1} size="small" bordered>
+            <Descriptions.Item label="ID">{viewing.id}</Descriptions.Item>
+            <Descriptions.Item label="名称">{viewing.name}</Descriptions.Item>
+            <Descriptions.Item label="启用">{viewing.enabled ? '是' : '否'}</Descriptions.Item>
+          </Descriptions>
+        )}
       </Modal>
     </>
   );

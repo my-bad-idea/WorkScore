@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Card, Form, InputNumber, Input, Button, message, Divider, Row, Col, Switch } from 'antd';
+import { Card, Form, InputNumber, Input, Button, message, Divider, Row, Col, Switch, Slider } from 'antd';
 import { useAuth } from '../../stores/auth';
 import { canManageSystemSettings } from '../../utils/permissions';
 import { settingsApi } from '../../api/client';
@@ -11,6 +11,8 @@ export default function SettingsPage() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const workPlanRatio = Form.useWatch('work_plan_ratio_percent', form);
+  const aiRatio = Form.useWatch('llm_assessment_weight_percent', form);
 
   useEffect(() => {
     (async () => {
@@ -188,8 +190,8 @@ export default function SettingsPage() {
           <Divider orientation="left" style={{ marginTop: 24, marginBottom: 16 }}>
             考核配置
           </Divider>
-          <div style={{ marginBottom: 16, padding: '12px 16px', background: 'var(--ant-color-fill-quaternary)', borderRadius: 8 }}>
-            <div style={{ fontSize: 13, color: 'var(--ant-color-text-secondary)', marginBottom: 12 }}>
+          <div className="settings-assessment-hint">
+            <div className="settings-assessment-hint-text">
               总分 = 工作计划得分 × 工作计划占比 + 周报得分 × 周报占比；周报得分内部再按 AI / 人工占比合成。
             </div>
             <Row gutter={24}>
@@ -200,7 +202,17 @@ export default function SettingsPage() {
                   extra="与周报考核占比之和为 100%"
                   rules={[{ required: true }, { type: 'number', min: 0, max: 100 }]}
                 >
-                  <InputNumber min={0} max={100} style={{ width: '100%' }} disabled={!canEdit} />
+                  <div className="settings-slider-row">
+                    <Slider
+                      min={0}
+                      max={100}
+                      tooltip={{ formatter: (v) => `${v}%` }}
+                      disabled={!canEdit}
+                    />
+                    <span className="settings-slider-value">
+                      {typeof workPlanRatio === 'number' ? `${workPlanRatio}%` : '--'}
+                    </span>
+                  </div>
                 </Form.Item>
               </Col>
               <Col xs={24} sm={12}>
@@ -213,7 +225,18 @@ export default function SettingsPage() {
                     const weekly = typeof wp === 'number' ? 100 - wp : 60;
                     return (
                       <Form.Item label="周报考核占比（%）" extra="只读，= 100% − 工作计划占比">
-                        <InputNumber value={weekly} readOnly style={{ width: '100%' }} />
+                        <div className="settings-slider-row">
+                          <Slider
+                            min={0}
+                            max={100}
+                            value={weekly}
+                            disabled
+                            tooltip={{ formatter: (v) => `${v}%` }}
+                          />
+                          <span className="settings-slider-value">
+                            {`${weekly}%`}
+                          </span>
+                        </div>
                       </Form.Item>
                     );
                   }}
@@ -226,7 +249,17 @@ export default function SettingsPage() {
                   extra="周报分数中 AI 评分的权重；与人工占比之和为 100%"
                   rules={[{ required: true }, { type: 'number', min: 0, max: 100 }]}
                 >
-                  <InputNumber min={0} max={100} style={{ width: '100%' }} disabled={!canEdit} />
+                  <div className="settings-slider-row">
+                    <Slider
+                      min={0}
+                      max={100}
+                      tooltip={{ formatter: (v) => `${v}%` }}
+                      disabled={!canEdit}
+                    />
+                    <span className="settings-slider-value">
+                      {typeof aiRatio === 'number' ? `${aiRatio}%` : '--'}
+                    </span>
+                  </div>
                 </Form.Item>
               </Col>
               <Col xs={24} sm={12}>
@@ -239,7 +272,18 @@ export default function SettingsPage() {
                     const manual = typeof ai === 'number' ? 100 - ai : 20;
                     return (
                       <Form.Item label="周报人工考核占比（%）" extra="只读，= 100% − 周报AI占比">
-                        <InputNumber value={manual} readOnly style={{ width: '100%' }} />
+                        <div className="settings-slider-row">
+                          <Slider
+                            min={0}
+                            max={100}
+                            value={manual}
+                            disabled
+                            tooltip={{ formatter: (v) => `${v}%` }}
+                          />
+                          <span className="settings-slider-value">
+                            {`${manual}%`}
+                          </span>
+                        </div>
                       </Form.Item>
                     );
                   }}

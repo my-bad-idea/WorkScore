@@ -1,0 +1,2126 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>月度考核平台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* =====================================================
+   主题变量
+   ===================================================== */
+:root {
+  --accent: #4F8EF7;
+  --accent2: #7C5CFC;
+  --accent-gradient: linear-gradient(135deg, #4F8EF7, #7C5CFC);
+  --danger: #F75A5A;
+  --warning: #F7A941;
+  --success: #3DD68C;
+  --info: #4F8EF7;
+  --r-sm: 6px; --r-md: 10px; --r-lg: 14px; --r-xl: 20px;
+  --nav-w: 220px; --nav-mini: 56px; --hdr-h: 48px;
+  --tr: 0.18s cubic-bezier(.4,0,.2,1);
+}
+[data-theme="dark"] {
+  --bg: #0E1117;
+  --bg1: #151923;
+  --bg2: #1B2130;
+  --bg3: #222840;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --txt: #E8EDF8;
+  --txt2: #8A93AD;
+  --txt3: #4B546B;
+  --shadow: 0 4px 24px rgba(0,0,0,.55);
+  --shadow-sm: 0 1px 4px rgba(0,0,0,.4);
+  --input-bg: rgba(255,255,255,0.05);
+  --hover: rgba(255,255,255,0.05);
+  --active-nav: rgba(79,142,247,0.13);
+}
+[data-theme="light"] {
+  --bg: #EEF1F8;
+  --bg1: #F6F8FF;
+  --bg2: #FFFFFF;
+  --bg3: #E8ECF7;
+  --border: rgba(0,0,0,0.07);
+  --border2: rgba(0,0,0,0.13);
+  --txt: #1A2040;
+  --txt2: #5A6380;
+  --txt3: #A0AABF;
+  --shadow: 0 4px 24px rgba(0,0,0,.10);
+  --shadow-sm: 0 1px 4px rgba(0,0,0,.07);
+  --input-bg: rgba(0,0,0,0.04);
+  --hover: rgba(0,0,0,0.04);
+  --active-nav: rgba(79,142,247,0.10);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;transition:background var(--tr),color var(--tr)}
+button,input,select,textarea{font-family:inherit}
+
+/* =====================================================
+   布局
+   ===================================================== */
+.layout{display:flex;min-height:100vh}
+
+/* =====================================================
+   左侧导航
+   ===================================================== */
+.nav{
+  width:var(--nav-w);
+  background:var(--bg1);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  position:fixed;left:0;top:0;bottom:0;z-index:200;
+  transition:width var(--tr);
+  overflow:hidden;
+}
+.nav.mini{width:var(--nav-mini)}
+
+/* Logo */
+.nav-logo{
+  height:var(--hdr-h);display:flex;align-items:center;
+  padding:0 14px;gap:10px;flex-shrink:0;
+  border-bottom:1px solid var(--border);
+}
+.logo-mark{
+  width:30px;height:30px;border-radius:8px;flex-shrink:0;
+  background:var(--accent-gradient);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;color:#fff;
+  box-shadow:0 3px 12px rgba(79,142,247,.35);
+}
+.logo-text{font-size:13px;font-weight:600;color:var(--txt);white-space:nowrap;overflow:hidden}
+.logo-text small{display:block;font-size:10px;font-weight:400;color:var(--txt3);margin-top:1px}
+
+/* 折叠按钮 */
+.nav-toggle-btn{
+  position:absolute;top:calc(var(--hdr-h)/2 - 11px);right:-11px;
+  width:22px;height:22px;border-radius:50%;
+  background:var(--bg2);border:1px solid var(--border2);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:var(--txt2);transition:all var(--tr);z-index:10;
+}
+.nav-toggle-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* 菜单区 */
+.nav-body{flex:1;overflow-y:auto;padding:8px 0;scrollbar-width:none}
+.nav-body::-webkit-scrollbar{display:none}
+.nav-section-label{
+  font-size:10px;font-weight:600;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--txt3);
+  padding:10px 16px 4px;white-space:nowrap;overflow:hidden;
+  transition:opacity var(--tr);
+}
+.nav.mini .nav-section-label{opacity:0;height:0;padding:0;pointer-events:none}
+.nav-item{
+  display:flex;align-items:center;gap:9px;
+  padding:8px 12px;margin:1px 6px;border-radius:var(--r-md);
+  cursor:pointer;color:var(--txt2);font-size:13px;font-weight:500;
+  white-space:nowrap;position:relative;transition:all var(--tr);
+}
+.nav-item:hover{background:var(--hover);color:var(--txt)}
+.nav-item.active{background:var(--active-nav);color:var(--accent);font-weight:600}
+.nav-item.active .ni-icon{color:var(--accent)}
+.ni-icon{font-size:15px;flex-shrink:0;width:22px;text-align:center}
+.ni-label{flex:1;overflow:hidden}
+.ni-badge{
+  min-width:17px;height:17px;border-radius:9px;padding:0 4px;
+  background:var(--danger);color:#fff;font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.nav.mini .ni-label,.nav.mini .ni-badge{display:none}
+
+/* 底部用户区 */
+.nav-footer{border-top:1px solid var(--border);padding:8px 6px;flex-shrink:0;position:relative}
+.user-btn{
+  display:flex;align-items:center;gap:9px;
+  padding:8px 10px;border-radius:var(--r-md);cursor:pointer;
+  transition:background var(--tr);
+}
+.user-btn:hover{background:var(--hover)}
+.user-ava{
+  width:30px;height:30px;border-radius:50%;
+  background:var(--accent-gradient);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:#fff;flex-shrink:0;
+}
+.user-info{flex:1;overflow:hidden}
+.user-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-pos{font-size:11px;color:var(--txt3)}
+.user-arrow{font-size:11px;color:var(--txt3);flex-shrink:0;transition:transform var(--tr)}
+.nav.mini .user-info,.nav.mini .user-arrow{display:none}
+
+/* 用户下拉菜单 */
+.user-dropdown{
+  position:absolute;bottom:calc(100% + 4px);left:6px;right:6px;
+  background:var(--bg2);border:1px solid var(--border2);
+  border-radius:var(--r-lg);box-shadow:var(--shadow);
+  overflow:hidden;display:none;z-index:300;
+  animation:dropUp .15s ease;
+}
+.nav.mini .user-dropdown{left:calc(var(--nav-mini) + 6px);right:auto;width:160px}
+.user-dropdown.open{display:block}
+@keyframes dropUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.udrop-item{
+  display:flex;align-items:center;gap:8px;
+  padding:9px 14px;cursor:pointer;font-size:13px;color:var(--txt2);
+  transition:background var(--tr);
+}
+.udrop-item:hover{background:var(--hover);color:var(--txt)}
+.udrop-item.danger{color:var(--danger)}
+.udrop-sep{height:1px;background:var(--border);margin:3px 0}
+
+/* =====================================================
+   主区域
+   ===================================================== */
+.main{
+  margin-left:var(--nav-w);flex:1;display:flex;
+  flex-direction:column;transition:margin-left var(--tr);min-width:0;
+}
+.main.mini{margin-left:var(--nav-mini)}
+
+/* 顶栏 */
+.hdr{
+  height:var(--hdr-h);background:var(--bg1);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 20px;gap:10px;
+  position:sticky;top:0;z-index:100;flex-shrink:0;
+}
+.hdr-title{font-size:14px;font-weight:600;flex:1}
+.hdr-sub{font-size:12px;color:var(--txt3);margin-left:6px;font-weight:400}
+
+/* 主题 & 语言切换 */
+.toggle-group{
+  display:flex;background:var(--bg3);border-radius:var(--r-sm);
+  padding:2px;gap:2px;
+}
+.tg-btn{
+  padding:4px 9px;border-radius:4px;font-size:11px;font-weight:500;
+  cursor:pointer;color:var(--txt2);background:none;border:none;
+  transition:all var(--tr);white-space:nowrap;
+}
+.tg-btn.active{background:var(--bg2);color:var(--txt);box-shadow:var(--shadow-sm)}
+.tg-btn:hover:not(.active){color:var(--txt)}
+
+.notif-btn{
+  width:30px;height:30px;border-radius:var(--r-sm);background:var(--bg3);
+  border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:15px;position:relative;transition:background var(--tr);
+}
+.notif-btn:hover{background:var(--border2)}
+.notif-dot{
+  position:absolute;top:5px;right:5px;width:6px;height:6px;
+  background:var(--danger);border-radius:50%;border:1.5px solid var(--bg1);
+}
+
+/* 月份切换器 */
+.month-switcher{
+  display:flex;align-items:center;gap:4px;
+  background:var(--bg3);border-radius:var(--r-sm);padding:3px 6px;
+}
+.ms-btn{
+  width:22px;height:22px;border-radius:4px;background:none;border:none;
+  cursor:pointer;color:var(--txt2);font-size:12px;display:flex;
+  align-items:center;justify-content:center;transition:all var(--tr);
+}
+.ms-btn:hover{background:var(--hover);color:var(--txt)}
+.ms-val{font-size:12px;font-weight:600;color:var(--txt);min-width:64px;text-align:center;font-family:'JetBrains Mono',monospace}
+
+/* =====================================================
+   内容区
+   ===================================================== */
+.content{flex:1;padding:18px 20px;overflow-y:auto}
+
+/* 页面切换 */
+.page{display:none;animation:pgIn .2s ease}
+.page.active{display:block}
+@keyframes pgIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* =====================================================
+   通用组件
+   ===================================================== */
+/* 卡片 */
+.card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:16px;
+  transition:border-color var(--tr);
+}
+.card:hover{border-color:var(--border2)}
+.card-hd{
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:14px;
+}
+.card-title{font-size:13px;font-weight:600;flex:1}
+.card-action{font-size:12px;color:var(--accent);cursor:pointer;white-space:nowrap}
+.card-action:hover{text-decoration:underline}
+
+/* 网格 */
+.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.g-auto{display:grid;gap:14px}
+.span2{grid-column:span 2}
+.span3{grid-column:span 3}
+
+/* 指标卡 */
+.mcard{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:14px 16px;
+  position:relative;overflow:hidden;transition:all var(--tr);
+}
+.mcard:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:var(--border2)}
+.mc-label{font-size:11px;font-weight:500;color:var(--txt2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.mc-val{font-size:26px;font-weight:700;line-height:1;margin-bottom:6px;font-family:'JetBrains Mono',monospace}
+.mc-val.grad{background:var(--accent-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.mc-sub{font-size:11px;color:var(--txt3)}
+.mc-sub .up{color:var(--success)}
+.mc-sub .dn{color:var(--danger)}
+.mc-bg{position:absolute;right:12px;top:12px;font-size:22px;opacity:.12}
+.mcard.accent{background:linear-gradient(135deg,rgba(79,142,247,.1),rgba(124,92,252,.07));border-color:rgba(79,142,247,.25)}
+
+/* 状态徽章 */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%}
+.badge.pending{background:rgba(247,169,65,.12);color:var(--warning)}
+.badge.pending::before{background:var(--warning)}
+.badge.progress{background:rgba(79,142,247,.12);color:var(--accent)}
+.badge.progress::before{background:var(--accent);animation:blink 1.4s ease-in-out infinite}
+.badge.done{background:rgba(61,214,140,.12);color:var(--success)}
+.badge.done::before{background:var(--success)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* 按钮 */
+.btn{
+  padding:6px 14px;border-radius:var(--r-sm);font-size:12px;font-weight:500;
+  cursor:pointer;border:1px solid var(--border2);background:none;
+  color:var(--txt2);font-family:inherit;transition:all var(--tr);
+  display:inline-flex;align-items:center;gap:5px;
+}
+.btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(79,142,247,.06)}
+.btn.primary{background:var(--accent-gradient);color:#fff;border:none;box-shadow:0 3px 10px rgba(79,142,247,.3)}
+.btn.primary:hover{opacity:.9;color:#fff}
+.btn.danger{border-color:rgba(247,90,90,.3);color:var(--danger)}
+.btn.danger:hover{background:rgba(247,90,90,.08);border-color:var(--danger)}
+.btn.sm{padding:4px 10px;font-size:11px}
+
+/* 表格 */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--txt3);padding:9px 12px;text-align:left;border-bottom:1px solid var(--border)}
+.tbl td{padding:11px 12px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tbody tr{cursor:pointer;transition:background var(--tr)}
+.tbl tbody tr:hover{background:var(--hover)}
+
+/* 人员单元格 */
+.pcell{display:flex;align-items:center;gap:9px}
+.pava{width:30px;height:30px;border-radius:50%;background:var(--accent-gradient);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.pava.b{background:linear-gradient(135deg,#3DD68C,#22D3EE)}
+.pava.c{background:linear-gradient(135deg,#F7A941,#F75A5A)}
+.pava.d{background:linear-gradient(135deg,#7C5CFC,#4F8EF7)}
+.pname{font-size:13px;font-weight:500}
+.ppos{font-size:11px;color:var(--txt3)}
+
+/* 进度条 */
+.bar-wrap{display:flex;align-items:center;gap:7px}
+.bar{flex:1;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;min-width:50px}
+.bar-fill{height:100%;border-radius:2px;background:var(--accent-gradient)}
+.bar-num{font-size:12px;font-weight:600;font-family:'JetBrains Mono',monospace;min-width:30px;text-align:right}
+
+/* 输入框 */
+.inp{
+  width:100%;padding:7px 10px;border-radius:var(--r-sm);
+  border:1px solid var(--border2);background:var(--input-bg);
+  color:var(--txt);font-size:13px;font-family:inherit;outline:none;
+  transition:border-color var(--tr);
+}
+.inp:focus{border-color:var(--accent)}
+.inp::placeholder{color:var(--txt3)}
+
+/* 筛选栏 */
+.filter-bar{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  padding:10px 14px;background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r-lg);margin-bottom:14px;
+}
+.fc{
+  padding:4px 11px;border-radius:20px;font-size:12px;font-weight:500;
+  cursor:pointer;border:1px solid var(--border);background:none;color:var(--txt2);
+  transition:all var(--tr);font-family:inherit;
+}
+.fc:hover,.fc.on{border-color:rgba(79,142,247,.4);color:var(--accent);background:rgba(79,142,247,.07)}
+.fc.all.on{background:var(--accent-gradient);color:#fff;border-color:transparent}
+.search-box{
+  padding:5px 10px;border-radius:var(--r-sm);border:1px solid var(--border2);
+  background:var(--input-bg);color:var(--txt);font-size:12px;font-family:inherit;
+  outline:none;width:160px;transition:border-color var(--tr);
+}
+.search-box:focus{border-color:var(--accent)}
+.f-spacer{flex:1}
+
+/* 分割线 */
+.sep{height:1px;background:var(--border);margin:14px 0}
+
+/* 小标签 */
+.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.tag.blue{background:rgba(79,142,247,.12);color:var(--accent)}
+.tag.purple{background:rgba(124,92,252,.12);color:#9B72FF}
+.tag.green{background:rgba(61,214,140,.12);color:var(--success)}
+.tag.red{background:rgba(247,90,90,.12);color:var(--danger)}
+.tag.yellow{background:rgba(247,169,65,.12);color:var(--warning)}
+
+/* 页面头部 */
+.pg-hd{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.pg-title{font-size:17px;font-weight:700}
+.pg-sub{font-size:12px;color:var(--txt3)}
+
+/* 段落标题 */
+.sec-hd{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.sec-title{font-size:13px;font-weight:600;flex:1}
+.sec-act{font-size:12px;color:var(--accent);cursor:pointer}
+
+/* =====================================================
+   工作台
+   ===================================================== */
+/* 个人卡片 */
+.profile-banner{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r-xl);padding:20px 24px;
+  position:relative;overflow:hidden;margin-bottom:14px;
+}
+.profile-banner::before{
+  content:'';position:absolute;top:-60px;right:-60px;
+  width:240px;height:240px;
+  background:radial-gradient(circle,rgba(79,142,247,.13) 0%,transparent 70%);
+  pointer-events:none;
+}
+.profile-banner::after{
+  content:'';position:absolute;bottom:-40px;left:120px;
+  width:180px;height:180px;
+  background:radial-gradient(circle,rgba(124,92,252,.09) 0%,transparent 70%);
+  pointer-events:none;
+}
+.pb-row{display:flex;align-items:center;gap:16px}
+.pb-ava{
+  width:52px;height:52px;border-radius:50%;
+  background:var(--accent-gradient);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;font-weight:700;color:#fff;flex-shrink:0;
+  box-shadow:0 4px 14px rgba(79,142,247,.35);
+}
+.pb-info{flex:1}
+.pb-name{font-size:18px;font-weight:700;margin-bottom:6px}
+.pb-tags{display:flex;gap:6px;flex-wrap:wrap}
+.pb-tag{font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;background:var(--bg3);border:1px solid var(--border);color:var(--txt2)}
+.pb-dates{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+  margin:16px 0;padding:14px;
+  background:var(--bg3);border-radius:var(--r-md);
+}
+.pb-date-item{}
+.pb-dl{font-size:10px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.pb-dv{font-size:13px;font-weight:600;font-family:'JetBrains Mono',monospace}
+.pb-dv.accent{color:var(--accent)}
+.pb-dv.warn{color:var(--warning)}
+.quick-btns{display:flex;gap:8px}
+.qbtn{
+  flex:1;padding:9px 12px;border-radius:var(--r-md);
+  border:1px solid var(--border);background:var(--bg3);
+  cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;
+  transition:all var(--tr);font-family:inherit;
+}
+.qbtn:hover{border-color:var(--accent);background:rgba(79,142,247,.07);color:var(--accent)}
+.qb-icon{font-size:16px}
+.qb-txt{font-size:11px;font-weight:500;color:inherit}
+
+/* 待办 */
+.todo-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 11px;border-radius:var(--r-md);
+  background:var(--bg3);border:1px solid var(--border);
+  margin-bottom:6px;cursor:pointer;transition:all var(--tr);
+}
+.todo-item:hover{border-color:var(--border2)}
+.td-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.td-txt{flex:1;font-size:13px}
+
+/* 考核流程 */
+.flow-step{display:flex;gap:12px;padding:8px 0}
+.flow-line{display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:20px}
+.flow-dot{
+  width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:700;flex-shrink:0;
+}
+.flow-dot.done{background:var(--accent-gradient);color:#fff}
+.flow-dot.cur{background:var(--bg2);border:2px solid var(--accent);color:var(--accent);animation:pr 2s ease-in-out infinite}
+.flow-dot.pend{background:var(--bg3);border:2px solid var(--border2);color:var(--txt3)}
+@keyframes pr{0%,100%{box-shadow:0 0 0 0 rgba(79,142,247,.3)}50%{box-shadow:0 0 0 5px rgba(79,142,247,0)}}
+.flow-seg{flex:1;width:2px;background:var(--border);margin:2px 0}
+.flow-seg.done{background:var(--accent-gradient)}
+.flow-step:last-child .flow-seg{display:none}
+.flow-body{flex:1;padding-top:1px}
+.flow-name{font-size:13px;font-weight:500}
+.flow-name.done{color:var(--txt3)}
+.flow-name.cur{color:var(--accent)}
+.flow-date{font-size:11px;color:var(--txt3);margin-top:1px}
+
+/* =====================================================
+   考核详情 - 周报展示
+   ===================================================== */
+.detail-score-ring{
+  width:90px;height:90px;border-radius:50%;flex-shrink:0;
+  background:conic-gradient(#4F8EF7 0deg,#7C5CFC calc(var(--pct,87.5)*3.6deg),var(--bg3) calc(var(--pct,87.5)*3.6deg));
+  display:flex;align-items:center;justify-content:center;
+}
+.dsr-inner{
+  width:72px;height:72px;border-radius:50%;background:var(--bg2);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.dsr-num{font-size:20px;font-weight:700;font-family:'JetBrains Mono',monospace;background:var(--accent-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+.dsr-lbl{font-size:9px;color:var(--txt3)}
+
+.weekly-tabs{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap}
+.wt{
+  padding:4px 12px;border-radius:var(--r-sm);font-size:12px;font-weight:500;
+  cursor:pointer;border:1px solid var(--border);background:none;color:var(--txt2);
+  transition:all var(--tr);font-family:inherit;
+}
+.wt.ok{border-color:rgba(61,214,140,.3);color:var(--success)}
+.wt.miss{border-color:rgba(247,90,90,.3);color:var(--danger)}
+.wt.cur{border-color:rgba(79,142,247,.4);background:rgba(79,142,247,.08);color:var(--accent)}
+.wt.on{background:var(--accent-gradient);color:#fff;border-color:transparent}
+
+/* =====================================================
+   周报管理
+   ===================================================== */
+.week-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.wcard{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:13px;cursor:pointer;
+  transition:all var(--tr);position:relative;
+}
+.wcard:hover{border-color:var(--border2);transform:translateY(-1px)}
+.wcard.ok{border-color:rgba(61,214,140,.3)}
+.wcard.miss{border-color:rgba(247,90,90,.25);background:rgba(247,90,90,.02)}
+.wcard.cur{border-color:rgba(79,142,247,.4);background:rgba(79,142,247,.05)}
+.wc-corner{position:absolute;top:9px;right:10px;font-size:13px}
+.wc-n{font-size:10px;font-weight:600;color:var(--txt3);margin-bottom:4px}
+.wc-date{font-size:11px;color:var(--txt3);margin-bottom:6px;font-family:'JetBrains Mono',monospace}
+.wc-st{font-size:12px;font-weight:600}
+.wc-st.ok{color:var(--success)}
+.wc-st.miss{color:var(--danger)}
+.wc-st.cur{color:var(--accent)}
+
+.report-view{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:18px;
+}
+.rv-hd{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.rv-badge{padding:3px 10px;border-radius:20px;background:var(--accent-gradient);color:#fff;font-size:11px;font-weight:700}
+.rv-body{
+  font-size:13px;color:var(--txt2);line-height:1.8;
+  padding:13px;background:var(--bg3);border-radius:var(--r-md);
+  border:1px solid var(--border);
+}
+.hash-row{font-size:10px;color:var(--txt3);margin-top:9px;display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace}
+.hash-dot{width:5px;height:5px;border-radius:50%;background:var(--success)}
+
+/* =====================================================
+   自述材料
+   ===================================================== */
+.mat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.mat-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:14px;cursor:pointer;
+  transition:all var(--tr);position:relative;overflow:hidden;
+}
+.mat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent-gradient);opacity:0;transition:opacity var(--tr)}
+.mat-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:var(--shadow)}
+.mat-card:hover::before{opacity:1}
+.mat-type{font-size:10px;font-weight:700;letter-spacing:.07em;padding:2px 9px;border-radius:20px;display:inline-block;margin-bottom:9px}
+.mat-name{font-size:13px;font-weight:600;margin-bottom:5px}
+.mat-desc{font-size:12px;color:var(--txt2);line-height:1.6;margin-bottom:9px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mat-foot{display:flex;align-items:center;gap:6px}
+.mat-file{font-size:11px;color:var(--txt3);background:var(--bg3);padding:2px 7px;border-radius:4px}
+.mat-date{font-size:11px;color:var(--txt3);margin-left:auto;font-family:'JetBrains Mono',monospace}
+.mat-add{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;opacity:.5;border-style:dashed}
+.mat-add:hover{opacity:.85}
+
+/* =====================================================
+   异议处理
+   ===================================================== */
+.obj-card{
+  background:var(--bg2);border:1px solid rgba(247,90,90,.2);
+  border-radius:var(--r-lg);padding:16px;margin-bottom:10px;
+  transition:border-color var(--tr);
+}
+.obj-card:hover{border-color:rgba(247,90,90,.4)}
+.obj-hd{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.obj-icon{width:36px;height:36px;border-radius:var(--r-sm);background:rgba(247,90,90,.1);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.obj-info{flex:1}
+.obj-name{font-size:14px;font-weight:600}
+.obj-meta{font-size:11px;color:var(--txt3)}
+.obj-diff{font-size:22px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--danger)}
+.obj-diff.pos{color:var(--success)}
+
+/* 三方评分对比 */
+.score-compare{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+  margin-bottom:12px;
+}
+.sc-block{padding:10px;background:var(--bg3);border-radius:var(--r-md);border:1px solid var(--border);text-align:center}
+.sc-label{font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;margin-bottom:5px}
+.sc-score{font-size:20px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.sc-score.leader{color:var(--accent)}
+.sc-score.peer{color:#9B72FF}
+.sc-score.ai{color:var(--success)}
+.sc-diff{font-size:10px;color:var(--txt3);margin-top:3px}
+.sc-diff .big{color:var(--danger);font-weight:600}
+
+/* 调整区 */
+.adj-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.adj-label{font-size:12px;color:var(--txt2)}
+.score-spin{display:flex;align-items:center;gap:6px}
+.spin-btn{width:26px;height:26px;border-radius:var(--r-sm);border:1px solid var(--border2);background:none;cursor:pointer;color:var(--txt2);font-size:14px;display:flex;align-items:center;justify-content:center;transition:all var(--tr)}
+.spin-btn:hover{border-color:var(--accent);color:var(--accent)}
+.spin-val{font-size:15px;font-weight:700;font-family:'JetBrains Mono',monospace;min-width:38px;text-align:center}
+.reason-input{
+  flex:1;min-width:200px;padding:6px 10px;border-radius:var(--r-sm);
+  border:1px solid var(--border2);background:var(--input-bg);
+  color:var(--txt);font-size:12px;font-family:inherit;outline:none;
+  transition:border-color var(--tr);
+}
+.reason-input:focus{border-color:var(--accent)}
+
+/* =====================================================
+   考核统计
+   ===================================================== */
+.trend-chart{height:110px;display:flex;align-items:flex-end;gap:5px;padding:0 2px}
+.tcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.tbar{
+  width:100%;border-radius:4px 4px 0 0;
+  background:linear-gradient(180deg,var(--accent),var(--accent2));
+  transition:opacity var(--tr);cursor:pointer;min-height:3px;
+}
+.tbar:hover{opacity:.8}
+.tbar.cur{box-shadow:0 0 10px rgba(79,142,247,.4)}
+.t-lbl{font-size:10px;color:var(--txt3);font-family:'JetBrains Mono',monospace}
+.t-val{font-size:10px;font-weight:600;color:var(--txt2)}
+
+.rank-list{display:flex;flex-direction:column;gap:5px}
+.rank-row{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:var(--r-md);background:var(--bg3);border:1px solid var(--border)}
+.rank-row.me{border-color:rgba(79,142,247,.3);background:rgba(79,142,247,.05)}
+.rn{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.rn.g{background:linear-gradient(135deg,#F7A941,#F75A5A);color:#fff}
+.rn.s{background:linear-gradient(135deg,#9BA3B5,#6B7280);color:#fff}
+.rn.b{background:linear-gradient(135deg,#CD7F32,#A05A2C);color:#fff}
+.rn.n{background:var(--bg2);border:1px solid var(--border);color:var(--txt3)}
+.rp{flex:1}
+.rp-name{font-size:13px;font-weight:500}
+.rp-pos{font-size:11px;color:var(--txt3)}
+.r-score{font-size:14px;font-weight:700;font-family:'JetBrains Mono',monospace}
+
+/* =====================================================
+   系统配置页
+   ===================================================== */
+.cfg-section{margin-bottom:18px}
+.cfg-title{font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.cfg-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cfg-field{display:flex;flex-direction:column;gap:5px}
+.cfg-label{font-size:12px;font-weight:500;color:var(--txt2)}
+.cfg-hint{font-size:11px;color:var(--txt3)}
+
+/* 滑块 */
+.slider-row{margin-bottom:10px}
+.slider-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.slider-name{font-size:13px;font-weight:500}
+.slider-pct{font-size:14px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--accent)}
+input[type=range]{
+  -webkit-appearance:none;width:100%;height:4px;
+  border-radius:2px;outline:none;cursor:pointer;
+  background:linear-gradient(to right,var(--accent) var(--val,33%),var(--bg3) var(--val,33%));
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:14px;height:14px;border-radius:50%;
+  background:var(--accent);cursor:pointer;box-shadow:0 0 6px rgba(79,142,247,.4);
+  border:2px solid var(--bg2);
+}
+.weight-total{display:flex;align-items:center;justify-content:space-between;font-size:13px;padding:8px 12px;background:var(--bg3);border-radius:var(--r-sm);margin-top:10px}
+.weight-total.err{background:rgba(247,90,90,.08);color:var(--danger)}
+.weight-total.ok{background:rgba(61,214,140,.08);color:var(--success)}
+
+/* 权限开关 */
+.toggle-switch{position:relative;width:34px;height:18px;flex-shrink:0}
+.toggle-switch input{display:none}
+.ts-track{
+  position:absolute;inset:0;border-radius:9px;
+  background:var(--bg3);border:1px solid var(--border2);
+  cursor:pointer;transition:background var(--tr);
+}
+.ts-track::before{
+  content:'';position:absolute;top:2px;left:2px;
+  width:12px;height:12px;border-radius:50%;
+  background:var(--txt3);transition:all var(--tr);
+}
+input:checked+.ts-track{background:var(--accent);border-color:var(--accent)}
+input:checked+.ts-track::before{background:#fff;transform:translateX(16px)}
+
+/* 维度权重表 */
+.dim-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.dim-tbl th{font-size:11px;color:var(--txt3);text-align:center;padding:6px 10px;border-bottom:1px solid var(--border)}
+.dim-tbl th:first-child{text-align:left}
+.dim-tbl td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:center}
+.dim-tbl td:first-child{text-align:left;font-weight:500}
+.dim-tbl tr:last-child td{border-bottom:none}
+
+/* =====================================================
+   组织管理公共
+   ===================================================== */
+.org-layout{display:grid;grid-template-columns:280px 1fr;gap:14px;height:calc(100vh - 100px)}
+.org-left{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);display:flex;flex-direction:column}
+.org-list{flex:1;overflow-y:auto;padding:8px}
+.org-item{
+  padding:9px 11px;border-radius:var(--r-md);cursor:pointer;
+  font-size:13px;transition:all var(--tr);
+  display:flex;align-items:center;gap:8px;
+}
+.org-item:hover{background:var(--hover)}
+.org-item.active{background:var(--active-nav);color:var(--accent);font-weight:600}
+.org-item-num{font-size:11px;color:var(--txt3);margin-left:auto;font-family:'JetBrains Mono',monospace}
+
+.org-right{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);display:flex;flex-direction:column}
+.org-right-hd{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.org-right-body{flex:1;overflow-y:auto;padding:14px 16px}
+
+/* 表单 */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.form-field{display:flex;flex-direction:column;gap:4px}
+.form-label{font-size:12px;font-weight:500;color:var(--txt2)}
+.sel{
+  width:100%;padding:7px 10px;border-radius:var(--r-sm);
+  border:1px solid var(--border2);background:var(--input-bg);
+  color:var(--txt);font-size:13px;font-family:inherit;outline:none;
+  transition:border-color var(--tr);cursor:pointer;
+}
+.sel:focus{border-color:var(--accent)}
+
+/* =====================================================
+   用于修饰
+   ===================================================== */
+.mb4{margin-bottom:4px}
+.mb8{margin-bottom:8px}
+.mb12{margin-bottom:12px}
+.mb14{margin-bottom:14px}
+.mb16{margin-bottom:16px}
+.mb18{margin-bottom:18px}
+.flex{display:flex}
+.items-center{align-items:center}
+.gap8{gap:8px}
+.gap10{gap:10px}
+.gap12{gap:12px}
+.flex1{flex:1}
+.mono{font-family:'JetBrains Mono',monospace}
+.txt2{color:var(--txt2)}
+.txt3{color:var(--txt3)}
+.sm{font-size:12px}
+.xs{font-size:11px}
+
+/* 评分卡 */
+.sc-card{
+  padding:13px;background:var(--bg3);border:1px solid var(--border);
+  border-radius:var(--r-md);margin-bottom:9px;
+}
+.scc-hd{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.scc-ava{width:26px;height:26px;border-radius:50%;background:var(--accent-gradient);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.scc-ava.anon{background:var(--bg2);border:1px solid var(--border2);color:var(--txt3)}
+.scc-name{font-size:13px;font-weight:500;flex:1}
+.scc-score{font-size:15px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--accent)}
+.scc-items{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.si{font-size:12px}
+.si-label{color:var(--txt3);margin-bottom:2px}
+.si-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:2px}
+.si-fill{height:100%;border-radius:2px;background:var(--accent-gradient)}
+.si-num{font-weight:600;font-family:'JetBrains Mono',monospace;font-size:11px}
+</style>
+</head>
+<body>
+<section id="page-login" style="display:none; min-height:100vh; background: var(--bg, #0b1220); padding:48px 16px;">
+  <div style="max-width: 980px; margin: 0 auto; display:grid; grid-template-columns: 1.1fr 0.9fr; gap: 24px; align-items: stretch;">
+    <div style="border-radius:16px; padding:28px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);">
+      <div style="font-size: 22px; font-weight: 700; color: #fff; letter-spacing: .3px;">AI 月度考核系统</div>
+      <div style="margin-top: 10px; color: rgba(255,255,255,0.72); line-height: 1.7;">
+        统一入口，支持 AI 建议分与人工校准；支持异议窗口与队列处理；可按部门/岗位/人员精细化管理。
+      </div>
+      <div style="margin-top: 20px; display:flex; gap: 10px; flex-wrap: wrap;">
+        <span style="padding:6px 10px; border-radius:999px; background: rgba(99,102,241,0.18); color: rgba(255,255,255,0.85); border:1px solid rgba(99,102,241,0.35);">权限分级</span>
+        <span style="padding:6px 10px; border-radius:999px; background: rgba(16,185,129,0.14); color: rgba(255,255,255,0.85); border:1px solid rgba(16,185,129,0.28);">可追溯</span>
+        <span style="padding:6px 10px; border-radius:999px; background: rgba(245,158,11,0.14); color: rgba(255,255,255,0.85); border:1px solid rgba(245,158,11,0.28);">可配置</span>
+      </div>
+      <div style="margin-top: 28px; color: rgba(255,255,255,0.6); font-size: 12px;">
+        提示：首次部署请先完成初始化安装（安装后该入口将隐藏）。
+      </div>
+    </div>
+
+    <div style="border-radius:16px; padding:28px; background: #0f1a33; border: 1px solid rgba(255,255,255,0.10); box-shadow: 0 12px 40px rgba(0,0,0,0.35);">
+      <div style="font-size: 16px; font-weight: 700; color:#fff;">登录</div>
+      <div style="margin-top: 6px; color: rgba(255,255,255,0.62); font-size: 12px;">请输入账号密码以继续</div>
+
+      <div style="margin-top: 18px;">
+        <label style="display:block; color: rgba(255,255,255,0.75); font-size: 12px; margin-bottom: 6px;">账号</label>
+        <input placeholder="例如：admin" style="width:100%; padding:12px 12px; border-radius:10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color:#fff; outline:none;" />
+      </div>
+
+      <div style="margin-top: 14px;">
+        <label style="display:block; color: rgba(255,255,255,0.75); font-size: 12px; margin-bottom: 6px;">密码</label>
+        <div style="display:flex; gap:10px;">
+          <input type="password" placeholder="请输入密码" style="flex:1; padding:12px 12px; border-radius:10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color:#fff; outline:none;" />
+          <button type="button" style="padding: 12px 12px; border-radius:10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.8); cursor:pointer;">
+            显示
+          </button>
+        </div>
+        <div style="margin-top: 8px; display:flex; justify-content: space-between; align-items:center;">
+          <label style="color: rgba(255,255,255,0.62); font-size:12px; display:flex; gap:8px; align-items:center;">
+            <input type="checkbox" /> 记住我
+          </label>
+          <a href="javascript:void(0)" style="color: rgba(99,102,241,0.95); font-size:12px; text-decoration:none;">忘记密码</a>
+        </div>
+      </div>
+
+      <button type="button" onclick="location.hash='#/dashboard'"
+        style="margin-top: 18px; width:100%; padding:12px 14px; border-radius:10px; border:none; cursor:pointer; background: linear-gradient(90deg, rgba(99,102,241,1), rgba(56,189,248,1)); color:#0b1220; font-weight:700;">
+        登录
+      </button>
+
+      <div style="margin-top: 14px; display:flex; justify-content: space-between; align-items:center;">
+        <span style="color: rgba(255,255,255,0.6); font-size:12px;">版本：v0.1 原型</span>
+        <a href="#/setup" style="color: rgba(255,255,255,0.75); font-size:12px; text-decoration:none;">
+          首次安装？去初始化 →
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section id="page-setup" style="display:none; min-height:100vh; background: var(--bg, #0b1220); padding:48px 16px;">
+  <div style="max-width: 980px; margin: 0 auto;">
+    <div style="display:flex; justify-content: space-between; align-items:flex-end; gap: 12px;">
+      <div>
+        <div style="font-size: 18px; font-weight: 800; color:#fff;">初始化安装</div>
+        <div style="margin-top: 6px; color: rgba(255,255,255,0.62); font-size: 12px;">
+          创建系统管理员账号并写入基础配置（仅首次可用）
+        </div>
+      </div>
+      <a href="#/login" style="color: rgba(99,102,241,0.95); font-size: 12px; text-decoration:none;">返回登录</a>
+    </div>
+
+    <div style="margin-top: 16px; border-radius:16px; padding:22px; background: #0f1a33; border: 1px solid rgba(255,255,255,0.10);">
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+        <div>
+          <label style="display:block; color: rgba(255,255,255,0.75); font-size: 12px; margin-bottom: 6px;">管理员账号</label>
+          <input placeholder="例如：admin" style="width:100%; padding:12px 12px; border-radius:10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color:#fff; outline:none;" />
+        </div>
+        <div>
+          <label style="display:block; color: rgba(255,255,255,0.75); font-size: 12px; margin-bottom: 6px;">管理员姓名</label>
+          <input placeholder="例如：系统管理员" style="width:100%; padding:12px 12px; border-radius:10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color:#fff; outline:none;" />
+        </div>
+        <div>
+          <label style="display:block; color: rgba(255,255,255,0.75); font-size: 12px; margin-bottom: 6px;">密码</label>
+          <input type="password" placeholder="至少 8 位，建议包含数字与字母" style="width:100%; padding:12px 12px; border-radius:10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color:#fff; outline:none;" />
+        </div>
+        <div>
+          <label style="display:block; color: rgba(255,255,255,0.75); font-size: 12px; margin-bottom: 6px;">确认密码</label>
+          <input type="password" placeholder="再次输入密码" style="width:100%; padding:12px 12px; border-radius:10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color:#fff; outline:none;" />
+        </div>
+      </div>
+
+      <div style="margin-top: 14px; display:flex; gap: 10px; justify-content: flex-end;">
+        <button type="button" onclick="location.hash='#/login'"
+          style="padding:10px 14px; border-radius:10px; background: transparent; border:1px solid rgba(255,255,255,0.14); color: rgba(255,255,255,0.8); cursor:pointer;">
+          取消
+        </button>
+        <button type="button" onclick="location.hash='#/login'"
+          style="padding:10px 14px; border-radius:10px; border:none; cursor:pointer; background: linear-gradient(90deg, rgba(16,185,129,1), rgba(34,197,94,1)); color:#052016; font-weight:800;">
+          完成安装并去登录
+        </button>
+      </div>
+
+      <div style="margin-top: 12px; color: rgba(255,255,255,0.55); font-size: 12px; line-height: 1.7;">
+        安装完成后：<br/>
+        1）/setup 将不可访问；2）你可以在“系统设置”中配置权重、截止日、缺失处理策略等；3）建议开启审计日志。
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section id="page-score-queue" style="display:none; min-height:100vh; background: var(--bg, #0b1220); padding:24px 16px;">
+  <div style="max-width: 1200px; margin: 0 auto;">
+    <div style="display:flex; justify-content: space-between; align-items:flex-end; gap:12px;">
+      <div>
+        <div style="font-size: 18px; font-weight: 800; color:#fff;">考核队列</div>
+        <div style="margin-top: 6px; color: rgba(255,255,255,0.62); font-size: 12px;">用于跟踪 AI 建议分生成/重试/失败原因与人工兜底</div>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <a href="#/dashboard" style="color: rgba(99,102,241,0.95); font-size: 12px; text-decoration:none;">返回工作台</a>
+      </div>
+    </div>
+    
+<div style="margin-top: 14px; border-radius:16px; padding:14px; background:#0f1a33; border:1px solid rgba(255,255,255,0.10);">
+  <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+    <input placeholder="搜索：记录人/任务ID/失败原因" style="flex:1; min-width:240px; padding:10px 12px; border-radius:10px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#fff; outline:none;" />
+    <select style="padding:10px 12px; border-radius:10px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#fff;">
+      <option>状态：全部</option><option>pending</option><option>running</option><option>failed</option><option>done</option>
+    </select>
+    <button style="padding:10px 12px; border-radius:10px; border:none; cursor:pointer; background: linear-gradient(90deg, rgba(99,102,241,1), rgba(56,189,248,1)); color:#0b1220; font-weight:800;">查询</button>
+  </div>
+</div>
+
+<div style="margin-top: 14px; border-radius:16px; overflow:hidden; background:#0f1a33; border:1px solid rgba(255,255,255,0.10);">
+  <table style="width:100%; border-collapse: collapse; color: rgba(255,255,255,0.86); font-size:12px;">
+    <thead>
+      <tr style="background: rgba(255,255,255,0.04);">
+        <th style="text-align:left; padding:12px 14px;">任务ID</th>
+        <th style="text-align:left; padding:12px 14px;">记录人</th>
+        <th style="text-align:left; padding:12px 14px;">类型</th>
+        <th style="text-align:left; padding:12px 14px;">状态</th>
+        <th style="text-align:left; padding:12px 14px;">重试</th>
+        <th style="text-align:left; padding:12px 14px;">更新时间</th>
+        <th style="text-align:left; padding:12px 14px;">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-top:1px solid rgba(255,255,255,0.06);">
+        <td style="padding:12px 14px;">Q-202602-00018</td>
+        <td style="padding:12px 14px;">张三</td>
+        <td style="padding:12px 14px;">AI建议分</td>
+        <td style="padding:12px 14px;"><span style="padding:3px 8px; border-radius:999px; background:rgba(245,158,11,0.14); border:1px solid rgba(245,158,11,0.28);">running</span></td>
+        <td style="padding:12px 14px;">1/3</td>
+        <td style="padding:12px 14px;">2026-02-27 15:12</td>
+        <td style="padding:12px 14px;">
+          <button style="padding:7px 10px; border-radius:10px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:rgba(255,255,255,0.85); cursor:pointer;">详情</button>
+          <button style="margin-left:8px; padding:7px 10px; border-radius:10px; background:rgba(16,185,129,0.14); border:1px solid rgba(16,185,129,0.28); color:rgba(255,255,255,0.9); cursor:pointer;">重试</button>
+        </td>
+      </tr>
+      <tr style="border-top:1px solid rgba(255,255,255,0.06);">
+        <td style="padding:12px 14px;">Q-202602-00009</td>
+        <td style="padding:12px 14px;">李四</td>
+        <td style="padding:12px 14px;">AI建议分</td>
+        <td style="padding:12px 14px;"><span style="padding:3px 8px; border-radius:999px; background:rgba(239,68,68,0.14); border:1px solid rgba(239,68,68,0.28);">failed</span></td>
+        <td style="padding:12px 14px;">3/3</td>
+        <td style="padding:12px 14px;">2026-02-27 14:55</td>
+        <td style="padding:12px 14px;">
+          <button style="padding:7px 10px; border-radius:10px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:rgba(255,255,255,0.85); cursor:pointer;">详情</button>
+          <button style="margin-left:8px; padding:7px 10px; border-radius:10px; background:rgba(239,68,68,0.14); border:1px solid rgba(239,68,68,0.28); color:rgba(255,255,255,0.9); cursor:pointer;">人工兜底</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div style="padding:12px 14px; color:rgba(255,255,255,0.55); font-size:12px;">注：该页用于排障与重试；详情建议用右侧抽屉承载。</div>
+</div>
+
+  </div>
+</section>
+
+
+<section id="page-ai-test" style="display:none; min-height:100vh; background: var(--bg, #0b1220); padding:24px 16px;">
+  <div style="max-width: 1200px; margin: 0 auto;">
+    <div style="display:flex; justify-content: space-between; align-items:flex-end; gap:12px;">
+      <div>
+        <div style="font-size: 18px; font-weight: 800; color:#fff;">AI 考核测试</div>
+        <div style="margin-top: 6px; color: rgba(255,255,255,0.62); font-size: 12px;">快速验证模型/提示词/输出结构，便于回归与排障</div>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <a href="#/dashboard" style="color: rgba(99,102,241,0.95); font-size: 12px; text-decoration:none;">返回工作台</a>
+      </div>
+    </div>
+    
+<div style="margin-top: 14px; display:grid; grid-template-columns: 0.9fr 1.1fr; gap:14px;">
+  <div style="border-radius:16px; padding:14px; background:#0f1a33; border:1px solid rgba(255,255,255,0.10);">
+    <div style="color:#fff; font-weight:800; font-size:12px;">参数</div>
+    <div style="margin-top:10px;">
+      <label style="display:block; color: rgba(255,255,255,0.7); font-size:12px; margin-bottom:6px;">选择模型</label>
+      <select style="width:100%; padding:10px 12px; border-radius:10px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#fff;">
+        <option>默认（system_settings.ai_default_llm_model）</option>
+        <option>gpt-4.1-mini</option>
+        <option>deepseek-chat</option>
+      </select>
+    </div>
+    <div style="margin-top:10px;">
+      <label style="display:block; color: rgba(255,255,255,0.7); font-size:12px; margin-bottom:6px;">选择 Agent</label>
+      <select style="width:100%; padding:10px 12px; border-radius:10px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#fff;">
+        <option>默认（system_settings.ai_default_agent）</option>
+        <option>score_agent_v1</option>
+        <option>score_agent_v2</option>
+      </select>
+    </div>
+    <div style="margin-top:10px;">
+      <label style="display:block; color: rgba(255,255,255,0.7); font-size:12px; margin-bottom:6px;">输入（模拟周报/材料）</label>
+      <textarea rows="10" placeholder="粘贴周报/材料摘要..." style="width:100%; padding:10px 12px; border-radius:10px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#fff; outline:none;"></textarea>
+    </div>
+    <button style="margin-top:12px; width:100%; padding:10px 12px; border-radius:10px; border:none; cursor:pointer; background: linear-gradient(90deg, rgba(99,102,241,1), rgba(56,189,248,1)); color:#0b1220; font-weight:800;">
+      运行测试
+    </button>
+  </div>
+
+  <div style="border-radius:16px; padding:14px; background:#0f1a33; border:1px solid rgba(255,255,255,0.10);">
+    <div style="display:flex; justify-content: space-between; align-items:center;">
+      <div style="color:#fff; font-weight:800; font-size:12px;">输出</div>
+      <div style="display:flex; gap:8px;">
+        <button style="padding:7px 10px; border-radius:10px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:rgba(255,255,255,0.85); cursor:pointer;">复制JSON</button>
+        <button style="padding:7px 10px; border-radius:10px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:rgba(255,255,255,0.85); cursor:pointer;">保存为用例</button>
+      </div>
+    </div>
+    <pre style="margin-top:10px; padding:12px; border-radius:12px; background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.08); color:rgba(255,255,255,0.85); overflow:auto; min-height: 420px;">
+{
+  "score": 86,
+  "dimensions": { "execution": 30, "quality": 28, "impact": 28 },
+  "summary": "…",
+  "risks": ["…"],
+  "evidence": ["…"]
+}
+    </pre>
+  </div>
+</div>
+
+  </div>
+</section>
+
+
+<section id="page-llm-models" style="display:none; min-height:100vh; background: var(--bg, #0b1220); padding:24px 16px;">
+  <div style="max-width: 1200px; margin: 0 auto;">
+    <div style="display:flex; justify-content: space-between; align-items:flex-end; gap:12px;">
+      <div>
+        <div style="font-size: 18px; font-weight: 800; color:#fff;">LLM 模型</div>
+        <div style="margin-top: 6px; color: rgba(255,255,255,0.62); font-size: 12px;">维护可用模型与默认模型（仅系统管理员）</div>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <a href="#/dashboard" style="color: rgba(99,102,241,0.95); font-size: 12px; text-decoration:none;">返回工作台</a>
+      </div>
+    </div>
+    
+<div style="margin-top: 14px; border-radius:16px; overflow:hidden; background:#0f1a33; border:1px solid rgba(255,255,255,0.10);">
+  <div style="padding:14px; display:flex; justify-content: space-between; gap:10px; align-items:center;">
+    <div style="color:rgba(255,255,255,0.75); font-size:12px;">仅系统管理员可维护。建议抽屉编辑：name/provider/model_id/api_base/api_key_ref/timeout/retries/notes</div>
+    <button style="padding:10px 12px; border-radius:10px; border:none; cursor:pointer; background: linear-gradient(90deg, rgba(16,185,129,1), rgba(34,197,94,1)); color:#052016; font-weight:800;">新增模型</button>
+  </div>
+  <table style="width:100%; border-collapse: collapse; color: rgba(255,255,255,0.86); font-size:12px;">
+    <thead><tr style="background: rgba(255,255,255,0.04);">
+      <th style="text-align:left; padding:12px 14px;">名称</th>
+      <th style="text-align:left; padding:12px 14px;">Provider</th>
+      <th style="text-align:left; padding:12px 14px;">模型ID</th>
+      <th style="text-align:left; padding:12px 14px;">可用</th>
+      <th style="text-align:left; padding:12px 14px;">默认</th>
+      <th style="text-align:left; padding:12px 14px;">操作</th>
+    </tr></thead>
+    <tbody>
+      <tr style="border-top:1px solid rgba(255,255,255,0.06);">
+        <td style="padding:12px 14px;">gpt-4.1-mini</td>
+        <td style="padding:12px 14px;">OpenAI</td>
+        <td style="padding:12px 14px;">gpt-4.1-mini</td>
+        <td style="padding:12px 14px;"><span style="padding:3px 8px; border-radius:999px; background:rgba(16,185,129,0.14); border:1px solid rgba(16,185,129,0.28);">enabled</span></td>
+        <td style="padding:12px 14px;">✅</td>
+        <td style="padding:12px 14px;">
+          <button style="padding:7px 10px; border-radius:10px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:rgba(255,255,255,0.85); cursor:pointer;">编辑</button>
+          <button style="margin-left:8px; padding:7px 10px; border-radius:10px; background:rgba(99,102,241,0.14); border:1px solid rgba(99,102,241,0.28); color:rgba(255,255,255,0.9); cursor:pointer;">设为默认</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+  </div>
+</section>
+
+
+<section id="page-agents" style="display:none; min-height:100vh; background: var(--bg, #0b1220); padding:24px 16px;">
+  <div style="max-width: 1200px; margin: 0 auto;">
+    <div style="display:flex; justify-content: space-between; align-items:flex-end; gap:12px;">
+      <div>
+        <div style="font-size: 18px; font-weight: 800; color:#fff;">Agent</div>
+        <div style="margin-top: 6px; color: rgba(255,255,255,0.62); font-size: 12px;">维护评分 Agent 的提示词/结构约束/版本（仅系统管理员）</div>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <a href="#/dashboard" style="color: rgba(99,102,241,0.95); font-size: 12px; text-decoration:none;">返回工作台</a>
+      </div>
+    </div>
+    
+<div style="margin-top: 14px; border-radius:16px; overflow:hidden; background:#0f1a33; border:1px solid rgba(255,255,255,0.10);">
+  <div style="padding:14px; display:flex; justify-content: space-between; gap:10px; align-items:center;">
+    <div style="color:rgba(255,255,255,0.75); font-size:12px;">建议抽屉编辑：key/version/system_prompt/user_prompt/schema/max_tokens/stop/notes</div>
+    <button style="padding:10px 12px; border-radius:10px; border:none; cursor:pointer; background: linear-gradient(90deg, rgba(16,185,129,1), rgba(34,197,94,1)); color:#052016; font-weight:800;">新增 Agent</button>
+  </div>
+  <table style="width:100%; border-collapse: collapse; color: rgba(255,255,255,0.86); font-size:12px;">
+    <thead><tr style="background: rgba(255,255,255,0.04);">
+      <th style="text-align:left; padding:12px 14px;">Key</th>
+      <th style="text-align:left; padding:12px 14px;">版本</th>
+      <th style="text-align:left; padding:12px 14px;">输出约束</th>
+      <th style="text-align:left; padding:12px 14px;">默认</th>
+      <th style="text-align:left; padding:12px 14px;">操作</th>
+    </tr></thead>
+    <tbody>
+      <tr style="border-top:1px solid rgba(255,255,255,0.06);">
+        <td style="padding:12px 14px;">score_agent_v1</td>
+        <td style="padding:12px 14px;">1.0.3</td>
+        <td style="padding:12px 14px;">JSON Schema ✅</td>
+        <td style="padding:12px 14px;">✅</td>
+        <td style="padding:12px 14px;">
+          <button style="padding:7px 10px; border-radius:10px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:rgba(255,255,255,0.85); cursor:pointer;">编辑</button>
+          <button style="margin-left:8px; padding:7px 10px; border-radius:10px; background:rgba(99,102,241,0.14); border:1px solid rgba(99,102,241,0.28); color:rgba(255,255,255,0.9); cursor:pointer;">设为默认</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+  </div>
+</section>
+
+
+<section id="page-dictionaries" style="display:none; min-height:100vh; background: var(--bg, #0b1220); padding:24px 16px;">
+  <div style="max-width: 1200px; margin: 0 auto;">
+    <div style="display:flex; justify-content: space-between; align-items:flex-end; gap:12px;">
+      <div>
+        <div style="font-size: 18px; font-weight: 800; color:#fff;">数据字典</div>
+        <div style="margin-top: 6px; color: rgba(255,255,255,0.62); font-size: 12px;">维护枚举/标签/评分维度等（仅系统管理员）</div>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <a href="#/dashboard" style="color: rgba(99,102,241,0.95); font-size: 12px; text-decoration:none;">返回工作台</a>
+      </div>
+    </div>
+    
+<div style="margin-top: 14px; border-radius:16px; padding:14px; background:#0f1a33; border:1px solid rgba(255,255,255,0.10);">
+  <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+    <select style="padding:10px 12px; border-radius:10px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#fff;">
+      <option>字典类型：全部</option>
+      <option>score_dimensions</option>
+      <option>work_types</option>
+      <option>tags</option>
+    </select>
+    <input placeholder="搜索：key/name" style="flex:1; min-width:240px; padding:10px 12px; border-radius:10px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#fff; outline:none;" />
+    <button style="padding:10px 12px; border-radius:10px; border:none; cursor:pointer; background: linear-gradient(90deg, rgba(99,102,241,1), rgba(56,189,248,1)); color:#0b1220; font-weight:800;">查询</button>
+    <button style="padding:10px 12px; border-radius:10px; border:none; cursor:pointer; background: linear-gradient(90deg, rgba(16,185,129,1), rgba(34,197,94,1)); color:#052016; font-weight:800;">新增字典项</button>
+  </div>
+</div>
+
+<div style="margin-top: 14px; border-radius:16px; overflow:hidden; background:#0f1a33; border:1px solid rgba(255,255,255,0.10);">
+  <table style="width:100%; border-collapse: collapse; color: rgba(255,255,255,0.86); font-size:12px;">
+    <thead><tr style="background: rgba(255,255,255,0.04);">
+      <th style="text-align:left; padding:12px 14px;">type</th>
+      <th style="text-align:left; padding:12px 14px;">key</th>
+      <th style="text-align:left; padding:12px 14px;">name</th>
+      <th style="text-align:left; padding:12px 14px;">order</th>
+      <th style="text-align:left; padding:12px 14px;">enabled</th>
+      <th style="text-align:left; padding:12px 14px;">操作</th>
+    </tr></thead>
+    <tbody>
+      <tr style="border-top:1px solid rgba(255,255,255,0.06);">
+        <td style="padding:12px 14px;">score_dimensions</td>
+        <td style="padding:12px 14px;">execution</td>
+        <td style="padding:12px 14px;">执行力</td>
+        <td style="padding:12px 14px;">10</td>
+        <td style="padding:12px 14px;">✅</td>
+        <td style="padding:12px 14px;">
+          <button style="padding:7px 10px; border-radius:10px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:rgba(255,255,255,0.85); cursor:pointer;">编辑</button>
+          <button style="margin-left:8px; padding:7px 10px; border-radius:10px; background:rgba(239,68,68,0.14); border:1px solid rgba(239,68,68,0.28); color:rgba(255,255,255,0.9); cursor:pointer;">禁用</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+  </div>
+</section>
+
+
+<section id="page-dashboard" style="display:block;">
+
+<div class="layout">
+
+<!-- ======================== 左侧导航 ======================== -->
+<nav class="nav" id="nav">
+  <div class="nav-logo">
+    <div class="logo-mark">智</div>
+    <div class="logo-text">月度考核<small>WorkScore Pro</small></div>
+  </div>
+  <button class="nav-toggle-btn" id="navBtn" onclick="toggleNav()">◀</button>
+
+  <div class="nav-body">
+    <div class="nav-section-label">工作</div>
+    <div class="nav-item active" onclick="go('dashboard','工作台')"><span class="ni-icon">⊞</span><span class="ni-label">工作台</span></div>
+    <div class="nav-item" onclick="go('assess-list','考核列表')"><span class="ni-icon">📋</span><span class="ni-label">考核列表</span><span class="ni-badge">8</span></div>
+    <div class="nav-item" onclick="go('assess-detail','考核详情')"><span class="ni-icon">👤</span><span class="ni-label">考核详情</span></div>
+    <div class="nav-section-label">打分</div>
+    <div class="nav-item" onclick="go('weekly','周报管理')"><span class="ni-icon">📝</span><span class="ni-label">周报管理</span><span class="ni-badge">1</span></div>
+    <div class="nav-item" onclick="go('materials','自述材料')"><span class="ni-icon">📎</span><span class="ni-label">自述材料</span></div>
+    <div class="nav-section-label">评审</div>
+    <div class="nav-item" onclick="go('objection','异议处理')"><span class="ni-icon">⚖️</span><span class="ni-label">异议处理</span><span class="ni-badge">2</span></div>
+    <div class="nav-item" onclick="go('stats','考核统计')"><span class="ni-icon">📊</span><span class="ni-label">考核统计</span></div>
+    <div class="nav-section-label">管理</div>
+    <div class="nav-item" onclick="go('dept','部门管理')"><span class="ni-icon">🏢</span><span class="ni-label">部门管理</span></div>
+    <div class="nav-item" onclick="go('position','岗位管理')"><span class="ni-icon">💼</span><span class="ni-label">岗位管理</span></div>
+    <div class="nav-item" onclick="go('users','人员管理')"><span class="ni-icon">👥</span><span class="ni-label">人员管理</span></div>
+    <div class="nav-item" onclick="go('settings','系统设置')"><span class="ni-icon">⚙️</span><span class="ni-label">系统设置</span></div>
+
+    <div class="nav-section-label" style="margin-top:10px;">AI / 运维</div>
+    <div class="nav-item" onclick="location.hash='#/score-queue'"><span class="ni-icon">🧾</span><span class="ni-label">考核队列</span></div>
+    <div class="nav-item" onclick="location.hash='#/ai-test'"><span class="ni-icon">🧪</span><span class="ni-label">AI 考核测试</span></div>
+
+    <div class="nav-section-label" style="margin-top:10px;">系统 / AI</div>
+    <div class="nav-item" onclick="location.hash='#/llm-models'"><span class="ni-icon">🧠</span><span class="ni-label">LLM 模型</span></div>
+    <div class="nav-item" onclick="location.hash='#/agents'"><span class="ni-icon">🤖</span><span class="ni-label">Agent</span></div>
+    <div class="nav-item" onclick="location.hash='#/dictionaries'"><span class="ni-icon">📚</span><span class="ni-label">数据字典</span></div>
+
+  </div>
+
+  <!-- 底部用户 -->
+  <div class="nav-footer">
+    <div class="user-dropdown" id="userDrop">
+      <div class="udrop-item" onclick="closeDrop()">👤 个人信息</div>
+      <div class="udrop-item" onclick="closeDrop()">🔑 修改密码</div>
+      <div class="udrop-sep"></div>
+      <div class="udrop-item danger" onclick="closeDrop()">🚪 注销登录</div>
+    </div>
+    <div class="user-btn" onclick="toggleDrop()">
+      <div class="user-ava">张</div>
+      <div class="user-info">
+        <div class="user-name">张伟明</div>
+        <div class="user-pos">前端工程师</div>
+      </div>
+      <div class="user-arrow" id="uArrow">▲</div>
+    </div>
+  </div>
+</nav>
+
+<!-- ======================== 主区域 ======================== -->
+<div class="main" id="main">
+  <!-- 顶栏 -->
+  <header class="hdr">
+    <div class="hdr-title" id="hdrTitle">工作台<span class="hdr-sub" id="hdrSub"></span></div>
+    <div style="flex:1"></div>
+    <div class="toggle-group">
+      <button class="tg-btn" onclick="setLang('zh')">中文</button>
+      <button class="tg-btn" onclick="setLang('en')">EN</button>
+    </div>
+    <div class="toggle-group">
+      <button class="tg-btn" onclick="setTheme('light')">☀</button>
+      <button class="tg-btn" onclick="setTheme('dark')">🌙</button>
+      <button class="tg-btn active" onclick="setTheme('system')">💻</button>
+    </div>
+    <button class="notif-btn">🔔<span class="notif-dot"></span></button>
+  </header>
+
+  <!-- 内容 -->
+  <div class="content">
+
+    <!-- ================================================
+         工作台
+         ================================================ -->
+    <div class="page active" id="pg-dashboard">
+      <!-- 第一行：个人卡片 -->
+      <div class="profile-banner mb14">
+        <div class="pb-row">
+          <div class="pb-ava">张</div>
+          <div class="pb-info">
+            <div class="pb-name">张伟明</div>
+            <div class="pb-tags">
+              <span class="pb-tag">🏢 研发部</span>
+              <span class="pb-tag">💼 前端工程师</span>
+              <span class="pb-tag" style="background:rgba(61,214,140,.1);border-color:rgba(61,214,140,.3);color:var(--success)">● 在职</span>
+              <span class="pb-tag" style="background:rgba(79,142,247,.1);border-color:rgba(79,142,247,.3);color:var(--accent)">部门负责人</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn sm" onclick="go('assess-detail','考核详情')">📊 本月考核</button>
+            <button class="btn primary sm" onclick="go('weekly','周报管理')">+ 提交周报</button>
+          </div>
+        </div>
+        <div class="pb-dates">
+          <div class="pb-date-item"><div class="pb-dl">今日日期</div><div class="pb-dv">2026-02-27</div></div>
+          <div class="pb-date-item"><div class="pb-dl">打分截止</div><div class="pb-dv warn">2026-03-05</div></div>
+          <div class="pb-date-item"><div class="pb-dl">距截止</div><div class="pb-dv accent">还剩 <strong>6</strong> 天</div></div>
+        </div>
+        <div class="quick-btns">
+          <button class="qbtn" onclick="go('assess-detail','考核详情')"><span class="qb-icon">📊</span><span class="qb-txt">查看本月考核</span></button>
+          <button class="qbtn" onclick="go('weekly','周报管理')"><span class="qb-icon">📝</span><span class="qb-txt">提交周报</span></button>
+          <button class="qbtn" onclick="go('materials','自述材料')"><span class="qb-icon">📎</span><span class="qb-txt">自述材料</span></button>
+          <button class="qbtn" onclick="go('stats','考核统计')"><span class="qb-icon">📈</span><span class="qb-txt">考核统计</span></button>
+        </div>
+      </div>
+
+      <!-- 第二行：指标卡片 -->
+      <div class="g5 mb14">
+        <div class="mcard accent">
+          <div class="mc-label">⭐ 本月综合得分</div>
+          <div class="mc-val grad">87.5</div>
+          <div class="mc-sub"><span class="up">↑ 3.2</span> 较上月</div>
+          <div class="mc-bg">🏆</div>
+        </div>
+        <div class="mcard">
+          <div class="mc-label">🎯 部门排名</div>
+          <div class="mc-val" style="color:var(--accent)">3<span style="font-size:14px;color:var(--txt3)">/12</span></div>
+          <div class="mc-sub"><span class="up">↑ 2名</span> 上升</div>
+          <div class="mc-bg">📊</div>
+        </div>
+        <div class="mcard">
+          <div class="mc-label">📝 本月周报</div>
+          <div class="mc-val" style="color:#9B72FF">3<span style="font-size:14px;color:var(--txt3)">/4</span></div>
+          <div class="mc-sub" style="color:var(--warning)">⚠ 本周未提交</div>
+          <div class="mc-bg">📋</div>
+        </div>
+        <div class="mcard">
+          <div class="mc-label">📎 自述材料</div>
+          <div class="mc-val" style="color:var(--success)">5</div>
+          <div class="mc-sub"><span class="up">●</span> 已上传完成</div>
+          <div class="mc-bg">✅</div>
+        </div>
+        <div class="mcard">
+          <div class="mc-label">⚖️ 待处理异议</div>
+          <div class="mc-val" style="color:var(--danger)">2</div>
+          <div class="mc-sub" style="color:var(--danger)">需要处理</div>
+          <div class="mc-bg">🔔</div>
+        </div>
+      </div>
+
+      <!-- 第三行：待办 + 考核流程 -->
+      <div class="g2">
+        <div class="card">
+          <div class="card-hd"><span class="card-title">⚡ 待处理事项</span><span class="card-action">全部</span></div>
+          <div class="todo-item"><div class="td-dot" style="background:var(--danger)"></div><div class="td-txt">本周周报尚未提交（第4周）</div><span class="tag red">紧急</span></div>
+          <div class="todo-item"><div class="td-dot" style="background:var(--warning)"></div><div class="td-txt">需对李明进行同事打分</div><span class="tag yellow">待打分</span></div>
+          <div class="todo-item"><div class="td-dot" style="background:var(--accent)"></div><div class="td-txt">王晓华提出考核分数异议</div><span class="tag blue">异议</span></div>
+          <div class="todo-item"><div class="td-dot" style="background:var(--success)"></div><div class="td-txt">上传2月测试用例文档</div><span class="tag green">材料</span></div>
+          <div class="todo-item"><div class="td-dot" style="background:#9B72FF"></div><div class="td-txt">确认2月月度考核已考核状态</div><span class="tag purple">考核</span></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><span class="card-title">🔄 本月考核流程</span><span class="card-action" onclick="go('assess-detail','考核详情')">查看详情</span></div>
+          <div class="flow-step"><div class="flow-line"><div class="flow-dot done">✓</div><div class="flow-seg done"></div></div><div class="flow-body"><div class="flow-name done">系统自动生成考核记录</div><div class="flow-date">2026-02-01 · 已完成</div></div></div>
+          <div class="flow-step"><div class="flow-line"><div class="flow-dot done">✓</div><div class="flow-seg done"></div></div><div class="flow-body"><div class="flow-name done">上传自述材料</div><div class="flow-date">2026-02-15 · 已完成 (5份)</div></div></div>
+          <div class="flow-step"><div class="flow-line"><div class="flow-dot done">✓</div><div class="flow-seg done"></div></div><div class="flow-body"><div class="flow-name done">周报提交 (3/4)</div><div class="flow-date">进行中 · 本周待补充</div></div></div>
+          <div class="flow-step"><div class="flow-line"><div class="flow-dot cur">4</div><div class="flow-seg"></div></div><div class="flow-body"><div class="flow-name cur">领导/同事打分中</div><div class="flow-date">截止 2026-03-05</div></div></div>
+          <div class="flow-step"><div class="flow-line"><div class="flow-dot pend">5</div><div class="flow-seg"></div></div><div class="flow-body"><div class="flow-name">AI 辅助分析</div><div class="flow-date">待触发</div></div></div>
+          <div class="flow-step"><div class="flow-line"><div class="flow-dot pend">6</div></div><div class="flow-body"><div class="flow-name">考核结果确认</div><div class="flow-date">待操作</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================
+         考核列表
+         ================================================ -->
+    <div class="page" id="pg-assess-list">
+      <div class="pg-hd">
+        <div><div class="pg-title">考核列表</div><div class="pg-sub">研发部 · 共12人</div></div>
+        <div style="flex:1"></div>
+        <div class="month-switcher" id="ms-alist">
+          <button class="ms-btn" onclick="prevMonth('alist')">◀</button>
+          <span class="ms-val" id="ms-alist-val">2026年02月</span>
+          <button class="ms-btn" onclick="nextMonth('alist')">▶</button>
+        </div>
+        <button class="btn primary" style="margin-left:8px">+ 批量操作</button>
+      </div>
+      <div class="g4 mb14">
+        <div class="mcard"><div class="mc-label">待考核</div><div class="mc-val" style="color:var(--warning)">3</div></div>
+        <div class="mcard"><div class="mc-label">考核中</div><div class="mc-val" style="color:var(--accent)">6</div></div>
+        <div class="mcard"><div class="mc-label">已考核</div><div class="mc-val" style="color:var(--success)">3</div></div>
+        <div class="mcard accent"><div class="mc-label">部门均分</div><div class="mc-val grad">82.4</div></div>
+      </div>
+      <div class="filter-bar">
+        <span style="font-size:12px;color:var(--txt3)">状态：</span>
+        <button class="fc all on">全部</button>
+        <button class="fc" onclick="fclick(this)">待考核</button>
+        <button class="fc" onclick="fclick(this)">考核中</button>
+        <button class="fc" onclick="fclick(this)">已考核</button>
+        <div class="f-spacer"></div>
+        <input class="search-box" placeholder="🔍 搜索姓名/岗位…">
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table class="tbl">
+          <thead><tr><th>考核人员</th><th>岗位</th><th>综合得分</th><th>周报</th><th>材料</th><th>状态</th><th>操作</th></tr></thead>
+          <tbody>
+            <tr onclick="go('assess-detail','考核详情')">
+              <td><div class="pcell"><div class="pava">张</div><div><div class="pname">张伟明 <span class="tag blue" style="font-size:9px">本人</span></div><div class="ppos">前端工程师</div></div></div></td>
+              <td><span class="xs txt3">研发/前端</span></td>
+              <td><div class="bar-wrap"><div class="bar"><div class="bar-fill" style="width:87.5%"></div></div><div class="bar-num">87.5</div></div></td>
+              <td><span class="mono sm" style="color:var(--success)">3/4</span></td>
+              <td><span class="mono sm">5</span></td>
+              <td><span class="badge progress">考核中</span></td>
+              <td><button class="btn sm">查看</button></td>
+            </tr>
+            <tr>
+              <td><div class="pcell"><div class="pava b">李</div><div><div class="pname">李明辉</div><div class="ppos">后端工程师</div></div></div></td>
+              <td><span class="xs txt3">研发/后端</span></td>
+              <td><div class="bar-wrap"><div class="bar"><div class="bar-fill" style="width:91%"></div></div><div class="bar-num">91.0</div></div></td>
+              <td><span class="mono sm" style="color:var(--success)">4/4</span></td>
+              <td><span class="mono sm">7</span></td>
+              <td><span class="badge done">已考核</span></td>
+              <td><button class="btn sm">查看</button></td>
+            </tr>
+            <tr>
+              <td><div class="pcell"><div class="pava c">王</div><div><div class="pname">王晓华</div><div class="ppos">UI设计师</div></div></div></td>
+              <td><span class="xs txt3">研发/设计</span></td>
+              <td><div class="bar-wrap"><div class="bar"><div class="bar-fill" style="width:76%"></div></div><div class="bar-num">76.0</div></div></td>
+              <td><span class="mono sm" style="color:var(--danger)">2/4</span></td>
+              <td><span class="mono sm">3</span></td>
+              <td><span class="badge progress">考核中</span></td>
+              <td><button class="btn sm">查看</button></td>
+            </tr>
+            <tr>
+              <td><div class="pcell"><div class="pava d">陈</div><div><div class="pname">陈思远</div><div class="ppos">测试工程师</div></div></div></td>
+              <td><span class="xs txt3">研发/测试</span></td>
+              <td><div class="bar-wrap"><div class="bar"><div class="bar-fill" style="width:0%"></div></div><div class="bar-num txt3">—</div></div></td>
+              <td><span class="mono sm" style="color:var(--warning)">1/4</span></td>
+              <td><span class="mono sm">1</span></td>
+              <td><span class="badge pending">待考核</span></td>
+              <td><button class="btn primary sm">打分</button></td>
+            </tr>
+            <tr>
+              <td><div class="pcell"><div class="pava" style="background:linear-gradient(135deg,#3DD68C,#22D3EE)">赵</div><div><div class="pname">赵丽娜</div><div class="ppos">产品经理</div></div></div></td>
+              <td><span class="xs txt3">研发/产品</span></td>
+              <td><div class="bar-wrap"><div class="bar"><div class="bar-fill" style="width:95%"></div></div><div class="bar-num">95.0</div></div></td>
+              <td><span class="mono sm" style="color:var(--success)">4/4</span></td>
+              <td><span class="mono sm">6</span></td>
+              <td><span class="badge done">已考核</span></td>
+              <td><button class="btn sm">查看</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ================================================
+         考核详情
+         ================================================ -->
+    <div class="page" id="pg-assess-detail">
+      <div class="pg-hd">
+        <div><div class="pg-title">考核详情</div><div class="pg-sub">张伟明 · 2026年2月月度考核</div></div>
+        <div style="flex:1"></div>
+        <span class="badge progress" style="font-size:13px;padding:5px 12px">考核中</span>
+        <button class="btn primary" style="margin-left:8px">确认已考核</button>
+      </div>
+      <div class="g2 mb14">
+        <!-- 左：综合信息 -->
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+            <div class="detail-score-ring" style="--pct:87.5">
+              <div class="dsr-inner"><div class="dsr-num">87.5</div><div class="dsr-lbl">综合分</div></div>
+            </div>
+            <div>
+              <div style="font-size:17px;font-weight:700;margin-bottom:6px">张伟明</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <span class="tag blue">研发部</span><span class="tag purple">前端工程师</span>
+                <span class="tag green">✓ 计入年度</span>
+              </div>
+            </div>
+          </div>
+          <div class="g4">
+            <div style="padding:10px;background:var(--bg3);border-radius:var(--r-md);text-align:center"><div class="xs txt3 mb4">领导打分</div><div class="mono" style="font-size:18px;font-weight:700;color:var(--accent)">89.0</div></div>
+            <div style="padding:10px;background:var(--bg3);border-radius:var(--r-md);text-align:center"><div class="xs txt3 mb4">同事均分</div><div class="mono" style="font-size:18px;font-weight:700;color:#9B72FF">86.3</div></div>
+            <div style="padding:10px;background:var(--bg3);border-radius:var(--r-md);text-align:center"><div class="xs txt3 mb4">AI建议分</div><div class="mono" style="font-size:18px;font-weight:700;color:var(--success)">88.5</div></div>
+            <div style="padding:10px;background:var(--bg3);border-radius:var(--r-md);text-align:center"><div class="xs txt3 mb4">差值</div><div class="mono" style="font-size:18px;font-weight:700;color:var(--success)">+1.0</div></div>
+          </div>
+        </div>
+        <!-- 右：变更监测 + 岗位标准 -->
+        <div class="card">
+          <div class="card-hd"><span class="card-title">📋 岗位考核标准快照</span></div>
+          <div style="font-size:12px;color:var(--txt2);line-height:1.8;padding:10px;background:var(--bg3);border-radius:var(--r-md);margin-bottom:12px">
+            <strong style="color:var(--txt)">前端工程师 · 2026年2月标准</strong><br>
+            1. 工作质量（40%）：代码规范，Bug率低于均值…<br>
+            2. 工作效率（30%）：需求按时交付率≥90%…<br>
+            3. 团队协作（30%）：积极参与Code Review…
+          </div>
+          <div class="card-hd"><span class="card-title">🔗 变更状态</span></div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;padding:6px 9px;background:var(--bg3);border-radius:var(--r-sm)"><span class="txt2">周报内容</span><span style="color:var(--success);font-weight:600">✓ 无变更</span></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;padding:6px 9px;background:var(--bg3);border-radius:var(--r-sm)"><span class="txt2">考核标准</span><span style="color:var(--warning);font-weight:600">⚠ 已变更</span></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;padding:6px 9px;background:var(--bg3);border-radius:var(--r-sm)"><span class="txt2">自述材料</span><span style="color:var(--success);font-weight:600">✓ 无变更</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 本月周报展示 -->
+      <div class="card mb14">
+        <div class="card-hd">
+          <span class="card-title">📝 本月周报</span>
+          <div class="weekly-tabs">
+            <button class="wt ok on" onclick="switchWt(this,'w1')">第1周 ✓</button>
+            <button class="wt ok" onclick="switchWt(this,'w2')">第2周 ✓</button>
+            <button class="wt ok" onclick="switchWt(this,'w3')">第3周 ✓</button>
+            <button class="wt miss" onclick="switchWt(this,'w4')">第4周 ✗</button>
+          </div>
+        </div>
+        <div id="wt-w1" class="rv-body">
+          <strong>第1周工作总结（02-02~02-08）：</strong><br>
+          完成需求分析，搭建工作台模块框架，与UX确认交互细节，输出低保真原型3份。<br><br>
+          <strong>下周计划：</strong> 开始Dashboard组件开发。
+          <div class="hash-row"><span class="hash-dot"></span>Hash: a3f7e2c1…无变更</div>
+        </div>
+        <div id="wt-w2" class="rv-body" style="display:none">
+          <strong>第2周工作总结（02-09~02-15）：</strong><br>
+          完成Dashboard指标卡、趋势图开发，前后端联调，修复接口Bug 3处。<br><br>
+          <strong>下周计划：</strong> 考核列表页面开发。
+          <div class="hash-row"><span class="hash-dot"></span>Hash: b4c8d3e2…无变更</div>
+        </div>
+        <div id="wt-w3" class="rv-body" style="display:none">
+          <strong>第3周工作总结（02-16~02-22）：</strong><br>
+          完成考核列表、详情页面，参与2次Code Review，发现安全问题1处。<br><br>
+          <strong>下周计划：</strong> 周报管理与自述材料页面。
+          <div class="hash-row"><span class="hash-dot"></span>Hash: c5d9e4f3…无变更</div>
+        </div>
+        <div id="wt-w4" class="rv-body" style="display:none;border-color:rgba(247,90,90,.3)">
+          <span style="color:var(--danger)">⚠ 本周周报尚未提交，截止日期 2026-02-28</span>
+        </div>
+      </div>
+
+      <!-- 评分明细 -->
+      <div class="card">
+        <div class="card-hd"><span class="card-title">📊 评分明细</span></div>
+        <div class="sc-card">
+          <div class="scc-hd"><div class="scc-ava">王</div><div class="scc-name">王部长 <span class="tag blue" style="font-size:9px">👑 领导</span></div><div style="font-size:11px;color:var(--txt3)">2026-02-24</div><div class="scc-score">89.0</div></div>
+          <div class="scc-items"><div class="si"><div class="si-label">工作质量</div><div class="si-bar"><div class="si-fill" style="width:90%"></div></div><div class="si-num">90</div></div><div class="si"><div class="si-label">工作效率</div><div class="si-bar"><div class="si-fill" style="width:85%"></div></div><div class="si-num">85</div></div><div class="si"><div class="si-label">团队协作</div><div class="si-bar"><div class="si-fill" style="width:92%"></div></div><div class="si-num">92</div></div></div>
+        </div>
+        <div class="sc-card">
+          <div class="scc-hd"><div class="scc-ava anon">🔒</div><div class="scc-name">匿名同事 <span class="tag purple" style="font-size:9px">🤝 同事</span></div><div style="font-size:11px;color:var(--txt3)">2026-02-22</div><div class="scc-score" style="color:#9B72FF">85.0</div></div>
+          <div class="scc-items"><div class="si"><div class="si-label">工作质量</div><div class="si-bar"><div class="si-fill" style="width:85%"></div></div><div class="si-num">85</div></div><div class="si"><div class="si-label">工作效率</div><div class="si-bar"><div class="si-fill" style="width:82%"></div></div><div class="si-num">82</div></div><div class="si"><div class="si-label">团队协作</div><div class="si-bar"><div class="si-fill" style="width:88%"></div></div><div class="si-num">88</div></div></div>
+        </div>
+        <div class="sc-card" style="border-color:rgba(61,214,140,.25)">
+          <div class="scc-hd"><div class="scc-ava" style="background:linear-gradient(135deg,var(--accent),#9B72FF)">AI</div><div class="scc-name">AI建议评分 <span class="tag green" style="font-size:9px">✨ 智能</span></div><div style="font-size:11px;color:var(--txt3)">2026-02-25</div><div class="scc-score" style="color:var(--success)">88.5</div></div>
+          <div class="scc-items"><div class="si"><div class="si-label">工作质量</div><div class="si-bar"><div class="si-fill" style="width:89%;background:linear-gradient(90deg,var(--accent),#9B72FF)"></div></div><div class="si-num">89</div></div><div class="si"><div class="si-label">工作效率</div><div class="si-bar"><div class="si-fill" style="width:87%;background:linear-gradient(90deg,var(--accent),#9B72FF)"></div></div><div class="si-num">87</div></div><div class="si"><div class="si-label">团队协作</div><div class="si-bar"><div class="si-fill" style="width:89%;background:linear-gradient(90deg,var(--accent),#9B72FF)"></div></div><div class="si-num">89</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================
+         周报管理
+         ================================================ -->
+    <div class="page" id="pg-weekly">
+      <div class="pg-hd">
+        <div><div class="pg-title">周报管理</div><div class="pg-sub">本月4周 · 已提交3篇</div></div>
+        <div style="flex:1"></div>
+        <div class="month-switcher">
+          <button class="ms-btn" onclick="prevMonth('weekly')">◀</button>
+          <span class="ms-val" id="ms-weekly-val">2026年02月</span>
+          <button class="ms-btn" onclick="nextMonth('weekly')">▶</button>
+        </div>
+        <button class="btn primary" style="margin-left:8px">+ 提交本周周报</button>
+      </div>
+      <div class="week-cards">
+        <div class="wcard ok" onclick="selWeek('w1')"><div class="wc-corner">✅</div><div class="wc-n">第1周</div><div class="wc-date">02-02 ~ 02-08</div><div class="wc-st ok">已提交</div></div>
+        <div class="wcard ok" onclick="selWeek('w2')"><div class="wc-corner">✅</div><div class="wc-n">第2周</div><div class="wc-date">02-09 ~ 02-15</div><div class="wc-st ok">已提交</div></div>
+        <div class="wcard ok" onclick="selWeek('w3')"><div class="wc-corner">✅</div><div class="wc-n">第3周</div><div class="wc-date">02-16 ~ 02-22</div><div class="wc-st ok">已提交</div></div>
+        <div class="wcard cur" onclick="selWeek('w4')"><div class="wc-corner" style="color:var(--accent)">⚡</div><div class="wc-n">第4周 <span class="xs" style="color:var(--accent)">当前</span></div><div class="wc-date">02-23 ~ 02-28</div><div class="wc-st cur">待提交</div></div>
+      </div>
+      <div class="report-view">
+        <div class="rv-hd">
+          <span class="rv-badge">第3周</span>
+          <div><div style="font-size:14px;font-weight:600">2026年第3周工作周报</div><div class="xs txt3 mono">2026-02-22 · 已提交</div></div>
+          <div style="flex:1"></div>
+          <button class="btn sm">编辑</button>
+        </div>
+        <div class="rv-body">
+          <strong>本周工作总结：</strong><br>
+          1. 完成考核列表与详情页面前端开发，通过UI验收。<br>
+          2. 参与前后端接口联调，修复排序Bug 3处。<br>
+          3. 完成Code Review 2次，发现安全隐患1处。<br>
+          4. 参与产品需求评审，提出前端可行性建议。<br><br>
+          <strong>下周计划：</strong> 完成周报管理与自述材料页面。
+          <div class="hash-row"><span class="hash-dot"></span>内容Hash: c5d9e4f3…d9b4 <span style="color:var(--success);margin-left:8px">✓ 与评分记录一致</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================
+         自述材料
+         ================================================ -->
+    <div class="page" id="pg-materials">
+      <div class="pg-hd">
+        <div><div class="pg-title">自述材料</div><div class="pg-sub">共5份</div></div>
+        <div style="flex:1"></div>
+        <div class="month-switcher">
+          <button class="ms-btn" onclick="prevMonth('mat')">◀</button>
+          <span class="ms-val" id="ms-mat-val">2026年02月</span>
+          <button class="ms-btn" onclick="nextMonth('mat')">▶</button>
+        </div>
+        <button class="btn primary" style="margin-left:8px">+ 上传材料</button>
+      </div>
+      <div class="g5 mb14">
+        <div class="mcard"><div class="mc-label">任务计划</div><div class="mc-val" style="color:var(--accent)">1</div></div>
+        <div class="mcard"><div class="mc-label">代码记录</div><div class="mc-val" style="color:#9B72FF">2</div></div>
+        <div class="mcard"><div class="mc-label">BUG记录</div><div class="mc-val" style="color:var(--danger)">1</div></div>
+        <div class="mcard"><div class="mc-label">测试用例</div><div class="mc-val" style="color:var(--success)">1</div></div>
+        <div class="mcard"><div class="mc-label">其他</div><div class="mc-val txt3">0</div></div>
+      </div>
+      <div class="mat-grid">
+        <div class="mat-card"><span class="mat-type tag blue">任务计划</span><div class="mat-name">2月迭代开发任务分解</div><div class="mat-desc">主要负责Dashboard模块和考核详情页，预计120人时，分四周完成。</div><div class="mat-foot"><div class="mat-file">📄 task-plan-feb.xlsx</div><div class="mat-date">02-05</div></div></div>
+        <div class="mat-card"><span class="mat-type tag purple">代码记录</span><div class="mat-name">Commit记录汇总 (Feb)</div><div class="mat-desc">本月共提交47次commit，三个模块新增代码约3800行。</div><div class="mat-foot"><div class="mat-file">📊 git-log-feb.pdf</div><div class="mat-date">02-28</div></div></div>
+        <div class="mat-card"><span class="mat-type tag purple">代码记录</span><div class="mat-name">Code Review贡献</div><div class="mat-desc">参与11次Review，提出有效建议23条，发现安全问题1个。</div><div class="mat-foot"><div class="mat-date">02-28</div></div></div>
+        <div class="mat-card"><span class="mat-type tag red">BUG记录</span><div class="mat-name">BUG修复记录</div><div class="mat-desc">共修复12个Bug，P0:1个，P1:4个，P2:7个，均已关闭。</div><div class="mat-foot"><div class="mat-file">🐛 bug-fix.xlsx</div><div class="mat-date">02-27</div></div></div>
+        <div class="mat-card"><span class="mat-type tag green">测试用例</span><div class="mat-name">单测覆盖率报告</div><div class="mat-desc">编写单测48个，覆盖率从67%提升至82%，核心组件95%。</div><div class="mat-foot"><div class="mat-file">📋 coverage.html</div><div class="mat-date">02-26</div></div></div>
+        <div class="mat-card mat-add"><div style="font-size:28px;color:var(--txt3)">＋</div><div class="sm txt3">上传新材料</div></div>
+      </div>
+    </div>
+
+    <!-- ================================================
+         异议处理
+         ================================================ -->
+    <div class="page" id="pg-objection">
+      <div class="pg-hd">
+        <div><div class="pg-title">异议处理</div><div class="pg-sub">领导评分、同事评分、AI评分三方比对，差异较大时可调整</div></div>
+        <div style="flex:1"></div>
+        <div class="month-switcher">
+          <button class="ms-btn" onclick="prevMonth('obj')">◀</button>
+          <span class="ms-val" id="ms-obj-val">2026年02月</span>
+          <button class="ms-btn" onclick="nextMonth('obj')">▶</button>
+        </div>
+      </div>
+      <div class="g4 mb14">
+        <div class="mcard"><div class="mc-label">待处理</div><div class="mc-val" style="color:var(--danger)">2</div></div>
+        <div class="mcard"><div class="mc-label">已处理</div><div class="mc-val" style="color:var(--success)">5</div></div>
+        <div class="mcard"><div class="mc-label">分数上调</div><div class="mc-val" style="color:var(--success)">+3.5</div></div>
+        <div class="mcard"><div class="mc-label">分数下调</div><div class="mc-val" style="color:var(--danger)">-2.0</div></div>
+      </div>
+
+      <!-- 异议卡1 -->
+      <div class="obj-card">
+        <div class="obj-hd">
+          <div class="obj-icon">⚠️</div>
+          <div class="obj-info">
+            <div class="obj-name">王晓华 · UI设计师</div>
+            <div class="obj-meta">同事打分异常低 · 三方差异 > 12分 · 2026-02-26</div>
+          </div>
+          <div><div class="xs txt3 mb4" style="text-align:right">三方差值</div><div class="obj-diff">12.0</div></div>
+        </div>
+        <!-- 三方评分对比 -->
+        <div class="score-compare">
+          <div class="sc-block">
+            <div class="sc-label">领导评分</div>
+            <div class="sc-score leader">82.0</div>
+            <div class="sc-diff">基准分</div>
+          </div>
+          <div class="sc-block" style="border-color:rgba(247,90,90,.3)">
+            <div class="sc-label">同事均分</div>
+            <div class="sc-score peer">64.0</div>
+            <div class="sc-diff"><span class="big">↓ 18分</span> 偏低</div>
+          </div>
+          <div class="sc-block">
+            <div class="sc-label">AI建议分</div>
+            <div class="sc-score ai">80.5</div>
+            <div class="sc-diff">近似领导分</div>
+          </div>
+        </div>
+        <div class="card" style="padding:10px;margin-bottom:12px;background:var(--bg3)">
+          <div class="xs txt3 mb4 mono">分析：某同事给出52分，与其他评分差>30分，AI判断存在异常，建议领导调整打分或剔除该极端值。</div>
+        </div>
+        <!-- 领导调整自己的打分 -->
+        <div class="adj-row">
+          <span class="adj-label">领导调整打分（原 82.0）：</span>
+          <div class="score-spin">
+            <button class="spin-btn" onclick="adjScore('obj1',-1)">−</button>
+            <span class="spin-val mono" id="obj1">82.0</span>
+            <button class="spin-btn" onclick="adjScore('obj1',1)">+</button>
+          </div>
+          <input class="reason-input" placeholder="调整原因（必填）…" value="同事评分存在异常极端值，综合考虑实际工作表现">
+          <button class="btn primary">确认调整</button>
+          <button class="btn danger">驳回</button>
+        </div>
+      </div>
+
+      <!-- 异议卡2 -->
+      <div class="obj-card">
+        <div class="obj-hd">
+          <div class="obj-icon">🔍</div>
+          <div class="obj-info">
+            <div class="obj-name">陈思远 · 测试工程师</div>
+            <div class="obj-meta">周报缺失导致得分偏低 · AI建议分高于人工 · 2026-02-26</div>
+          </div>
+          <div><div class="xs txt3 mb4" style="text-align:right">AI超出</div><div class="obj-diff pos">+8.5</div></div>
+        </div>
+        <div class="score-compare">
+          <div class="sc-block"><div class="sc-label">领导评分</div><div class="sc-score leader">71.5</div><div class="sc-diff">含周报扣分</div></div>
+          <div class="sc-block"><div class="sc-label">同事均分</div><div class="sc-score peer">73.0</div><div class="sc-diff">正常</div></div>
+          <div class="sc-block" style="border-color:rgba(61,214,140,.3)"><div class="sc-label">AI建议分</div><div class="sc-score ai">80.0</div><div class="sc-diff"><span style="color:var(--success);font-weight:600">↑ 8.5</span> 偏高</div></div>
+        </div>
+        <div class="card" style="padding:10px;margin-bottom:12px;background:var(--bg3)">
+          <div class="xs txt3 mb4 mono">分析：该员工出差期间缺少一周周报，但代码提交和Bug修复数据正常，AI建议综合实际产出适当调高评分。</div>
+        </div>
+        <div class="adj-row">
+          <span class="adj-label">领导调整打分（原 71.5）：</span>
+          <div class="score-spin">
+            <button class="spin-btn" onclick="adjScore('obj2',-1)">−</button>
+            <span class="spin-val mono" id="obj2">71.5</span>
+            <button class="spin-btn" onclick="adjScore('obj2',1)">+</button>
+          </div>
+          <input class="reason-input" placeholder="调整原因（必填）…" value="出差缺席周报，实际工作量已通过材料核实">
+          <button class="btn primary">确认调整</button>
+          <button class="btn danger">驳回</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================
+         考核统计
+         ================================================ -->
+    <div class="page" id="pg-stats">
+      <div class="pg-hd">
+        <div><div class="pg-title">考核统计</div><div class="pg-sub">张伟明 · 个人统计与部门对比</div></div>
+      </div>
+      <div class="g5 mb14">
+        <div class="mcard accent"><div class="mc-label">⭐ 本月得分</div><div class="mc-val grad">87.5</div><div class="mc-sub"><span class="up">↑ 3.2</span> 较上月</div></div>
+        <div class="mcard"><div class="mc-label">📈 近6月均分</div><div class="mc-val" style="color:var(--accent)">85.2</div><div class="mc-sub">持续上升</div></div>
+        <div class="mcard"><div class="mc-label">🏆 最高月份</div><div class="mc-val" style="color:var(--warning)">91.0</div><div class="mc-sub">2025年11月</div></div>
+        <div class="mcard"><div class="mc-label">🎯 部门排名</div><div class="mc-val" style="color:var(--success)">3</div><div class="mc-sub">共12人</div></div>
+        <div class="mcard"><div class="mc-label">⚖️ 本月异议</div><div class="mc-val" style="color:var(--danger)">0</div><div class="mc-sub">本人无异议</div></div>
+      </div>
+      <div class="g2 mb14">
+        <div class="card">
+          <div class="card-hd"><span class="card-title">📈 近6月得分趋势</span></div>
+          <div class="trend-chart">
+            <div class="tcol"><div class="t-val">82</div><div class="tbar" style="height:62px;opacity:.6"></div><div class="t-lbl">09月</div></div>
+            <div class="tcol"><div class="t-val">88</div><div class="tbar" style="height:80px;opacity:.7"></div><div class="t-lbl">10月</div></div>
+            <div class="tcol"><div class="t-val">91</div><div class="tbar" style="height:95px;opacity:.8"></div><div class="t-lbl">11月</div></div>
+            <div class="tcol"><div class="t-val">84</div><div class="tbar" style="height:68px;opacity:.7"></div><div class="t-lbl">12月</div></div>
+            <div class="tcol"><div class="t-val">79</div><div class="tbar" style="height:52px;opacity:.65"></div><div class="t-lbl">01月</div></div>
+            <div class="tcol"><div class="t-val">88</div><div class="tbar cur" style="height:80px"></div><div class="t-lbl" style="color:var(--accent);font-weight:700">02月</div></div>
+          </div>
+          <div class="sep" style="margin:10px 0 8px"></div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--txt3)">
+            <span>最低: <strong style="color:var(--txt)">79.0</strong></span>
+            <span>均值: <strong style="color:var(--accent)">85.2</strong></span>
+            <span>最高: <strong style="color:var(--success)">91.0</strong></span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><span class="card-title">⚖️ 部门异议统计（近6月）</span></div>
+          <div class="g2 mb12">
+            <div style="padding:10px;background:var(--bg3);border-radius:var(--r-md);text-align:center"><div class="xs txt3 mb4">总异议数</div><div class="mono" style="font-size:20px;font-weight:700;color:var(--danger)">7</div></div>
+            <div style="padding:10px;background:var(--bg3);border-radius:var(--r-md);text-align:center"><div class="xs txt3 mb4">已处理</div><div class="mono" style="font-size:20px;font-weight:700;color:var(--success)">5</div></div>
+          </div>
+          <div style="font-size:12px;color:var(--txt2);line-height:2">
+            <div style="display:flex;justify-content:space-between"><span>同事评分异常</span><span class="mono" style="color:var(--warning)">4次</span></div>
+            <div style="display:flex;justify-content:space-between"><span>周报缺失影响</span><span class="mono" style="color:var(--accent)">2次</span></div>
+            <div style="display:flex;justify-content:space-between"><span>AI与人工差异大</span><span class="mono" style="color:#9B72FF">1次</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><span class="card-title">🏆 部门本月排名</span><span class="card-action">查看全部</span></div>
+        <div class="rank-list">
+          <div class="rank-row"><div class="rn g">1</div><div class="rp"><div class="rp-name">赵丽娜</div><div class="rp-pos">产品经理</div></div><div class="r-score">95.0</div></div>
+          <div class="rank-row"><div class="rn s">2</div><div class="rp"><div class="rp-name">李明辉</div><div class="rp-pos">后端工程师</div></div><div class="r-score">91.0</div></div>
+          <div class="rank-row me"><div class="rn b">3</div><div class="rp"><div class="rp-name">张伟明 <span class="tag blue" style="font-size:9px">本人</span></div><div class="rp-pos">前端工程师</div></div><div class="r-score" style="color:var(--accent)">87.5</div></div>
+          <div class="rank-row"><div class="rn n">4</div><div class="rp"><div class="rp-name">孙雅婷</div><div class="rp-pos">全栈工程师</div></div><div class="r-score">85.0</div></div>
+          <div class="rank-row"><div class="rn n">5</div><div class="rp"><div class="rp-name">刘浩然</div><div class="rp-pos">后端工程师</div></div><div class="r-score">82.5</div></div>
+          <div class="rank-row"><div class="rn n">6</div><div class="rp"><div class="rp-name">王晓华</div><div class="rp-pos">UI设计师</div></div><div class="r-score" style="color:var(--warning)">76.0</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================
+         部门管理
+         ================================================ -->
+    <div class="page" id="pg-dept">
+      <div class="pg-hd">
+        <div><div class="pg-title">部门管理</div><div class="pg-sub">共4个部门</div></div>
+        <div style="flex:1"></div>
+        <button class="btn primary">+ 新增部门</button>
+      </div>
+      <div class="org-layout">
+        <div class="org-left">
+          <div style="padding:10px;border-bottom:1px solid var(--border)">
+            <input class="inp" placeholder="🔍 搜索部门…" style="font-size:12px">
+          </div>
+          <div class="org-list">
+            <div class="org-item active">🏢 研发部<span class="org-item-num">12人</span></div>
+            <div class="org-item">🎨 设计部<span class="org-item-num">5人</span></div>
+            <div class="org-item">📊 产品部<span class="org-item-num">8人</span></div>
+            <div class="org-item">🔧 运维部<span class="org-item-num">4人</span></div>
+          </div>
+        </div>
+        <div class="org-right">
+          <div class="org-right-hd">
+            <div style="font-size:14px;font-weight:600;flex:1">研发部 详情</div>
+            <button class="btn sm">编辑</button>
+            <button class="btn danger sm">删除</button>
+          </div>
+          <div class="org-right-body">
+            <div class="form-row">
+              <div class="form-field"><div class="form-label">部门名称</div><input class="inp" value="研发部"></div>
+              <div class="form-field"><div class="form-label">状态</div><select class="sel"><option>启用</option><option>停用</option></select></div>
+            </div>
+            <div class="sep"></div>
+            <div class="sec-hd"><div class="sec-title">部门岗位（4个）</div><span class="sec-act">管理岗位</span></div>
+            <table class="tbl">
+              <thead><tr><th>岗位名称</th><th>人数</th><th>状态</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr><td>前端工程师</td><td><span class="mono sm">3</span></td><td><span class="badge done">启用</span></td><td><button class="btn sm">查看</button></td></tr>
+                <tr><td>后端工程师</td><td><span class="mono sm">4</span></td><td><span class="badge done">启用</span></td><td><button class="btn sm">查看</button></td></tr>
+                <tr><td>测试工程师</td><td><span class="mono sm">3</span></td><td><span class="badge done">启用</span></td><td><button class="btn sm">查看</button></td></tr>
+                <tr><td>全栈工程师</td><td><span class="mono sm">2</span></td><td><span class="badge done">启用</span></td><td><button class="btn sm">查看</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================
+         岗位管理
+         ================================================ -->
+    <div class="page" id="pg-position">
+      <div class="pg-hd">
+        <div><div class="pg-title">岗位管理</div><div class="pg-sub">共12个岗位</div></div>
+        <div style="flex:1"></div>
+        <button class="btn primary">+ 新增岗位</button>
+      </div>
+      <div class="org-layout">
+        <div class="org-left">
+          <div style="padding:10px;border-bottom:1px solid var(--border)">
+            <select class="sel" style="font-size:12px"><option>全部部门</option><option selected>研发部</option><option>设计部</option><option>产品部</option></select>
+          </div>
+          <div class="org-list">
+            <div class="org-item active">前端工程师<span class="org-item-num">3人</span></div>
+            <div class="org-item">后端工程师<span class="org-item-num">4人</span></div>
+            <div class="org-item">测试工程师<span class="org-item-num">3人</span></div>
+            <div class="org-item">全栈工程师<span class="org-item-num">2人</span></div>
+            <div class="org-item">产品经理<span class="org-item-num">3人</span></div>
+            <div class="org-item">UI设计师<span class="org-item-num">2人</span></div>
+          </div>
+        </div>
+        <div class="org-right">
+          <div class="org-right-hd">
+            <div style="font-size:14px;font-weight:600;flex:1">前端工程师 · 考核标准</div>
+            <span class="badge done" style="margin-right:8px">启用</span>
+            <button class="btn sm">编辑</button>
+          </div>
+          <div class="org-right-body">
+            <div class="form-row">
+              <div class="form-field"><div class="form-label">岗位名称</div><input class="inp" value="前端工程师"></div>
+              <div class="form-field"><div class="form-label">所属部门</div><select class="sel"><option selected>研发部</option></select></div>
+            </div>
+            <div class="sep"></div>
+            <div class="sec-hd"><div class="sec-title">📋 岗位考核标准</div><button class="btn sm">编辑标准</button></div>
+            <div style="background:var(--bg3);border-radius:var(--r-md);padding:14px;font-size:12px;color:var(--txt2);line-height:1.9;border:1px solid var(--border)">
+              <div style="font-weight:600;color:var(--txt);margin-bottom:8px">考核维度与权重</div>
+              <div>📌 <strong>工作质量（40%）</strong>：代码规范符合团队标准，Bug率低于行业均值，功能按需求实现率≥98%</div>
+              <div>⚡ <strong>工作效率（30%）</strong>：需求按时交付率≥90%，合理拆分任务，无阻塞性阻碍</div>
+              <div>🤝 <strong>团队协作（30%）</strong>：积极参与Code Review，技术分享≥1次/月，跨团队协作顺畅</div>
+            </div>
+            <div class="sep"></div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--warning)">
+              <span>⚠</span><span>考核标准变更后将同步到当月考核记录（若有"考核中"状态则阻断）</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================
+         人员管理
+         ================================================ -->
+    <div class="page" id="pg-users">
+      <div class="pg-hd">
+        <div><div class="pg-title">人员管理</div><div class="pg-sub">共29人</div></div>
+        <div style="flex:1"></div>
+        <button class="btn primary">+ 新增人员</button>
+      </div>
+      <div class="filter-bar mb14">
+        <span class="xs txt3">部门：</span>
+        <button class="fc all on">全部</button>
+        <button class="fc" onclick="fclick(this)">研发部</button>
+        <button class="fc" onclick="fclick(this)">设计部</button>
+        <button class="fc" onclick="fclick(this)">产品部</button>
+        <div class="f-spacer"></div>
+        <input class="search-box" placeholder="🔍 搜索姓名/用户名…">
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table class="tbl">
+          <thead><tr><th>人员</th><th>用户名</th><th>部门/岗位</th><th>角色</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><div class="pcell"><div class="pava">张</div><div><div class="pname">张伟明</div></div></div></td>
+              <td><span class="mono sm">zhangwm</span></td>
+              <td><span class="xs txt3">研发部 / 前端工程师</span></td>
+              <td><span class="tag blue">部门负责人</span></td>
+              <td><span class="badge done">启用</span></td>
+              <td><span class="mono xs txt3">2024-06-01</span></td>
+              <td><button class="btn sm">编辑</button> <button class="btn danger sm">重置密码</button></td>
+            </tr>
+            <tr>
+              <td><div class="pcell"><div class="pava b">李</div><div><div class="pname">李明辉</div></div></div></td>
+              <td><span class="mono sm">limh</span></td>
+              <td><span class="xs txt3">研发部 / 后端工程师</span></td>
+              <td><span class="tag purple">普通用户</span></td>
+              <td><span class="badge done">启用</span></td>
+              <td><span class="mono xs txt3">2024-08-15</span></td>
+              <td><button class="btn sm">编辑</button> <button class="btn danger sm">重置密码</button></td>
+            </tr>
+            <tr>
+              <td><div class="pcell"><div class="pava c">王</div><div><div class="pname">王晓华</div></div></div></td>
+              <td><span class="mono sm">wangxh</span></td>
+              <td><span class="xs txt3">研发部 / UI设计师</span></td>
+              <td><span class="tag purple">普通用户</span></td>
+              <td><span class="badge done">启用</span></td>
+              <td><span class="mono xs txt3">2025-01-10</span></td>
+              <td><button class="btn sm">编辑</button> <button class="btn danger sm">重置密码</button></td>
+            </tr>
+            <tr>
+              <td><div class="pcell"><div class="pava d">管</div><div><div class="pname">系统管理员</div></div></div></td>
+              <td><span class="mono sm">admin</span></td>
+              <td><span class="xs txt3">—</span></td>
+              <td><span class="tag red">系统管理员</span></td>
+              <td><span class="badge done">启用</span></td>
+              <td><span class="mono xs txt3">2024-01-01</span></td>
+              <td><button class="btn sm">编辑</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ================================================
+         系统设置
+         ================================================ -->
+    <div class="page" id="pg-settings">
+      <div class="pg-hd">
+        <div><div class="pg-title">系统设置</div><div class="pg-sub">权重 · 规则 · 分布预期（修改后仅作用于新建考核）</div></div>
+        <div style="flex:1"></div>
+        <button class="btn primary">保存配置</button>
+      </div>
+      <div class="g2">
+        <!-- 左列 -->
+        <div>
+          <!-- 打分权重 -->
+          <div class="card mb14">
+            <div class="card-hd"><span class="card-title">⚖️ 打分权重配置</span><span class="tag red" style="font-size:10px" id="wt-total-badge">合计 98%</span></div>
+            <div style="padding:9px 12px;background:rgba(247,169,65,.08);border:1px solid rgba(247,169,65,.25);border-radius:var(--r-sm);margin-bottom:14px;font-size:12px;color:var(--warning)">三项权重之和必须等于100%，否则无法保存。</div>
+            <div class="slider-row">
+              <div class="slider-top"><span class="slider-name">AI 考核</span><span class="slider-pct" id="sl-ai-pct">20%</span></div>
+              <input type="range" min="0" max="100" value="20" id="sl-ai" oninput="updateSlider('ai')" style="--val:20%">
+            </div>
+            <div class="slider-row">
+              <div class="slider-top"><span class="slider-name">自评</span><span class="slider-pct" id="sl-self-pct">20%</span></div>
+              <input type="range" min="0" max="100" value="20" id="sl-self" oninput="updateSlider('self')" style="--val:20%">
+            </div>
+            <div class="slider-row">
+              <div class="slider-top"><span class="slider-name">同行评价</span><span class="slider-pct" id="sl-peer-pct">25%</span></div>
+              <input type="range" min="0" max="100" value="25" id="sl-peer" oninput="updateSlider('peer')" style="--val:25%">
+            </div>
+            <div class="slider-row">
+              <div class="slider-top"><span class="slider-name">管理者</span><span class="slider-pct" id="sl-mgr-pct">33%</span></div>
+              <input type="range" min="0" max="100" value="33" id="sl-mgr" oninput="updateSlider('mgr')" style="--val:33%">
+            </div>
+            <div class="weight-total err" id="wt-total">
+              <span>合计</span><span class="mono" id="wt-total-num">98%</span>
+            </div>
+          </div>
+
+          <!-- 维度权重 -->
+          <div class="card">
+            <div class="card-hd"><span class="card-title">📐 维度权重（按角色）</span><span class="xs txt3">已锁定，月初快照</span></div>
+            <table class="dim-tbl">
+              <thead><tr><th>维度</th><th>初级</th><th>中级</th><th>高级</th><th>负责人</th></tr></thead>
+              <tbody>
+                <tr><td>交付质量</td><td>50%</td><td>40%</td><td>35%</td><td>25%</td></tr>
+                <tr><td>工作效率</td><td>25%</td><td>25%</td><td>20%</td><td>15%</td></tr>
+                <tr><td>协作贡献</td><td>15%</td><td>20%</td><td>25%</td><td>30%</td></tr>
+                <tr><td>成长迭代</td><td>10%</td><td>15%</td><td>20%</td><td>30%</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 右列 -->
+        <div>
+          <!-- 同行打分规则 -->
+          <div class="card mb14">
+            <div class="card-hd"><span class="card-title">👥 同行打分规则</span></div>
+            <div class="cfg-grid mb12">
+              <div class="cfg-field"><div class="cfg-label">最低同行打分人数</div><input class="inp" value="3" type="number" min="1"></div>
+              <div class="cfg-field"><div class="cfg-label">每月打分截止日</div><input class="inp" value="28" type="number" min="1" max="31"></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg3);border-radius:var(--r-md)">
+              <label class="toggle-switch"><input type="checkbox" checked><span class="ts-track"></span></label>
+              <div><div class="sm">去掉最高/最低分后取均值</div><div class="xs txt3">超过3人时剔除一个最高分和一个最低分</div></div>
+            </div>
+          </div>
+
+          <!-- 异议机制 -->
+          <div class="card mb14">
+            <div class="card-hd"><span class="card-title">⚖️ 异议机制</span></div>
+            <div class="cfg-grid">
+              <div class="cfg-field"><div class="cfg-label">结果公示后异议窗口（天）</div><input class="inp" value="3" type="number"></div>
+              <div class="cfg-field"><div class="cfg-label">本月工作周数</div><input class="inp" value="4" type="number" min="1" max="6"></div>
+            </div>
+            <div class="xs txt3" style="margin-top:8px">超过截止日后将标注逾期，影响AI打分权重归一化。</div>
+          </div>
+
+          <!-- 自评缺失处理 -->
+          <div class="card mb14">
+            <div class="card-hd"><span class="card-title">📝 自评缺失处理策略</span></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn primary sm">记0分计入权重</button>
+              <button class="btn sm">按剩余权重归一化</button>
+            </div>
+          </div>
+
+          <!-- AI打分失败处理 -->
+          <div class="card mb14">
+            <div class="card-hd"><span class="card-title">🤖 AI打分失败处理</span></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn primary sm">允许管理者手动覆试</button>
+              <button class="btn sm">标记无效，剩余权重归一化</button>
+            </div>
+          </div>
+
+          <!-- 账号设置 -->
+          <div class="card">
+            <div class="card-hd"><span class="card-title">🔐 账号与令牌</span></div>
+            <div class="cfg-grid">
+              <div class="cfg-field"><div class="cfg-label">登录令牌过期时间（小时）</div><input class="inp" value="24" type="number"></div>
+              <div class="cfg-field"><div class="cfg-label">默认人员密码</div><input class="inp" value="WorkScore@2026" type="password"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /layout -->
+</section><!-- /page-dashboard -->
+
+<script>
+/* ===== 主题 ===== */
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+let curTheme = 'system';
+function setTheme(t) {
+  curTheme = t;
+  document.querySelectorAll('.tg-btn').forEach((b,i) => b.classList.toggle('active', ['light','dark','system'][i] === t));
+  document.documentElement.dataset.theme = t === 'system' ? (mq.matches ? 'dark' : 'light') : t;
+}
+mq.addEventListener('change', () => { if (curTheme === 'system') setTheme('system'); });
+
+/* ===== 语言 ===== */
+function setLang(l) { document.querySelectorAll('.tg-btn').forEach(b => { if(b.textContent==='中文'||b.textContent==='EN') b.classList.toggle('active', (b.textContent==='中文' && l==='zh')||(b.textContent==='EN' && l==='en')); }); }
+document.querySelectorAll('.toggle-group')[0].children[0].classList.add('active');
+
+/* ===== 导航 ===== */
+let navMini = false;
+function toggleNav() {
+  navMini = !navMini;
+  document.getElementById('nav').classList.toggle('mini', navMini);
+  document.getElementById('main').classList.toggle('mini', navMini);
+  document.getElementById('navBtn').textContent = navMini ? '▶' : '◀';
+}
+
+/* ===== 用户下拉 ===== */
+let dropOpen = false;
+function toggleDrop() {
+  dropOpen = !dropOpen;
+  document.getElementById('userDrop').classList.toggle('open', dropOpen);
+  document.getElementById('uArrow').style.transform = dropOpen ? 'rotate(180deg)' : '';
+}
+function closeDrop() {
+  dropOpen = false;
+  document.getElementById('userDrop').classList.remove('open');
+  document.getElementById('uArrow').style.transform = '';
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.nav-footer')) closeDrop();
+});
+
+/* ===== 页面切换 ===== */
+const titles = {dashboard:'工作台',['assess-list']:'考核列表',['assess-detail']:'考核详情',weekly:'周报管理',materials:'自述材料',objection:'异议处理',stats:'考核统计',dept:'部门管理',position:'岗位管理',users:'人员管理',settings:'系统设置'};
+function go(id, label) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('pg-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navItems = document.querySelectorAll('.nav-item');
+  const keys = ['dashboard','assess-list','assess-detail','weekly','materials','objection','stats','dept','position','users','settings'];
+  const idx = keys.indexOf(id);
+  if (idx >= 0 && navItems[idx]) navItems[idx].classList.add('active');
+  document.getElementById('hdrTitle').innerHTML = (titles[id]||label||id) + '<span class="hdr-sub" id="hdrSub"></span>';
+  closeDrop();
+}
+
+/* ===== 月份切换 ===== */
+const months = {};
+['alist','weekly','mat','obj'].forEach(k => { months[k] = {y:2026,m:2}; });
+function fmtM(k) {
+  const {y,m} = months[k];
+  return y + '年' + String(m).padStart(2,'0') + '月';
+}
+function prevMonth(k) { const o = months[k]; if(o.m===1){o.y--;o.m=12;}else o.m--; updateMs(k); }
+function nextMonth(k) { const o = months[k]; if(o.m===12){o.y++;o.m=1;}else o.m++; updateMs(k); }
+function updateMs(k) {
+  const map = {alist:'ms-alist-val',weekly:'ms-weekly-val',mat:'ms-mat-val',obj:'ms-obj-val'};
+  const el = document.getElementById(map[k]);
+  if(el) el.textContent = fmtM(k);
+}
+
+/* ===== 筛选chip ===== */
+function fclick(el) {
+  const parent = el.closest('.filter-bar');
+  parent.querySelectorAll('.fc').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+}
+
+/* ===== 考核详情周报tab ===== */
+function switchWt(btn, id) {
+  btn.closest('.card-hd').querySelectorAll('.wt').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  ['w1','w2','w3','w4'].forEach(w => {
+    const el = document.getElementById('wt-' + w);
+    if(el) el.style.display = w === id ? '' : 'none';
+  });
+}
+
+/* ===== 异议调整分数 ===== */
+const scores = {obj1:82.0, obj2:71.5};
+function adjScore(id, delta) {
+  scores[id] = Math.max(0, Math.min(100, +(scores[id] + delta).toFixed(1)));
+  document.getElementById(id).textContent = scores[id].toFixed(1);
+}
+
+/* ===== 权重滑块 ===== */
+function updateSlider(name) {
+  const el = document.getElementById('sl-' + name);
+  const val = +el.value;
+  document.getElementById('sl-' + name + '-pct').textContent = val + '%';
+  el.style.setProperty('--val', val + '%');
+  updateWeightTotal();
+}
+function updateWeightTotal() {
+  const total = ['ai','self','peer','mgr'].reduce((s,n) => s + +document.getElementById('sl-'+n).value, 0);
+  const el = document.getElementById('wt-total');
+  const nb = document.getElementById('wt-total-num');
+  const badge = document.getElementById('wt-total-badge');
+  nb.textContent = total + '%';
+  if(badge) badge.textContent = '合计 ' + total + '%';
+  el.className = 'weight-total ' + (total === 100 ? 'ok' : 'err');
+}
+</script>
+
+<script>
+/* === hash router === */
+(function () {
+  const routes = ["login","setup","dashboard","score-queue","ai-test","llm-models","agents","dictionaries"];
+  function showRoute(name){
+    routes.forEach(r=>{
+      const el=document.getElementById("page-"+r);
+      if(el) el.style.display = (r===name ? "block" : "none");
+    });
+  }
+  function normalize(){
+    const raw = (location.hash || "#/dashboard").replace("#/","");
+    return routes.includes(raw) ? raw : "dashboard";
+  }
+  window.addEventListener("hashchange", ()=>showRoute(normalize()));
+  // default entry: if user opens the file directly, jump to dashboard
+  if(!location.hash) location.hash = "#/dashboard";
+  showRoute(normalize());
+})();
+</script>
+
+</body>
+</html>
